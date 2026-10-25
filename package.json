@@ -1,0 +1,24 @@
+{
+  "name": "shop-pos-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ဆိုင် POS - offline-first Android app (Capacitor + Supabase)",
+  "scripts": {
+    "vendor": "node scripts/vendor.js",
+    "setup": "node scripts/vendor.js && node scripts/android-setup.js && cap sync android",
+    "apk": "npm run setup && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/filesystem": "^6.0.2",
+    "@capacitor/share": "^6.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0",
+    "@fontsource/noto-sans-myanmar": "^5.1.0",
+    "@fontsource/plus-jakarta-sans": "^5.1.0",
+    "@supabase/supabase-js": "2.45.4"
+  }
+}

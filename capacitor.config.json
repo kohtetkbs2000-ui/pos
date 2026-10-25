@@ -1,0 +1,11 @@
+{
+  "appId": "com.shoppos.app",
+  "appName": "ဆိုင် POS",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

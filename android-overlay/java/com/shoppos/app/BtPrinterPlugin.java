@@ -87,16 +87,24 @@ public class BtPrinterPlugin extends Plugin {
                 try {
                     closeQuiet();
                     BluetoothDevice dev = ad.getRemoteDevice(address);
-                    ad.cancelDiscovery();
-                    BluetoothSocket s;
-                    try {
-                        s = dev.createRfcommSocketToServiceRecord(SPP);
-                        s.connect();
-                    } catch (Exception first) {
-                        // some cheap printers only accept this fallback
-                        s = (BluetoothSocket) dev.getClass().getMethod("createRfcommSocket", int.class).invoke(dev, 1);
-                        s.connect();
+                    // cancelDiscovery() needs BLUETOOTH_SCAN on Android 12+ - never let it block connecting
+                    try { ad.cancelDiscovery(); } catch (Exception ignored) { }
+                    BluetoothSocket s = null;
+                    Exception last = null;
+                    for (int mode = 0; mode < 3 && s == null; mode++) {
+                        BluetoothSocket t = null;
+                        try {
+                            if (mode == 0) t = dev.createRfcommSocketToServiceRecord(SPP);
+                            else if (mode == 1) t = dev.createInsecureRfcommSocketToServiceRecord(SPP);
+                            else t = (BluetoothSocket) dev.getClass().getMethod("createRfcommSocket", int.class).invoke(dev, 1);
+                            t.connect();
+                            s = t;
+                        } catch (Exception e) {
+                            last = e;
+                            try { if (t != null) t.close(); } catch (Exception ignored) { }
+                        }
                     }
+                    if (s == null) throw (last != null ? last : new Exception("connect failed"));
                     synchronized (BtPrinterPlugin.this) { socket = s; out = s.getOutputStream(); }
                     call.resolve();
                 } catch (Exception e) {

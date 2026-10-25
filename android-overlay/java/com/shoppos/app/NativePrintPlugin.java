@@ -22,6 +22,9 @@ public class NativePrintPlugin extends Plugin {
         final String html = call.getString("html", "");
         final String name = call.getString("name", "voucher");
         final String size = call.getString("size", "a4");
+        final Object wo = call.getData().opt("wmm"), ho = call.getData().opt("hmm");
+        final double wmm = wo instanceof Number ? ((Number) wo).doubleValue() : 0;
+        final double hmm = ho instanceof Number ? ((Number) ho).doubleValue() : 0;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -37,7 +40,11 @@ public class NativePrintPlugin extends Plugin {
                             PrintManager pm = (PrintManager) getActivity().getSystemService(Context.PRINT_SERVICE);
                             PrintDocumentAdapter adapter = view.createPrintDocumentAdapter(name);
                             PrintAttributes.Builder b = new PrintAttributes.Builder();
-                            if ("th".equals(size)) {
+                            if (wmm > 0 && hmm > 0) {
+                                int wm = (int) Math.round(wmm / 25.4 * 1000), hm = (int) Math.round(hmm / 25.4 * 1000);
+                                b.setMediaSize(new PrintAttributes.MediaSize("lbl" + wm + "x" + hm, "Label", wm, hm));
+                                b.setMinMargins(PrintAttributes.Margins.NO_MARGINS);
+                            } else if ("th".equals(size)) {
                                 b.setMediaSize(new PrintAttributes.MediaSize("th80", "80mm", 3150, 11000));
                                 b.setMinMargins(PrintAttributes.Margins.NO_MARGINS);
                             } else {

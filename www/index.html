@@ -305,6 +305,7 @@ textarea.inp{line-height:1.6;resize:vertical}
     <div class="ttl"><div class="shop" id="shopName"></div><h1 id="pageTitle">ဆိုင် POS</h1></div>
     <div class="top-r">
       <button class="chip" id="syncChip" data-act="settings" aria-label="သိမ်းဆည်းမှု အခြေအနေ"></button>
+      <button class="icon-btn" data-act="new-label" aria-label="Label ထုတ်မည်" id="lblBtn"></button>
       <button class="icon-btn" data-act="refresh" aria-label="Refresh" id="refBtn"></button>
       <button class="icon-btn" data-act="settings" aria-label="ဆက်တင်များ" id="gearBtn"></button>
     </div>
@@ -1240,9 +1241,10 @@ function voucherSheet(id){
      +'<div class="ln g"><span>ပေးရန် စုစုပေါင်း</span><span>'+ks(v.total)+'</span></div>'
      +'<div class="ln"><span>'+paidLbl(v)+'</span><span>'+ks(v.paid||0)+'</span></div><div class="ln"><span>ကျန်ငွေ</span><span><b'+(rem>0?' class="w"':'')+'>'+ks(rem)+'</b></span></div>'
      +(v.pointsEarned>0?'<div class="ln"><span>ရရှိသော အမှတ်</span><span>+'+ks(v.pointsEarned)+' မှတ်</span></div>':'')+'</div>'
-     +((v.payments||[]).length?'<div class="sec-t">ငွေပေးချေမှု မှတ်တမ်း</div>'+v.payments.map(p=>'<div class="ln rowf" style="justify-content:space-between;font-size:14px"><span class="mut">'+fmtD(dstr(new Date(p.at)))+' '+fmtT(p.at)+' · '+esc(p.method||DEFAULT_METHOD)+(p.byName?' · '+esc(p.byName):'')+'</span><b class="num">'+ks(p.amount)+' ကျပ်</b></div>').join(''):'')
+     +((v.payments||[]).length?'<div class="sec-t">ငွေပေးချေမှု မှတ်တမ်း</div>'+v.payments.map(p=>'<div class="ln rowf" style="justify-content:space-between;font-size:14px"><span class="mut">'+fmtD(dstr(new Date(p.at)))+' '+fmtT(p.at)+' · '+esc(p.method||DEFAULT_METHOD)+(p.refund?' · ပြန်ပေးငွေ':'')+(p.byName?' · '+esc(p.byName):'')+'</span><b class="num">'+ks(p.amount)+' ကျပ်</b></div>').join(''):'')
+     +((v.returns||[]).length?'<div class="sec-t">ပြန်အမ်းမှတ်တမ်း</div>'+v.returns.map(r=>'<div class="ln" style="font-size:14px"><div class="mut">'+fmtD(dstr(new Date(r.at)))+' '+fmtT(r.at)+(r.byName?' · '+esc(r.byName):'')+'</div><div>'+r.items.map(i=>esc(i.name)+' ×'+i.qty).join('၊ ')+' — <b class="num">'+ks(r.value)+' ကျပ်</b>'+(r.cash>0?' (ပြန်ပေးငွေ '+ks(r.cash)+')':'')+'</div></div>').join(''):'')
      +(rem>0?'<div class="sec-t">စရံ / ငွေပေးချေမှု မှတ်မည်</div><div class="rowf" style="flex-wrap:nowrap"><input class="inp" id="vPay" inputmode="numeric" value="'+rem+'" style="flex:1;min-width:0" aria-label="ပေးချေငွေ"><button class="btn pri" id="vPayGo">မှတ်မည်</button></div><div style="margin-top:8px">'+methodPickerShell('vM')+'</div>':'')
-   +(vCan(v)?'<div class="rowf" style="margin-top:12px"><button class="btn s" id="vEdit">'+ico('edit')+'ဘောက်ချာ ပြင်မည်</button></div>':'')
+   +(vCan(v)?'<div class="rowf" style="margin-top:12px">'+((v.returns||[]).length?'':'<button class="btn s" id="vEdit">'+ico('edit')+'ဘောက်ချာ ပြင်မည်</button>')+((v.items||[]).length?'<button class="btn s" id="vRet">'+ico('refresh')+'ပစ္စည်း ပြန်အမ်းမည်</button>':'')+'</div>':'')
    +shareHTML(v)};
   const printTab=v=>'<div class="sec-t" style="margin-top:0">ပရင့်ထုတ်ရန်</div>'+seg('pmode',[['th','80mm ဘောက်ချာ'],['a4','A4 စာရွက်']],mode)
    +(owner()?'<p class="sub" style="margin-top:8px">ဘောက်ချာပေါ်ရှိ စာသား / လိုဂိုကို နှိပ်၍ ပြင်နိုင်ပါသည် — စာသား၊ အရွယ်အစား၊ စာလုံးအထူ၊ နေရာ ချိန်ညှိနိုင်သည်။</p>':'')
@@ -1296,6 +1298,7 @@ function voucherSheet(id){
         const vmp=q('#vM')?methodPicker(el,'vM',DEFAULT_METHOD):null;
         on('#vPayGo',()=>{const a=num(q('#vPay').value);if(a<=0){toast('ပမာဏ ထည့်ပါ');return}const ap=applyPayment(v(),a,vmp?vmp.get():DEFAULT_METHOD);toast(money(ap)+' မှတ်ပြီးပါပြီ');render()});
         on('#vEdit',()=>voucherEditSheet(id,()=>render()));
+        on('#vRet',()=>returnSheet(id,()=>render()));
         on('#vImg',()=>saveVoucherImage(v()));
         on('#vCopy',()=>copyText(shareText(v())));
         on('#vPrintA4',()=>{flush();doPrint(v(),'a4')});
@@ -1349,29 +1352,28 @@ const LBL_KEY='shoppos.label';
 function labelPrefs(){let o={};try{o=JSON.parse(localStorage.getItem(LBL_KEY)||'{}')}catch(e){}return {w:o.w>=20?o.w:70,h:o.h>=15?o.h:80}}
 function saveLabelPrefs(w,h){try{localStorage.setItem(LBL_KEY,JSON.stringify({w:w,h:h}))}catch(e){}}
 function labelSummary(d,mm){
-  const its=d.items||[];if(!its.length&&d.total==null)return '';
-  const qn=its.reduce((a,i)=>a+(Number(i.qty)||0),0),paid=d.status!=='unpaid';
+  const head=(d.itemsHead||'').trim(),lines=String(d.itemsText||'').split('\n').map(x=>x.trim()).filter(Boolean),tot=(d.totalText||'').trim(),st=(d.statusText||'').trim();
+  if(!head&&!lines.length&&!tot&&!st)return '';
   let h='<div style="flex:1;min-height:0;overflow:hidden;margin-top:'+mm(1.4)+'">';
-  if(its.length){
-    h+='<div style="font-size:'+mm(3.5)+';font-weight:800">ပစ္စည်း '+its.length+' မျိုး · '+qn+' ခု</div>'
-      +'<div style="font-size:'+mm(3.2)+';line-height:1.35;overflow-wrap:anywhere">'+its.map(i=>esc(i.name||'')+' ×'+(Number(i.qty)||0)+(i.unit?' '+esc(i.unit):'')).join(' · ')+'</div>';
-  }
+  if(head)h+='<div style="font-size:'+mm(3.5)+';font-weight:800;overflow-wrap:anywhere">'+esc(head)+'</div>';
+  if(lines.length)h+='<div style="font-size:'+mm(3.2)+';line-height:1.35;overflow-wrap:anywhere">'+lines.map(esc).join(' · ')+'</div>';
   h+='</div>';
-  if(d.total!=null){
+  if(tot||st){
     h+='<div style="flex:none;display:flex;justify-content:space-between;align-items:center;gap:'+mm(2)+';margin-top:'+mm(1.2)+'">'
-      +'<div style="font-size:'+mm(4.4)+';font-weight:800;white-space:nowrap"><span style="font-size:'+mm(3)+';font-weight:600">Total </span>'+ks(d.total)+' <span style="font-size:'+mm(3)+';font-weight:600">ကျပ်</span></div>'
-      +'<div style="font-size:'+mm(3.4)+';font-weight:800;border:'+mm(.5)+' solid #000;border-radius:'+mm(1.2)+';padding:'+mm(.3)+' '+mm(1.8)+';white-space:nowrap">'+(paid?'PAID':'UNPAID'+(d.rem>0?' · ကျန် '+ks(d.rem):''))+'</div></div>';
+      +(tot?'<div style="font-size:'+mm(4.4)+';font-weight:800;white-space:nowrap"><span style="font-size:'+mm(3)+';font-weight:600">Total </span>'+esc(tot)+'</div>':'<span></span>')
+      +(st?'<div style="font-size:'+mm(3.4)+';font-weight:800;border:'+mm(.5)+' solid #000;border-radius:'+mm(1.2)+';padding:'+mm(.3)+' '+mm(1.8)+';white-space:nowrap">'+esc(st)+'</div>':'')+'</div>';
   }
   return h;
 }
 function labelFromVoucher(v){
-  const d={name:'',addr:'',phone:'',code:(v&&v.no)||'',date:(v&&v.date)||today()};
+  const d={name:'',addr:'',phone:'',code:(v&&v.no)||'',date:(v&&v.date)||today(),itemsHead:'',itemsText:'',totalText:'',statusText:''};
   if(!v)return d;
   const c=v.customerId?Store.get('customers',v.customerId):null;
   if(c){d.name=c.name||'';d.addr=c.address||'';d.phone=c.phone||''}else if(v.customerName)d.name=v.customerName;
-  const rem=Sel.rem(v);
-  d.items=(v.items||[]).map(i=>({name:i.name,qty:i.qty,unit:i.unit||''}));
-  d.total=v.total||0;d.rem=rem;d.status=rem>0?'unpaid':'paid';
+  const rem=Sel.rem(v),its=v.items||[],qn=its.reduce((a,i)=>a+(Number(i.qty)||0),0);
+  if(its.length){d.itemsHead='ပစ္စည်း '+its.length+' မျိုး · '+qn+' ခု';d.itemsText=its.map(i=>(i.name||'')+' ×'+(Number(i.qty)||0)+(i.unit?' '+i.unit:'')).join('\n')}
+  d.totalText=ks(v.total||0)+' ကျပ်';
+  d.statusText=rem>0?'UNPAID · ကျန် '+ks(rem):'PAID';
   return d;
 }
 async function autoLabel(v){
@@ -1444,7 +1446,11 @@ function labelSheet(v){
      +'<div class="field"><button type="button" class="btn block" id="lbCust">'+ico('users')+'<span id="lbCustT"></span></button></div>'
      +'<div class="field"><label class="lbl" for="lbName">နာမည်</label><input class="inp" id="lbName"></div>'
      +'<div class="field"><label class="lbl" for="lbAddr">နေရပ် လိပ်စာ</label><textarea class="inp" id="lbAddr" rows="2"></textarea></div>'
-     +'<div class="two"><div class="field"><label class="lbl" for="lbPhone">ဖုန်းနံပါတ်</label><input class="inp" id="lbPhone" inputmode="tel"></div><div class="field"><label class="lbl" for="lbCode">Code</label><input class="inp" id="lbCode"></div></div>',
+     +'<div class="two"><div class="field"><label class="lbl" for="lbPhone">ဖုန်းနံပါတ်</label><input class="inp" id="lbPhone" inputmode="tel"></div><div class="field"><label class="lbl" for="lbCode">Code</label><input class="inp" id="lbCode"></div></div>'
+     +'<div class="field"><label class="lbl" for="lbHead">ပစ္စည်း အကျဉ်း (ခေါင်းစီး)</label><input class="inp" id="lbHead" placeholder="ဥပမာ - ပစ္စည်း 3 မျိုး · 6 ခု"></div>'
+     +'<div class="field"><label class="lbl" for="lbItems">ပစ္စည်း စာရင်း (တစ်ကြောင်းလျှင် တစ်မျိုး)</label><textarea class="inp" id="lbItems" rows="3"></textarea></div>'
+     +'<div class="two"><div class="field"><label class="lbl" for="lbTotal">Total</label><input class="inp" id="lbTotal" placeholder="12,500 ကျပ်"></div><div class="field"><label class="lbl" for="lbStat">Paid / Unpaid</label><input class="inp" id="lbStat" placeholder="PAID"></div></div>'
+     +'<div class="rowf" style="gap:6px;margin:-4px 0 10px"><button type="button" class="chip" data-st="PAID" style="cursor:pointer">PAID</button><button type="button" class="chip" data-st="UNPAID" style="cursor:pointer">UNPAID</button><button type="button" class="chip" data-st="" style="cursor:pointer">ဖျောက်မည်</button></div>',
     footer:'<button class="btn pri block" id="lbDirect" style="margin-bottom:8px">'+ico('print')+'Printer သို့ တိုက်ရိုက်ပို့မည်</button><button class="btn block" id="lbPrint">'+ico('print')+'ပရင့်ထုတ်မည် (စက္ကူအရွယ်အတိုင်း)</button>',
     onMount(el){
       const q=s=>el.querySelector(s),cl=(x,a,b)=>Math.min(b,Math.max(a,x));
@@ -1456,11 +1462,12 @@ function labelSheet(v){
         inn.style.cssText='position:relative;margin:0 auto;width:'+(W*px*s).toFixed(1)+'px;height:'+(H*px*s).toFixed(1)+'px';
         inn.innerHTML='<div style="position:absolute;left:0;top:0;width:'+W+'mm;height:'+H+'mm;transform:scale('+s.toFixed(4)+');transform-origin:0 0">'+labelHTML(d,W,H)+'</div>';
       };
-      const setF=()=>{q('#lbName').value=d.name;q('#lbAddr').value=d.addr;q('#lbPhone').value=d.phone;q('#lbCode').value=d.code;q('#lbCustT').textContent=picked?(' ဖောက်သည်: '+picked+' (ပြောင်းမည်)'):' ဖောက်သည် ရွေးမည် (အကုန်ဖြည့်ပေးမည်)'};
+      const setF=()=>{q('#lbName').value=d.name;q('#lbAddr').value=d.addr;q('#lbPhone').value=d.phone;q('#lbCode').value=d.code;q('#lbHead').value=d.itemsHead;q('#lbItems').value=d.itemsText;q('#lbTotal').value=d.totalText;q('#lbStat').value=d.statusText;q('#lbCustT').textContent=picked?(' ဖောက်သည်: '+picked+' (ပြောင်းမည်)'):' ဖောက်သည် ရွေးမည် (အကုန်ဖြည့်ပေးမည်)'};
       q('#lbW').value=W;q('#lbH').value=H;setF();paint();
-      [['#lbName','name'],['#lbAddr','addr'],['#lbPhone','phone'],['#lbCode','code']].forEach(f=>q(f[0]).addEventListener('input',()=>{d[f[1]]=q(f[0]).value;paint()}));
+      [['#lbName','name'],['#lbAddr','addr'],['#lbPhone','phone'],['#lbCode','code'],['#lbHead','itemsHead'],['#lbItems','itemsText'],['#lbTotal','totalText'],['#lbStat','statusText']].forEach(f=>q(f[0]).addEventListener('input',()=>{d[f[1]]=q(f[0]).value;paint()}));
       ['#lbW','#lbH'].forEach(s=>q(s).addEventListener('input',paint));
       $$('[data-sz]',el).forEach(b=>b.onclick=()=>{const z=b.dataset.sz.split('x');q('#lbW').value=z[0];q('#lbH').value=z[1];paint()});
+      $$('[data-st]',el).forEach(b=>b.onclick=()=>{q('#lbStat').value=b.dataset.st;d.statusText=b.dataset.st;paint()});
       q('#lbCust').onclick=()=>custPickSheet(c=>{fillC(c);setF();paint()});
       const go=f=>{const dm=dims();saveLabelPrefs(dm[0],dm[1]);f(Object.assign({},d),dm[0],dm[1])};
       q('#lbDirect').onclick=()=>go(labelDirect);
@@ -1471,6 +1478,46 @@ const vCan=v=>Auth.owner()||(v.date===today()&&!Sel.isClosed(v.date));
 function unapplyVoucher(v){
   (v.items||[]).forEach(i=>{const p=Store.get('products',i.pid);if(p)Store.put('products',Object.assign({},p,{stock:(p.stock||0)+i.qty}))});
   if(v.customerId){const c=Store.get('customers',v.customerId);if(c)Store.put('customers',Object.assign({},c,{points:Math.max(0,(c.points||0)+(v.pointsUsed||0)-(v.pointsEarned||0))}))}
+}
+function returnSheet(id,after){
+  const v0=Store.get('vouchers',id);if(!v0||!(v0.items||[]).length){toast('ပြန်အမ်းစရာ ပစ္စည်း မရှိပါ');return}
+  const qs=v0.items.map(()=>0);
+  const calc=()=>{
+    const retSub=v0.items.reduce((a,i,k)=>a+Math.round(i.price)*qs[k],0),sub0=v0.subtotal||0,ratio=sub0>0?retSub/sub0:0;
+    const discBack=Math.round((v0.discount||0)*ratio),ptsBack=Math.round((v0.pointsUsed||0)*ratio),pvBack=Math.round((v0.pointsValue||0)*ratio);
+    const newSub=sub0-retSub,newTotal=Math.max(0,newSub-((v0.discount||0)-discBack)-((v0.pointsValue||0)-pvBack));
+    const cash=Math.max(0,(v0.paid||0)-newTotal);
+    return {retSub:retSub,discBack:discBack,ptsBack:ptsBack,pvBack:pvBack,newSub:newSub,newTotal:newTotal,value:(v0.total||0)-newTotal,cash:cash,debt:((v0.total||0)-newTotal)-cash};
+  };
+  const sum=()=>{const c=calc();return '<div class="ln"><span>ပြန်အမ်းသော တန်ဖိုး</span><span>'+ks(c.value)+'</span></div><div class="ln g"><span>ပြန်ပေးရမည့် ငွေ</span><span>'+ks(c.cash)+' ကျပ်</span></div>'+(c.debt>0?'<div class="ln"><span>ကြွေးမှ လျှော့မည်</span><span>'+ks(c.debt)+'</span></div>':'')+'<div class="ln"><span>ဘောက်ချာ စုစုပေါင်း (အသစ်)</span><span>'+ks(c.newTotal)+'</span></div>'};
+  Sheet.open({title:'ပစ္စည်း ပြန်အမ်းမည် #'+v0.no,
+    body:'<p class="sub" style="margin-bottom:8px">ပြန်အမ်းမည့် အရေအတွက်ကို ထည့်ပါ။ လက်ကျန်ပစ္စည်း ပြန်တိုးပြီး ငွေပေးပြီးသား ပမာဏမှ ပြန်ပေးရမည့်ငွေကို တွက်ပေးပါမည်။</p>'
+      +v0.items.map((i,k)=>'<div class="ve-it"><div class="rowf" style="justify-content:space-between"><b>'+esc(i.name)+'</b><span class="sub">'+ks(i.price)+' × '+i.qty+(i.unit?' '+esc(i.unit):'')+'</span></div><div class="field" style="margin:6px 0 0"><label class="lbl" for="rt'+k+'">ပြန်အမ်းမည့် အရေအတွက် (အများဆုံး '+i.qty+')</label><input class="inp" id="rt'+k+'" data-k="'+k+'" inputmode="numeric" placeholder="0"></div></div>').join('')
+      +'<div class="sumbox" id="rtSum" style="margin-top:12px">'+sum()+'</div>',
+    footer:'<button class="btn pri block" id="rtGo">ပြန်အမ်းမည်</button>',
+    onMount(el,ctl){
+      el.addEventListener('input',e=>{const t=e.target;if(t.dataset.k==null)return;const k=Number(t.dataset.k),mx=v0.items[k].qty;let n=Math.floor(num(t.value));n=Math.min(Math.max(0,n),mx);qs[k]=n;if(String(n)!==t.value.trim()&&t.value.trim()!=='')t.value=n;el.querySelector('#rtSum').innerHTML=sum()});
+      el.querySelector('#rtGo').onclick=async()=>{
+        const c=calc();if(c.retSub<=0){toast('ပြန်အမ်းမည့် အရေအတွက် ထည့်ပါ');return}
+        const v=Store.get('vouchers',id);if(!v)return;
+        if(!(await confirmBox('ပစ္စည်း ပြန်အမ်းမည်','ပြန်အမ်းတန်ဖိုး '+ks(c.value)+' ကျပ် (ပြန်ပေးငွေ '+ks(c.cash)+' ကျပ်) ကို မှတ်မည်လား။','ပြန်အမ်းမည်')))return;
+        const now=Date.now(),me=Auth.me||{},S=Store.d.settings;
+        const ret=[],items=[];
+        v.items.forEach((i,k)=>{const q=qs[k]||0;if(q>0){ret.push({pid:i.pid,name:i.name,unit:i.unit||'',price:i.price,qty:q});const p=Store.get('products',i.pid);if(p)Store.put('products',Object.assign({},p,{stock:(p.stock||0)+q}))}if(i.qty-q>0)items.push(Object.assign({},i,{qty:i.qty-q}))});
+        const lastM=((v.payments||[]).filter(p=>p.amount>0).slice(-1)[0]||{}).method||DEFAULT_METHOD;
+        const pays=(v.payments||[]).slice();if(c.cash>0)pays.push({at:now,amount:-c.cash,method:lastM,refund:true,by:me.id||'',byName:me.name||''});
+        const newPaid=(v.paid||0)-c.cash;
+        let newEarned=v.pointsEarned||0;
+        if(v.customerId){
+          const cu=Store.get('customers',v.customerId);
+          if(S.earnPer>0)newEarned=Math.min(newEarned,Math.floor(newPaid/S.earnPer));
+          if(cu)Store.put('customers',Object.assign({},cu,{points:Math.max(0,(cu.points||0)+c.ptsBack+(newEarned-(v.pointsEarned||0)))}));
+        }
+        Store.put('vouchers',Object.assign({},v,{items:items,subtotal:c.newSub,discount:(v.discount||0)-c.discBack,pointsUsed:(v.pointsUsed||0)-c.ptsBack,pointsValue:(v.pointsValue||0)-c.pvBack,total:c.newTotal,paid:newPaid,payments:pays,pointsEarned:newEarned,
+          returns:(v.returns||[]).concat([{at:now,items:ret,value:c.value,cash:c.cash,by:me.id||'',byName:me.name||''}])}));
+        ctl.close();if(after)after();toast('ပြန်အမ်းမှတ်ပြီးပါပြီ'+(c.cash>0?' — '+ks(c.cash)+' ကျပ် ပြန်ပေးပါ':''));
+      };
+    }});
 }
 function deleteVoucher(v){unapplyVoucher(v);Store.del('vouchers',v.id)}
 function voucherEditSheet(id,after){
@@ -1625,6 +1672,40 @@ function checkoutSheet(){
       paintCust();paintRes();setMode('paid');
     }});
 }
+const csvCell=x=>{x=x==null?'':String(x);return /[",\n\r]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x};
+const toCSV=rows=>'\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
+function csvRows(kind){
+  if(kind==='vouchers'){
+    const r=[['ဘောက်ချာအမှတ်','ရက်စွဲ','အချိန်','ဖောက်သည်','ဖုန်း','ဖြတ်သူ','ပစ္စည်း','ယူနစ်','အရေအတွက်','ဈေးနှုန်း','ကျသင့်ငွေ','ကုန်ပစ္စည်းစုစုပေါင်း','လျှော့စျေး','ပေးရန်စုစုပေါင်း','ပေးငွေ','ကျန်ငွေ','အခြေအနေ']];
+    Store.list('vouchers').sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).forEach(v=>{
+      const c=v.customerId?Store.get('customers',v.customerId):null,its=(v.items||[]).length?v.items:[null];
+      its.forEach((i,k)=>r.push([v.no,v.date,fmtT(v.createdAt||0),Sel.cname(v),c?c.phone:'',v.byName||'',i?i.name:'',i?i.unit:'',i?i.qty:'',i?i.price:'',i?i.price*i.qty:'',
+        k?'':v.subtotal,k?'':v.discount||0,k?'':v.total,k?'':v.paid||0,k?'':Sel.rem(v),k?'':(Sel.rem(v)>0?'ငွေမလွှဲရသေး':'ငွေပေးပြီး')]));
+    });return r;
+  }
+  if(kind==='products')return [['ပစ္စည်းအမည်','ယူနစ်','ရောင်းဈေး','ဝယ်ဈေး','လက်ကျန်','ကုဒ်']].concat(Store.list('products').sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(p=>[p.name,p.unit||'',p.price,p.cost==null?'':p.cost,p.stock,p.sku||'']));
+  if(kind==='customers')return [['အမည်','ဖုန်း','လိပ်စာ','အမှတ်','ကြွေးကျန်','စုစုပေါင်းဝယ်ယူငွေ']].concat(Store.list('customers').sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c=>[c.name,c.phone||'',c.address||'',c.points||0,Sel.custDue(c.id),Sel.custSpent(c.id)]));
+  return [['ရက်စွဲ','အမျိုးအစား','ပမာဏ','နည်းလမ်း','မှတ်ချက်','မှတ်သူ']].concat(Store.list('expenses').sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(x=>[x.date,x.category||'',x.amount,x.method||'',x.note||'',x.byName||'']));
+}
+async function exportData(kind){
+  const st=dstr(new Date());
+  try{
+    if(kind==='backup'){
+      const d={};['products','customers','vouchers','expenses','closings'].forEach(c=>d[c]=Store.list(c));
+      await Store.dl.save({filename:'shoppos-backup-'+st+'.json',data:JSON.stringify({app:'shoppos',version:1,exportedAt:Date.now(),data:d,settings:Store.d.settings})});
+    }else await Store.dl.save({filename:'shoppos-'+kind+'-'+st+'.csv',data:toCSV(csvRows(kind))});
+    toast('ဖိုင် ထုတ်ပြီးပါပြီ');
+  }catch(e){if(e&&e.code==='declined')return;toast('ဖိုင်ထုတ်၍ မရပါ')}
+}
+async function restoreBackup(file){
+  let j;try{j=JSON.parse(await file.text())}catch(e){toast('Backup ဖိုင် မမှန်ပါ');return}
+  if(!j||j.app!=='shoppos'||!j.data){toast('Backup ဖိုင် မမှန်ပါ');return}
+  const n=['products','customers','vouchers','expenses','closings'].reduce((a,c)=>a+(j.data[c]||[]).length,0);
+  if(!(await confirmBox('Backup ပြန်သွင်းမည်','ဒေတာ '+n+' ခု ပြန်သွင်းမည်။ အမှတ်စဉ်တူသော ဒေတာများကို Backup ထဲက အတိုင်း ပြန်ရေးပါမည်။ (အကောင့်များကို မထိပါ)','ပြန်သွင်းမည်')))return;
+  ['products','customers','vouchers','expenses','closings'].forEach(c=>(j.data[c]||[]).forEach(o=>{if(o&&o.id)Store.put(c,o)}));
+  if(j.settings)Store.putSettings(Object.assign({},Store.d.settings,j.settings));
+  toast('ပြန်သွင်းပြီးပါပြီ — ဒေတာ '+n+' ခု');
+}
 function settingsSheet(){
   const S=Store.d.settings;
   const hasDemo=['products','customers','vouchers'].some(c=>Store.list(c).some(x=>x.demo));
@@ -1647,6 +1728,9 @@ function settingsSheet(){
      +'<p class="sub">အမှတ်များကို ငွေရရှိသည့်အခါ တွက်ချက်၍ ထည့်ပေးပါသည်။ ကြွေးဖြင့်ရောင်းသော ပမာဏအတွက် ကြွေးရှင်းသည့်အခါမှ အမှတ်ရပါမည်။</p>'
      +'<div class="sec-t">ဒေတာ</div><p class="sub" style="margin-bottom:8px">'+(Store.mode==='cloud'?'ဒေတာများကို ဤဖုန်းထဲတွင်ပါ သိမ်းထားသဖြင့် အင်တာနက် မရှိလည်း သုံးနိုင်ပါသည်။ အင်တာနက် ပြန်ရသည်နှင့် Supabase သို့ အလိုအလျောက် တင်ပြီး အသစ်များကို ဒေါင်းလုပ် လုပ်ပါမည်။'+(Store.pendingCount()?' (မတင်ရသေးသော '+Store.pendingCount()+' ခု ရှိသည်)':'')+(Store.syncErr?' — '+Store.syncErr:''):'ဒေတာများကို ဤစက်၏ ဘရောက်ဇာထဲတွင်သာ သိမ်းဆည်းထားပါသည်။ အခြားစက်တွင် မမြင်ရပါ။')+'</p>'
      +'<div class="rowf" style="margin-bottom:12px">'+(Store.mode==='cloud'?'<button class="btn s" id="sbSync">ယခု ချိန်ညှိမည်</button><button class="btn s" id="sbLink">ငွေကိုင်ဖုန်းအတွက် လင့်ခ် ကူးမည်</button>':'')+'<button class="btn s" id="sbChg">Supabase '+(Store.mode==='cloud'?'ပြောင်းမည်':'ချိတ်မည်')+'</button></div>'
+     +'<div class="sec-t">Backup / Excel ထုတ်ရန်</div><p class="sub" style="margin-bottom:8px">Backup ဖိုင်ကို ဖုန်းပျောက်လျှင် ပြန်သွင်းရန် သိမ်းထားပါ။ CSV ဖိုင်ကို Excel / Google Sheets တွင် ဖွင့်နိုင်သည်။</p>'
+     +'<div class="rowf" style="margin-bottom:8px"><button class="btn s pri" data-ex="backup">Backup ဖိုင် (JSON)</button><label class="btn s" for="sRestF">Backup ပြန်သွင်းမည်</label><input type="file" id="sRestF" accept=".json,application/json" hidden></div>'
+     +'<div class="rowf" style="margin-bottom:12px"><button class="btn s" data-ex="vouchers">ဘောက်ချာ CSV</button><button class="btn s" data-ex="products">ပစ္စည်း CSV</button><button class="btn s" data-ex="customers">ဖောက်သည် CSV</button><button class="btn s" data-ex="expenses">ကုန်ကျစရိတ် CSV</button></div>'
      +'<div class="sec-t">Print / Printer</div>'
      +'<div class="field"><label class="lbl">ပုံမှန် ပရင့်ထုတ်မည့် အရွယ်</label><div class="seg" id="sPm"><button type="button" data-v="th">80mm ဘောက်ချာ</button><button type="button" data-v="a4">A4 စာရွက်</button></div></div>'
      +'<div class="stat" style="margin-top:0"><span>Printer</span><span><b class="'+(Prn.connected()?'':'w')+'">'+(Prn.connected()?esc(Prn.name):'မချိတ်ရသေးပါ')+'</b></span></div>'
@@ -1687,6 +1771,8 @@ function settingsSheet(){
         Store.putSettings(ns);ctl.close();toast('ဆက်တင် သိမ်းပြီးပါပြီ');paintChrome();
       };
       q('#sPrn').onclick=()=>printerSheet();
+      $$('[data-ex]',el).forEach(b=>b.onclick=()=>exportData(b.dataset.ex));
+      q('#sRestF').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)restoreBackup(f)};
       q('#sDemo').onclick=()=>{loadDemo();ctl.close()};
       const dc=q('#sDemoClr');if(dc)dc.onclick=async()=>{if(await confirmBox('နမူနာဒေတာ ဖျက်မည်','နမူနာအဖြစ် ထည့်ထားသော ကုန်ပစ္စည်း၊ ဖောက်သည်၊ ဘောက်ချာများကို ဖျက်မည်။ သင်ကိုယ်တိုင် ထည့်ထားသော ဒေတာကို မထိခိုက်ပါ။','ဖျက်မည်')){clearDemo();ctl.close()}};
     }});
@@ -2562,6 +2648,7 @@ async function doRefresh(){
 }
 const ACT={
   'refresh':()=>doRefresh(),
+  'new-label':()=>labelSheet(null),
   'goto':t=>{if(t.dataset.vstatus){F.vStatus=t.dataset.vstatus;F.vRange='all';F.vQuery=''}App.go(t.dataset.tab)},
   'seg':t=>{const k=t.dataset.key;if(k==='pmode')return;F[k]=t.dataset.val;App.paint(false)},
   'settings':()=>Auth.owner()?settingsSheet():mySheet(),
@@ -2630,7 +2717,7 @@ const pendingList=()=>Store.list('accounts').filter(a=>a.pending===true&&a.activ
   }catch(e){console.error(e)}
 })();
 (function boot(){
-  $('#gearBtn').innerHTML=ico('sliders');$('#refBtn').innerHTML=ico('refresh');
+  $('#gearBtn').innerHTML=ico('sliders');$('#refBtn').innerHTML=ico('refresh');$('#lblBtn').innerHTML=ico('print');
   document.body.classList.add('noauth');
   $('#tabbarIn').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)App.go(b.dataset.tab)});
   $('#view').innerHTML='<div class="skel"></div><div class="skel" style="height:110px"></div><div class="skel"></div>';
@@ -2644,7 +2731,7 @@ const pendingList=()=>Store.list('accounts').filter(a=>a.pending===true&&a.activ
     });
     paintChrome();
     Prn.restore();
-    if(Auth.restore()){const m=Auth.me;Auth.me=null;authScreen(m)}else authScreen()
+    if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen()
   });
   setInterval(()=>{if(today()!==App.lastDay){App.lastDay=today();App.paint(false);toast('နောက်တစ်နေ့သို့ ရောက်ပါပြီ — မရှင်းရသေးသော ကြွေးများကို ယခင်ရက်မှ လွှဲပြောင်းဟု မှတ်ထားပါသည်')}},30000);
   window.addEventListener('resize',()=>{if(App.tab==='sell'&&$('#cartBox'))$('#cartBox').innerHTML=cartHTML()});

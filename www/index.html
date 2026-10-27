@@ -2618,6 +2618,32 @@ async function reopenDay(date,ok){
   }
 }
 function viewReports(){const o=Auth.owner();return closeCardHTML()+(o?viewHome('top'):'')+dashBody()+(o?viewHome('bottom'):'')}
+function prodAgg(list){const o={};list.forEach(v=>v.items.forEach(i=>{const r=o[i.pid]||(o[i.pid]={pid:i.pid,name:i.name,qty:0,amt:0});r.qty+=i.qty;r.amt+=i.price*i.qty}));return Object.values(o).sort((a,b)=>b.amt-a.amt||b.qty-a.qty)}
+function prodRankCard(vs,rr,ap,cutoff,tEnd){
+  const sh=(ds,k)=>{const d=parseD(ds);d.setDate(d.getDate()+k);return dstr(d)};
+  let pc,pt;
+  if(rr==='month'){pc=dstr(new Date(ap[0],ap[1]-2,1));pt=dstr(new Date(ap[0],ap[1]-1,0))}
+  else if(rr==='year'){pc=(ap[0]-1)+'-01-01';pt=(ap[0]-1)+'-12-31'}
+  else{const n=Math.round((parseD(tEnd)-parseD(cutoff))/864e5)+1;pt=sh(cutoff,-1);pc=sh(cutoff,-n)}
+  const cur=prodAgg(vs).slice(0,10);
+  const prevAll=prodAgg(Sel.vouchers().filter(v=>v.date>=pc&&v.date<=pt));
+  const pr={};prevAll.forEach((r,i)=>{pr[r.pid]=i+1});
+  const hasPrev=prevAll.length>0,mx=cur.length?cur[0].amt||1:1;
+  const bd='font-weight:700;font-size:12px;white-space:nowrap';
+  const arrow=(r,i)=>{
+    if(!hasPrev)return '';
+    const p=pr[r.pid];
+    if(!p)return '<span style="'+bd+';color:#1D4ED8">NEW</span>';
+    const d=p-(i+1);
+    if(d>0)return '<span style="'+bd+';color:#15803D">▲ '+d+'</span>';
+    if(d<0)return '<span style="'+bd+';color:var(--red)">▼ '+(-d)+'</span>';
+    return '<span class="sub" style="font-weight:700">–</span>';
+  };
+  return '<section class="card"><div class="card-h"><h3>အရောင်းရဆုံး ပစ္စည်းများ (Rank)</h3></div>'
+   +(hasPrev?'<div class="sub" style="margin:-4px 0 6px">▲▼ = ယခင်ကာလနှင့် နှိုင်းယှဉ်</div>':'')
+   +(cur.length?cur.map((r,i)=>'<div style="padding:8px 0;border-top:1px solid var(--line)"><div class="rowf" style="justify-content:space-between;flex-wrap:nowrap;gap:8px"><div style="display:flex;align-items:center;gap:10px;min-width:0"><div class="rk"'+(i===0?' style="background:var(--pri);color:var(--pri-fg)"':'')+'>'+(i+1)+'</div><div class="nm" style="min-width:0">'+esc(r.name)+'</div></div><div style="display:flex;align-items:center;gap:8px;flex:none">'+arrow(r,i)+'<div class="num"><b>'+ks(r.amt)+'</b> <span class="sub">ကျပ်</span></div></div></div><div class="sub">'+ks(r.qty)+' ခု ရောင်းရသည်</div><div class="meter"><i style="width:'+Math.max(3,r.amt/mx*100)+'%"></i></div></div>').join(''):emptyBox('box','ဤကာလအတွင်း ရောင်းချမှု မရှိပါ'))
+   +'</section>';
+}
 function dashBody(){
   const cash=!Auth.owner(),rr=cash?'day':F.rRange,t0=today();
   if(!F.rDate||F.rDate>t0)F.rDate=t0;
@@ -2636,14 +2662,14 @@ function dashBody(){
   const sales=vs.reduce((a,v)=>a+v.total,0),paidSum=vs.reduce((a,v)=>a+(v.paid||0),0);
   const ex=Store.list('expenses').filter(e=>(!cutoff||e.date>=cutoff)&&e.date<=t).reduce((a,e)=>a+e.amount,0);
   return (cash?'<div class="stat" style="margin-top:0"><span>ယနေ့ <b>'+fmtD(t)+'</b></span></div>':'<div class="rrow">'+seg('rRange',[['day','Day'],['month','Month'],['year','Year']],rr)+'<button type="button" class="calbtn" data-act="cal-open" aria-label="Calendar">'+ico('calendar')+'</button></div><div class="cycrow"><button type="button" class="btn s" data-act="rnav" data-d="-1" aria-label="ယခင်">‹</button><div class="cl"><b>'+plabel+'</b></div><button type="button" class="btn s" data-act="rnav" data-d="1" aria-label="နောက်"'+(tEnd>=t0?' disabled':'')+'>›</button></div>')
-   +'<div class="tiles"><div class="tile"><div class="eb">ရောင်းရငွေ</div><div class="v">'+ks(sales)+'<small>ကျပ်</small></div><div class="sub">ဘောက်ချာ '+vs.length+' စောင်</div></div><div class="tile"><div class="eb">ရရှိငွေ / ကြွေး</div><div class="v">'+ks(paidSum)+'<small>ကျပ်</small></div><div class="sub">ကြွေး '+ks(sales-paidSum)+' ကျပ်</div></div></div>'
-   +'<div class="tiles"><div class="tile"><div class="eb">ကုန်ကျစရိတ်</div><div class="v">'+ks(ex)+'<small>ကျပ်</small></div></div><div class="tile"><div class="eb">ယနေ့ ရရှိငွေ</div><div class="v">'+ks(Sel.collectedOn(today()))+'<small>ကျပ်</small></div></div></div>'
+   +'<div class="tiles"><div class="tile"><div class="eb">ရောင်းရငွေ</div><div class="v">'+ks(sales)+'<small>ကျပ်</small></div><div class="sub">ဘောက်ချာ '+vs.length+' စောင်</div></div><div class="tile"><div class="eb">ရရှိငွေ / ကြွေး</div><div class="v">'+ks(paidSum)+'<small>ကျပ်</small></div>'+((sales-paidSum)>0?'<div class="sub" style="color:var(--red);font-weight:700">ကြွေး '+ks(sales-paidSum)+' ကျပ်</div>':'<div class="sub" style="color:#15803D;font-weight:700">ကြွေးမရှိ</div>')+'</div></div>'
+   +'<div class="tiles"><div class="tile"><div class="eb">ကုန်ကျစရိတ်</div><div class="v">'+ks(ex)+'<small>ကျပ်</small></div></div>'+(function(){var c=Sel.collectedOn(today());return c===paidSum?'<div class="tile"><div class="eb">လက်ကျန်ငွေ (ရရှိ − ကုန်ကျ)</div><div class="v">'+ks(paidSum-ex)+'<small>ကျပ်</small></div></div>':'<div class="tile"><div class="eb">ယနေ့ ရရှိငွေ</div><div class="v">'+ks(c)+'<small>ကျပ်</small></div></div>'})()+'</div>'
    +(cash?'':profitCard(vs,ex,plabel))
    +dashCharts(vs,cutoff,t,sales,paidSum,cash||rr==='day'||(rr==='custom'&&cutoff===tEnd))
    +(cash?'':'<section class="card"><div class="card-h"><h3>ဝယ်ယူမှုအများဆုံး ဖောက်သည်များ စာရင်း</h3></div>'
    +(top.length?'<div>'+top.map((r,i)=>{const c=Store.get('customers',r.id),v0=vs.find(v=>v.customerId===r.id);return '<button class="rank" data-act="open-customer" data-id="'+r.id+'"><div class="rk">'+(i+1)+'</div><div style="flex:1;min-width:0"><div class="nm">'+esc(c?c.name:(v0?v0.customerName:'ဖောက်သည်'))+'</div><div class="sub">ဘောက်ချာ '+r.n+' စောင်'+(r.due>0?' · ကြွေး '+ks(r.due):'')+'</div><div class="meter"><i style="width:'+Math.max(3,r.spent/mx*100)+'%"></i></div></div><div class="num" style="text-align:right;flex:none"><b>'+ks(r.spent)+'</b><div class="sub">ကျပ်</div></div></button>'}).join('')+'</div>':emptyBox('users','ဤကာလအတွင်း ဖောက်သည် ဝယ်ယူမှု မရှိပါ'))+'</section>')
-   +'<section class="card"><div class="card-h"><h3>အရောင်းရဆုံး ပစ္စည်းများ</h3></div>'
-   +(tp.length?tp.map(r=>'<div style="padding:8px 0;border-top:1px solid var(--line)"><div class="rowf" style="justify-content:space-between;flex-wrap:nowrap"><div class="nm" style="min-width:0">'+esc(r.name)+'</div><div class="num" style="flex:none"><b>'+ks(r.amt)+'</b> <span class="sub">ကျပ်</span></div></div><div class="sub">'+ks(r.qty)+' ခု ရောင်းရသည်</div><div class="meter"><i style="width:'+Math.max(3,r.amt/pmx*100)+'%"></i></div></div>').join(''):emptyBox('box','ဤကာလအတွင်း ရောင်းချမှု မရှိပါ'))+'</section>';
+   +(Auth.owner()?prodRankCard(vs,rr,ap,cutoff,tEnd):('<section class="card"><div class="card-h"><h3>အရောင်းရဆုံး ပစ္စည်းများ</h3></div>'
+   +(tp.length?tp.map(r=>'<div style="padding:8px 0;border-top:1px solid var(--line)"><div class="rowf" style="justify-content:space-between;flex-wrap:nowrap"><div class="nm" style="min-width:0">'+esc(r.name)+'</div><div class="num" style="flex:none"><b>'+ks(r.amt)+'</b> <span class="sub">ကျပ်</span></div></div><div class="sub">'+ks(r.qty)+' ခု ရောင်းရသည်</div><div class="meter"><i style="width:'+Math.max(3,r.amt/pmx*100)+'%"></i></div></div>').join(''):emptyBox('box','ဤကာလအတွင်း ရောင်းချမှု မရှိပါ'))+'</section>'));
 }
 
 /* ================= App shell ================= */

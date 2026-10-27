@@ -746,7 +746,7 @@ const tierPrice=(p,q,force)=>{const ts=(p.tiers||[]).slice().sort((a,b)=>a.min-b
 const Cart={
   items:[],customerId:null,
   P(pid){const it=this.items.find(i=>i.pid===pid);return it&&it.custom?Object.assign({id:pid,stock:1e9},it.custom):Store.get('products',pid)},
-  lines(){return this.items.map(i=>{const p=this.P(i.pid);if(!p)return null;const fx=i.fixed!=null,pr=fx?i.fixed:tierPrice(p,i.qty,i.whole);return {p:p,qty:i.qty,price:pr,whole:pr!==p.price,forced:!!i.whole||fx,fixed:fx,hasTier:!!(p.tiers&&p.tiers.length),amount:pr*i.qty}}).filter(Boolean)},
+  lines(){return this.items.map(i=>{const p=this.P(i.pid);if(!p)return null;const fx=i.fixed!=null,pr=fx?i.fixed:tierPrice(p,i.qty,i.whole);return {p:p,qty:i.qty,price:pr,whole:pr!==p.price,forced:!!i.whole||fx,fixed:fx,tierSel:fx&&(p.tiers||[]).some(x=>x.price===i.fixed),hasTier:!!(p.tiers&&p.tiers.length),amount:pr*i.qty}}).filter(Boolean)},
   subtotal(){return this.lines().reduce((a,l)=>a+l.amount,0)},
   count(){return this.items.reduce((a,i)=>a+i.qty,0)},
   add(pid){
@@ -2034,7 +2034,7 @@ function cartHTML(){
   const lines=Cart.lines();
   if(!lines.length)return emptyBox('cart','ဇယားတွင် ပစ္စည်း မရှိသေးပါ','ပစ္စည်းကို နှိပ်၍ ထည့်ပါ');
   return '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ပစ္စည်း</th><th class="r col-price">ဈေးနှုန်း</th><th class="c">အရေအတွက်</th><th class="r">ကျသင့်ငွေ</th></tr></thead><tbody>'
-   +lines.map(l=>'<tr><td><div class="nm">'+esc(l.p.name)+'</div><div class="sub sub-price">'+ks(l.price)+' ကျပ်'+(l.whole?' · လက်ကား':'')+'</div>'+'<div class="rowf" style="gap:6px;margin-top:4px">'+(l.hasTier?'<button type="button" class="btn s" data-act="cart-whole" data-id="'+l.p.id+'" style="'+(l.forced&&!l.fixed?'background:var(--act);color:#fff;border-color:var(--act)':'')+'">'+(l.forced&&!l.fixed?'✓ လက်ကားဈေး သုံးထား':'လက်ကားဈေး သုံးမည်')+'</button>':'')+'<button type="button" class="btn s" data-act="cart-price" data-id="'+l.p.id+'" style="'+(l.fixed?'background:var(--act);color:#fff;border-color:var(--act)':'')+'">'+(l.fixed?'✓ သတ်မှတ်ဈေး သုံးထား':'ဈေး ရွေးမည်')+'</button></div>'+'</td><td class="r col-price">'+ks(l.price)+(l.whole?'<div class="sub" style="color:var(--act);font-weight:700">လက်ကားဈေး</div>':'')+'</td>'
+   +lines.map(l=>'<tr><td><div class="nm">'+esc(l.p.name)+'</div><div class="sub sub-price">'+ks(l.price)+' ကျပ်'+(l.whole?' · လက်ကား':'')+'</div>'+'<div class="rowf" style="gap:6px;margin-top:4px">'+(l.hasTier?'<button type="button" class="btn s" data-act="cart-whole" data-id="'+l.p.id+'" style="'+((l.forced&&!l.fixed)||l.tierSel?'background:var(--act);color:#fff;border-color:var(--act)':'')+'">'+((l.forced&&!l.fixed)||l.tierSel?'✓ လက်ကားဈေး သုံးထား ('+ks(l.price)+')':'လက်ကားဈေး သုံးမည်')+'</button>':'')+'<button type="button" class="btn s" data-act="cart-price" data-id="'+l.p.id+'" style="'+(l.fixed?'background:var(--act);color:#fff;border-color:var(--act)':'')+'">'+(l.fixed?'✓ သတ်မှတ်ဈေး သုံးထား':'ဈေး ရွေးမည်')+'</button></div>'+'</td><td class="r col-price">'+ks(l.price)+(l.whole?'<div class="sub" style="color:var(--act);font-weight:700">လက်ကားဈေး</div>':'')+'</td>'
      +'<td class="c"><div class="stepper"><button type="button" data-act="qty-dec" data-id="'+l.p.id+'" aria-label="လျှော့မည်">−</button><input inputmode="numeric" data-in="qty" data-id="'+l.p.id+'" value="'+l.qty+'" aria-label="အရေအတွက်"><button type="button" data-act="qty-inc" data-id="'+l.p.id+'" aria-label="တိုးမည်">+</button></div></td>'
      +'<td class="r"><b>'+ks(l.amount)+'</b> <button type="button" class="x-btn" data-act="qty-rm" data-id="'+l.p.id+'" aria-label="ဖယ်ရှားမည်">'+ico('x','s')+'</button></td></tr>').join('')
    +'</tbody><tfoot><tr><td colspan="'+(window.innerWidth>540?3:2)+'">စုစုပေါင်း</td><td class="r">'+ks(Cart.subtotal())+'</td></tr></tfoot></table></div>';
@@ -2053,7 +2053,7 @@ function cartPriceSheet(pid){
   Sheet.open({title:p.name+' — ဈေး ရွေးမည်',small:true,
     body:'<p class="sub" style="margin-bottom:10px">အရေအတွက် '+it.qty+' ခု ဝယ်သည်ဖြစ်စေ၊ လက်ကားဈေး (သို့) ကိုယ်တိုင်သတ်မှတ်ဈေးဖြင့် ဖြတ်နိုင်ပါသည်။</p>'
      +opt('auto','အလိုအလျောက် (အရေအတွက်အလိုက်)',tierPrice(p,it.qty,false),'ပုံမှန်ဈေး '+ks(p.price)+' ကျပ်')
-     +ts.map((t,k)=>opt('t'+k,'လက်ကားဈေး',t.price,t.min+' ခုနှင့်အထက် ဈေးနှုန်း')).join('')
+     +ts.map((t,k)=>opt('t'+k,'လက်ကားဈေး — '+t.min+' ခုနှင့်အထက်',t.price,'နှစ်သက်ရာ ဈေးကို ရွေးနိုင်သည်')).join('')
      +'<div class="field" style="margin-top:6px"><label class="lbl" for="cpCustom">ကိုယ်တိုင် သတ်မှတ်ဈေး (ကျပ်)</label><div class="rowf" style="flex-wrap:nowrap"><input class="inp" id="cpCustom" inputmode="numeric" placeholder="ဥပမာ - 1500" value="'+(cur!=null?cur:'')+'" style="flex:1;min-width:0"><button type="button" class="btn pri" id="cpSet">သုံးမည်</button></div></div>',
     onMount(el,ctl){
       const done=()=>{ctl.close();redrawCart()};
@@ -2310,7 +2310,7 @@ function authScreen(saved){
         }else{
           const a=Auth.find(u);
           if(!a||a.active===false||await Auth.hash(p,a.salt)!==a.hash){err('ဖုန်းနံပါတ် သို့မဟုတ် စကားဝှက် မှားနေပါသည်');return}
-          if((a.role==='owner')!==asOwner()){err(asOwner()?'ဤအကောင့်သည် ဆိုင်ပိုင်ရှင် မဟုတ်ပါ — ငွေကိုင်အဖြစ် ပြန်ရွေးပါ':'ဤအကောင့်သည် ဆိုင်ပိုင်ရှင် အကောင့် ဖြစ်ပါသည် — Owner အဖြစ် ပြန်ရွေးပါ');return}
+          if((a.role==='owner')!==asOwner()){err(asOwner()?'ဤအကောင့်သည် ဆိုင်ပိုင်ရှင် မဟုတ်ပါ — ငွေကိုင်အဖြစ် ပြန်ရွေးပါ':'ဖုန်းနံပါတ် သို့မဟုတ် စကားဝှက် မှားနေပါသည်');return}
           Auth.start(a);if(a.role!=='owner'&&a.pending===true)waitScreen(a);else enter();
         }
       }catch(e){err('လုပ်ဆောင်၍ မရပါ ('+(e&&e.message||e)+')')}
@@ -2732,7 +2732,7 @@ const ACT={
   'qty-dec':t=>{const it=Cart.items.find(i=>i.pid===t.dataset.id);if(it){Cart.set(t.dataset.id,it.qty-1);redrawCart()}},
   'qty-rm':t=>{Cart.remove(t.dataset.id);redrawCart()},
   'cart-price':t=>cartPriceSheet(t.dataset.id),
-  'cart-whole':t=>{const it=Cart.items.find(i=>i.pid===t.dataset.id);if(it){delete it.fixed;it.whole=!it.whole;redrawCart()}},
+  'cart-whole':t=>cartPriceSheet(t.dataset.id),
   'cart-clear':()=>{Cart.items=[];App.paint(false)},
   'checkout':()=>checkoutSheet(),
   'close-day':()=>closeDay(),

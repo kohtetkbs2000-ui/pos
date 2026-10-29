@@ -731,6 +731,7 @@ const Sel={
   salesOn(d){return Store.list('vouchers').reduce((a,v)=>a+(v.date===d?v.total:0),0)},
   countOn(d){return Store.list('vouchers').filter(v=>v.date===d).length},
   collectedOn(d){let t=0;Store.list('vouchers').forEach(v=>(v.payments||[]).forEach(p=>{if(dstr(new Date(p.at))===d)t+=p.amount}));return t},
+  debtCollectedOn(d){let t=0;Store.list('vouchers').forEach(v=>{if(v.date<d)(v.payments||[]).forEach(p=>{if(dstr(new Date(p.at))===d)t+=p.amount})});return t},
   outstanding(){return Store.list('vouchers').reduce((a,v)=>a+Sel.rem(v),0)},
   carried(d){return Store.list('vouchers').reduce((a,v)=>a+(v.date<d?Sel.rem(v):0),0)},
   carriedCount(d){return Store.list('vouchers').filter(v=>v.date<d&&Sel.rem(v)>0).length},
@@ -784,11 +785,13 @@ function createVoucher(o){
   pts=Math.min(pts,maxPts);
   const pointsValue=Math.min(pts*S.pointValue,subtotal-discount);
   const total=subtotal-discount-pointsValue;
-  const received=Math.min(Math.max(0,Math.round(o.received)),total);
+  let pays=null;
+  if(Array.isArray(o.payments)){let left=total;pays=[];o.payments.forEach(x=>{const a=Math.min(Math.max(0,Math.round(x.amount||0)),left);if(a>0){left-=a;pays.push({at:now,amount:a,method:x.method||DEFAULT_METHOD,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''})}})}
+  const received=pays?pays.reduce((a,x)=>a+x.amount,0):Math.min(Math.max(0,Math.round(o.received)),total);
   const earned=(cust&&S.earnPer>0)?Math.floor(received/S.earnPer):0;
   const v={id:uid('v'),no:nextNo(date),date:date,createdAt:now,customerId:cust?cust.id:null,customerName:cust?cust.name:'',
     items:items,subtotal:subtotal,discount:discount,pointsUsed:pts,pointsValue:pointsValue,total:total,paid:received,
-    payments:received>0?[{at:now,amount:received,method:o.method||DEFAULT_METHOD,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''}]:[],pointsEarned:earned,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''};
+    payments:pays||(received>0?[{at:now,amount:received,method:o.method||DEFAULT_METHOD,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''}]:[]),pointsEarned:earned,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''};
   items.forEach(i=>{const p=Store.get('products',i.pid);if(p)Store.put('products',Object.assign({},p,{stock:Math.max(0,(p.stock||0)-i.qty)}))});
   if(cust)Store.put('customers',Object.assign({},cust,{points:Math.max(0,(cust.points||0)-pts+earned)}));
   Store.put('vouchers',v);
@@ -1614,7 +1617,7 @@ function checkoutSheet(){
   if(Sel.isClosed(today())){toast('ယနေ့ စာရင်းပိတ်ပြီးပါပြီ — ဘောက်ချာ ထပ်ဖြတ်၍ မရပါ');return}
   const lines=Cart.lines();if(!lines.length){toast('ပစ္စည်း အရင်ထည့်ပါ');return}
   const sub=Cart.subtotal(),S=Store.d.settings;
-  const st={custId:Cart.customerId,mode:'paid'};
+  const st={custId:Cart.customerId,mode:'paid',split:false,rows:[]};
   Sheet.open({title:'ငွေရှင်းမည်',
     body:'<div class="field"><label class="lbl">ဖောက်သည်</label><div id="ckSel"></div>'
      +'<div class="search" style="margin-top:6px"><span aria-hidden="true">'+ico('search')+'</span><input class="inp" id="ckSearch" placeholder="အမည် သို့မဟုတ် ဖုန်းဖြင့် ရှာမည်"></div>'
@@ -1623,8 +1626,10 @@ function checkoutSheet(){
      +'<div id="ckNew" hidden style="margin-top:8px"><div class="two"><input class="inp" id="nName" placeholder="အမည်" aria-label="အမည်"><input class="inp" id="nPhone" inputmode="tel" placeholder="ဖုန်းနံပါတ်" aria-label="ဖုန်းနံပါတ်"></div><input class="inp" id="nAddr" placeholder="လိပ်စာ" aria-label="လိပ်စာ" style="margin-top:8px"><button type="button" class="btn pri s" id="nSave" style="margin-top:8px">ထည့်သွင်းမည်</button></div></div>'
      +'<div class="two"><div class="field"><label class="lbl" for="ckDisc">လျှော့စျေး (ကျပ်)</label><input class="inp" id="ckDisc" inputmode="numeric" placeholder="0"></div>'
      +'<div class="field" id="ckPtsBox" hidden><label class="lbl" for="ckPts">အသုံးပြုမည့် အမှတ်</label><input class="inp" id="ckPts" inputmode="numeric" placeholder="0"><button type="button" class="btn s" id="ckPtsAll" style="align-self:flex-start">အများဆုံးသုံးမည်</button></div></div>'
-     +'<div class="field"><label class="lbl">ငွေပေးချေမှု</label>'+'<div class="seg" role="group"><button type="button" id="mPaid" aria-pressed="true">ငွေပေးပြီး</button><button type="button" id="mUnpaid" aria-pressed="false">ငွေမလွှဲရသေး</button></div></div>'
-     +'<div class="field"><label class="lbl" for="ckRec" id="ckRecL">ယခုပေးငွေ</label><input class="inp" id="ckRec" inputmode="numeric"></div>'
+     +'<div class="field" id="ckModeF"><label class="lbl">ငွေပေးချေမှု</label>'+'<div class="seg" role="group"><button type="button" id="mPaid" aria-pressed="true">ငွေပေးပြီး</button><button type="button" id="mUnpaid" aria-pressed="false">ငွေမလွှဲရသေး</button></div></div>'
+     +'<div class="field" id="ckRecF"><label class="lbl" for="ckRec" id="ckRecL">ယခုပေးငွေ</label><input class="inp" id="ckRec" inputmode="numeric"></div>'
+     +'<div class="field" id="ckSplit" hidden><label class="lbl">ငွေပေးချေမှု ခွဲပေးခြင်း (နည်းလမ်းတစ်ခုချင်း ပမာဏထည့်ပါ)</label><div id="ckRows"></div><button type="button" class="btn s" id="ckAddRow">'+ico('plus')+'နည်းလမ်း ထပ်ထည့်မည်</button></div>'
+     +'<div class="field"><button type="button" class="btn s" id="ckSplitBtn">ငွေပေးနည်း ခွဲမည်</button></div>'
      +'<div class="field" id="ckMF"><label class="lbl">ငွေပေးချေမှု နည်းလမ်း</label>'+methodPickerShell('ckM')+'</div>'
      +'<div class="sumbox" id="ckSum"></div>',
     footer:'<button class="btn pri block" id="ckGo">'+ico('check')+'ဘောက်ချာ ထုတ်မည်</button>',
@@ -1637,14 +1642,16 @@ function checkoutSheet(){
         const maxPts=cust&&S.pointValue>0?Math.min(cust.points||0,Math.ceil((sub-disc)/S.pointValue)):0;
         const pts=Math.min(Math.max(0,Math.floor(num(q('#ckPts').value))),maxPts);
         const pv=Math.min(pts*S.pointValue,sub-disc),total=sub-disc-pv;
-        const rec=st.mode==='paid'?total:Math.min(Math.max(0,Math.round(num(q('#ckRec').value))),total);
+        let pays=null;
+        if(st.split){let left=total;pays=[];st.rows.forEach(r=>{const a=Math.min(Math.max(0,Math.round(num(r.a))),left);if(a>0){left-=a;pays.push({amount:a,method:r.m})}})}
+        const rec=pays?pays.reduce((a,x)=>a+x.amount,0):st.mode==='paid'?total:Math.min(Math.max(0,Math.round(num(q('#ckRec').value))),total);
         const earn=cust&&S.earnPer>0?Math.floor(rec/S.earnPer):0;
-        return {cust:cust,disc:disc,pts:pts,maxPts:maxPts,pv:pv,total:total,rec:rec,rem:total-rec,earn:earn};
+        return {cust:cust,disc:disc,pts:pts,maxPts:maxPts,pv:pv,total:total,rec:rec,rem:total-rec,earn:earn,pays:pays};
       };
       const paintSum=()=>{
         const c=calc();
         q('#ckRec').disabled=false;
-        q('#ckMF').hidden=!(c.rec>0);
+        q('#ckMF').hidden=st.split||!(c.rec>0);
         if(st.mode==='paid'&&document.activeElement!==q('#ckRec'))q('#ckRec').value=c.total;
         q('#ckRecL').textContent=st.mode==='paid'?'ပေးငွေ (လျော့ရိုက်လျှင် စရံငွေ ဖြစ်မည်)':'စရံငွေ (ရှိလျှင်)';
         q('#ckSum').innerHTML='<div class="ln"><span>ကုန်ပစ္စည်း စုစုပေါင်း</span><span>'+ks(sub)+'</span></div>'
@@ -1652,6 +1659,7 @@ function checkoutSheet(){
           +(c.pv>0?'<div class="ln"><span>အမှတ် '+ks(c.pts)+' မှတ်ဖြင့် နှုတ်ငွေ</span><span>- '+ks(c.pv)+'</span></div>':'')
           +'<div class="ln g"><span>ပေးရန် စုစုပေါင်း</span><span>'+ks(c.total)+' ကျပ်</span></div>'
           +'<div class="ln"><span>'+(c.rem>0?'စရံငွေ':'ပေးငွေ')+'</span><span>'+ks(c.rec)+'</span></div>'
+          +(c.pays?c.pays.map(x=>'<div class="ln"><span class="sub">· '+esc(x.method)+'</span><span class="sub">'+ks(x.amount)+'</span></div>').join(''):'')
           +'<div class="ln"><span>'+(c.rem>0?'ကြွေးသို့ ပေါင်းမည်':'ကျန်ငွေ')+'</span><span><b>'+ks(c.rem)+'</b></span></div>'
           +(c.cust?'<div class="ln"><span>ရရှိမည့် အမှတ်</span><span>+'+ks(c.earn)+' မှတ်</span></div>':'');
       };
@@ -1688,6 +1696,20 @@ function checkoutSheet(){
         }
       });
       q('#ckRec').addEventListener('blur',paintSum);
+      const mOpts=sel=>(Store.d.settings.methods||[DEFAULT_METHOD]).map(m=>'<option'+(m===sel?' selected':'')+'>'+esc(m)+'</option>').join('');
+      const paintRows=()=>{q('#ckRows').innerHTML=st.rows.map((r,k)=>'<div class="rowf" style="flex-wrap:nowrap;margin-bottom:8px"><select class="inp" data-sm="'+k+'" style="flex:1;min-width:0" aria-label="ငွေပေးချေမှု နည်းလမ်း">'+mOpts(r.m)+'</select><input class="inp" inputmode="numeric" data-sa="'+k+'" value="'+esc(r.a)+'" placeholder="ပမာဏ" aria-label="ပမာဏ" style="flex:1;min-width:0">'+(st.rows.length>2?'<button type="button" class="x-btn" data-srm="'+k+'" aria-label="ဖယ်ရှားမည်">'+ico('x','s')+'</button>':'')+'</div>').join('')};
+      const setSplit=on=>{
+        st.split=on;
+        if(on){const ms=Store.d.settings.methods||[DEFAULT_METHOD],t=calc().total;st.rows=[{m:mp.get(),a:String(t)},{m:ms.find(m=>m!==mp.get())||mp.get(),a:''}];paintRows()}
+        q('#ckSplit').hidden=!on;q('#ckRecF').hidden=on;q('#ckModeF').hidden=on;
+        q('#ckSplitBtn').textContent=on?'ငွေပေးနည်း မခွဲတော့ပါ':'ငွေပေးနည်း ခွဲမည်';
+        if(!on)setMode(st.mode,true);else paintSum();
+      };
+      q('#ckSplitBtn').onclick=()=>setSplit(!st.split);
+      q('#ckAddRow').onclick=()=>{const ms=Store.d.settings.methods||[DEFAULT_METHOD];st.rows.push({m:ms[0],a:''});paintRows();paintSum();const n=q('[data-sa="'+(st.rows.length-1)+'"]');if(n)n.focus()};
+      q('#ckSplit').addEventListener('input',e=>{const t=e.target;if(t.dataset.sa!=null){st.rows[Number(t.dataset.sa)].a=t.value;paintSum()}});
+      q('#ckSplit').addEventListener('change',e=>{const t=e.target;if(t.dataset.sm!=null){st.rows[Number(t.dataset.sm)].m=t.value;paintSum()}});
+      q('#ckSplit').addEventListener('click',e=>{const b=e.target.closest('[data-srm]');if(b){st.rows.splice(Number(b.dataset.srm),1);paintRows();paintSum()}});
       q('#ckPtsAll').onclick=()=>{const c=calc();q('#ckPts').value=c.maxPts;paintSum()};
       const setMode=(m,keep)=>{st.mode=m;q('#mPaid').setAttribute('aria-pressed',String(m==='paid'));q('#mUnpaid').setAttribute('aria-pressed',String(m==='unpaid'));if(m==='unpaid'&&!keep)q('#ckRec').value='';paintSum()};
       q('#mPaid').onclick=()=>setMode('paid');q('#mUnpaid').onclick=()=>setMode('unpaid');
@@ -1697,7 +1719,7 @@ function checkoutSheet(){
         if(c.rem>0&&!st.custId){toast('ကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ');return}
         const fresh=Cart.lines();
         for(const l of fresh){if(l.qty>l.p.stock){toast(l.p.name+' လက်ကျန် မလုံလောက်ပါ');return}}
-        const v=createVoucher({lines:fresh,customerId:st.custId,discount:c.disc,pointsUsed:c.pts,received:c.rec,method:mp.get()});
+        const v=createVoucher({lines:fresh,customerId:st.custId,discount:c.disc,pointsUsed:c.pts,received:c.rec,method:mp.get(),payments:c.pays?c.pays.map(x=>({amount:x.amount,method:x.method})):undefined});
         Cart.clear();ctl.close();App.render();updateCobar();
         toast('ဘောက်ချာ ထုတ်ပြီးပါပြီ');autoLabel(v);setTimeout(()=>voucherSheet(v.id),250);
       };
@@ -2007,14 +2029,14 @@ const TABS=[
 const F={dView:'v',vFrom:'',vTo:'',vMethod:'',vBy:'',vCust:'',vN:100,eRange:'month',eDate:'',eFrom:'',eTo:'',eCat:'',eBy:'',vStatus:'all',vRange:'all',vQuery:'',cQuery:'',cSort:'spent',pQuery:'',pLow:'all',posQuery:'',rRange:'month',rDate:'',rFrom:'',rTo:''};
 
 function viewHome(part){
-  const t=today(),sales=Sel.salesOn(t),coll=Sel.collectedOn(t),out=Sel.outstanding(),carried=Sel.carried(t),cnt=Sel.countOn(t);
+  const t=today(),sales=Sel.salesOn(t),coll=Sel.collectedOn(t),out=Sel.outstanding(),carried=Sel.carried(t),cnt=Sel.countOn(t),dc=Sel.debtCollectedOn(t);
   const empty=!Store.list('products').length&&!Store.list('vouchers').length&&!Store.list('customers').length;
   const dd=parseD(t),unpaid=Sel.unpaid().slice(0,5),low=Sel.lowStock().slice(0,5);
   let h='',h2='';
   if(empty)h+='<section class="card"><div class="card-h"><h3>စတင်အသုံးပြုရန်</h3></div><p class="mut" style="margin-bottom:12px">ကုန်ပစ္စည်းနှင့် ဖောက်သည်များ ထည့်သွင်းပြီး ရောင်းချမှုကို စတင်နိုင်ပါပြီ။ အရင်စမ်းကြည့်လိုလျှင် နမူနာဒေတာ ထည့်နိုင်ပါသည်။</p><div class="rowf"><button class="btn pri" data-act="demo-load">နမူနာဒေတာဖြင့် စမ်းကြည့်မည်</button><button class="btn" data-act="new-product">'+ico('plus')+'ကုန်ပစ္စည်း ထည့်မည်</button></div></section>';
-  h+='<button class="hero tap" data-act="day-detail" style="display:block;width:100%;text-align:left;font:inherit"><div class="eb">'+WEEK[dd.getDay()]+'၊ '+fmtD(t)+' — ယနေ့ ရောင်းရငွေ</div><div class="big">'+ks(sales)+'<small>ကျပ်</small></div><div class="sub">ဘောက်ချာ '+cnt+' စောင် · ငွေစာရင်း အသေးစိတ်ကြည့်ရန် ›</div></button>';
+  h+='<button class="hero tap" data-act="day-detail" style="display:block;width:100%;text-align:left;font:inherit"><div class="eb">'+WEEK[dd.getDay()]+'၊ '+fmtD(t)+' — ယနေ့ ရောင်းရငွေ</div><div class="big">'+ks(sales)+'<small>ကျပ်</small></div><div class="sub">ဘောက်ချာ '+cnt+' စောင်'+(dc>0?' · ယနေ့ ကြွေးရရှိငွေ '+ks(dc)+' ကျပ်':'')+' · ငွေစာရင်း အသေးစိတ်ကြည့်ရန် ›</div></button>';
   h+='<div class="tiles"><button class="tile tap" data-act="day-detail"><div class="eb">ယနေ့ ဘောက်ချာ</div><div class="v">'+cnt+'<small>စောင်</small></div><div class="sub">ငွေစာရင်း အသေးစိတ် ကြည့်ရန် ›</div></button><button class="tile tap" data-act="goto" data-tab="debt"><div class="eb">ကြွေးကျန် စုစုပေါင်း</div><div class="v'+(out>0?' w':'')+'">'+ks(out)+'<small>ကျပ်</small></div><div class="sub">စာရင်းကြည့်ရန် ›</div></button></div>';
-  h+='<div class="tiles"><div class="tile"><div class="eb">ယနေ့ ကုန်ကျစရိတ်</div><div class="v">'+ks(Ex.on(t))+'<small>ကျပ်</small></div></div>'+(Auth.owner()?'<div class="tile"><div class="eb">ယနေ့ ရရှိငွေ</div><div class="v">'+ks(coll)+'<small>ကျပ်</small></div></div>':'')+'</div>';
+  h+='<div class="tiles" style="grid-template-columns:1fr"><div class="tile"><div class="eb">ယနေ့ ကုန်ကျစရိတ်</div><div class="v">'+ks(Ex.on(t))+'<small>ကျပ်</small></div></div>'+'</div>';
   h2+='<section class="card"><div class="card-h"><h3>ငွေမလွှဲရသေးသော ဘောက်ချာများ</h3><button class="btn s" data-act="goto" data-tab="vouchers" data-vstatus="unpaid">အားလုံးကြည့်မည်</button></div>'
     +(unpaid.length?'<div class="list">'+unpaid.map(v=>'<button class="li" data-act="open-voucher" data-id="'+v.id+'"><div class="mid"><div class="nm">'+esc(Sel.cname(v))+'</div><div class="sub">#'+esc(v.no)+' · '+fmtD(v.date)+'</div>'+carriedTag(v)+'</div><div class="end"><b>'+ks(Sel.rem(v))+'</b><div class="sub">ကျပ်</div></div></button>').join('')+'</div>':emptyBox('check','ငွေမလွှဲရသေးသော ဘောက်ချာ မရှိပါ'))+'</section>';
   h2+='<section class="card"><div class="card-h"><h3>လက်ကျန်နည်းသော ပစ္စည်းများ</h3><button class="btn s" data-act="goto" data-tab="stock">ကုန်ပစ္စည်း</button></div>'
@@ -2662,8 +2684,8 @@ function dashBody(){
   const sales=vs.reduce((a,v)=>a+v.total,0),paidSum=vs.reduce((a,v)=>a+(v.paid||0),0);
   const ex=Store.list('expenses').filter(e=>(!cutoff||e.date>=cutoff)&&e.date<=t).reduce((a,e)=>a+e.amount,0);
   return (cash?'<div class="stat" style="margin-top:0"><span>ယနေ့ <b>'+fmtD(t)+'</b></span></div>':'<div class="rrow">'+seg('rRange',[['day','Day'],['month','Month'],['year','Year']],rr)+'<button type="button" class="calbtn" data-act="cal-open" aria-label="Calendar">'+ico('calendar')+'</button></div><div class="cycrow"><button type="button" class="btn s" data-act="rnav" data-d="-1" aria-label="ယခင်">‹</button><div class="cl"><b>'+plabel+'</b></div><button type="button" class="btn s" data-act="rnav" data-d="1" aria-label="နောက်"'+(tEnd>=t0?' disabled':'')+'>›</button></div>')
-   +'<div class="tiles"><div class="tile"><div class="eb">ရောင်းရငွေ</div><div class="v">'+ks(sales)+'<small>ကျပ်</small></div><div class="sub">ဘောက်ချာ '+vs.length+' စောင်</div></div><div class="tile"><div class="eb">ရရှိငွေ / ကြွေး</div><div class="v">'+ks(paidSum)+'<small>ကျပ်</small></div>'+((sales-paidSum)>0?'<div class="sub" style="color:var(--red);font-weight:700">ကြွေး '+ks(sales-paidSum)+' ကျပ်</div>':'<div class="sub" style="color:#15803D;font-weight:700">ကြွေးမရှိ</div>')+'</div></div>'
-   +'<div class="tiles"><div class="tile"><div class="eb">ကုန်ကျစရိတ်</div><div class="v">'+ks(ex)+'<small>ကျပ်</small></div></div>'+(function(){var c=Sel.collectedOn(today());return c===paidSum?'<div class="tile"><div class="eb">လက်ကျန်ငွေ (ရရှိ − ကုန်ကျ)</div><div class="v">'+ks(paidSum-ex)+'<small>ကျပ်</small></div></div>':'<div class="tile"><div class="eb">ယနေ့ ရရှိငွေ</div><div class="v">'+ks(c)+'<small>ကျပ်</small></div></div>'})()+'</div>'
+   +'<div class="tiles"><div class="tile"><div class="eb">ရောင်းရငွေ</div><div class="v">'+ks(sales)+'<small>ကျပ်</small></div><div class="sub">ဘောက်ချာ '+vs.length+' စောင်'+(function(){var d=Sel.debtCollectedOn(today());return d>0?'<br>ယနေ့ ကြွေးရရှိငွေ '+ks(d)+' ကျပ်':''})()+'</div></div><button type="button" class="tile tap" data-act="goto" data-tab="debt" style="text-align:left;font:inherit"><div class="eb">ကြွေးကျန် စုစုပေါင်း</div><div class="v'+(Sel.outstanding()>0?' w':'')+'">'+ks(Sel.outstanding())+'<small>ကျပ်</small></div>'+(Sel.outstanding()>0?'<div class="sub">စာရင်းကြည့်ရန် ›</div>':'<div class="sub" style="color:#15803D;font-weight:700">ကြွေးမရှိ</div>')+'</button></div>'
+   +'<div class="tiles"><div class="tile"><div class="eb">ကုန်ကျစရိတ်</div><div class="v">'+ks(ex)+'<small>ကျပ်</small></div></div>'+'<div class="tile"><div class="eb">လက်ကျန်ငွေ (ရရှိ − ကုန်ကျ)</div><div class="v">'+ks(paidSum-ex)+'<small>ကျပ်</small></div></div></div>'
    +(cash?'':profitCard(vs,ex,plabel))
    +dashCharts(vs,cutoff,t,sales,paidSum,cash||rr==='day'||(rr==='custom'&&cutoff===tEnd))
    +(cash?'':'<section class="card"><div class="card-h"><h3>ဝယ်ယူမှုအများဆုံး ဖောက်သည်များ စာရင်း</h3></div>'
@@ -2827,7 +2849,7 @@ const pendingList=()=>Store.list('accounts').filter(a=>a.pending===true&&a.activ
     if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen()
   });
   setInterval(()=>{if(today()!==App.lastDay){App.lastDay=today();App.paint(false);toast('နောက်တစ်နေ့သို့ ရောက်ပါပြီ — မရှင်းရသေးသော ကြွေးများကို ယခင်ရက်မှ လွှဲပြောင်းဟု မှတ်ထားပါသည်')}},30000);
-  window.addEventListener('resize',()=>{if(App.tab==='sell'&&$('#cartBox'))$('#cartBox').innerHTML=cartHTML()});
+  let _cw=window.innerWidth>540;window.addEventListener('resize',()=>{const w=window.innerWidth>540;if(w===_cw)return;_cw=w;const cb=$('#cartBox');if(App.tab==='sell'&&cb&&!cb.contains(document.activeElement))cb.innerHTML=cartHTML()});
 })();
 })();
 </script>

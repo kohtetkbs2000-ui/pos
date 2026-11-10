@@ -1,0 +1,165 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SUPABASE_URL: https://hlssypwqvvveuilhdsto.supabase.co
+  SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsc3N5cHdxdnZ2ZXVpbGhkc3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDA5OTEsImV4cCI6MjEwNzg3Njk5MX0.9xo2KE3cu82J-CjlD4DHHnseJHkldMQlgNERZZcmGw8
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # package.json / capacitor.config မရှိမှသာ အလိုအလျောက် ဖန်တီးမည်
+      - name: Bootstrap Capacitor project (only if missing)
+        run: |
+          if [ ! -f package.json ]; then
+            cat > package.json <<'JSON'
+          {
+            "name": "shoppos",
+            "version": "1.0.0",
+            "private": true,
+            "dependencies": {
+              "@capacitor/android": "^7.0.0",
+              "@capacitor/core": "^7.0.0",
+              "@capacitor/filesystem": "^7.0.0",
+              "@capacitor/share": "^7.0.0"
+            },
+            "devDependencies": {
+              "@capacitor/cli": "^7.0.0"
+            }
+          }
+          JSON
+          fi
+          if ! ls capacitor.config.* >/dev/null 2>&1; then
+            cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "com.shoppos.app",
+            "appName": "Shop POS",
+            "webDir": "www",
+            "server": { "androidScheme": "https" }
+          }
+          JSON
+          fi
+
+      # Capacitor 7+ => Java 21, အရင်ဗားရှင်း => Java 17
+      - name: Pick Java version
+        id: jv
+        run: |
+          V=$(node -e "try{const p=require('./package.json');const d=Object.assign({},p.dependencies,p.devDependencies);const v=String(d['@capacitor/android']||d['@capacitor/core']||'7').replace(/[^0-9.]/g,'');console.log(parseInt(v)||7)}catch(e){console.log(7)}")
+          if [ "$V" -ge 7 ]; then echo "java=21" >> "$GITHUB_OUTPUT"; else echo "java=17" >> "$GITHUB_OUTPUT"; fi
+          echo "Capacitor major: $V"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.jv.outputs.java }}
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Install dependencies
+        run: npm install
+
+      # Web app ကို Supabase ချိတ်ပြီး Login (Owner / Cashier) အပြည့်အစုံ ပြန်ထားမည်
+      - name: Prepare web app (Supabase + Login)
+        run: |
+          WEBDIR=$(node -e "
+            const fs=require('fs');let d='www';
+            for(const f of ['capacitor.config.json','capacitor.config.ts','capacitor.config.js']){
+              if(fs.existsSync(f)){const m=/webDir\s*['\"]?\s*[:=]\s*['\"]([^'\"]+)['\"]/.exec(fs.readFileSync(f,'utf8'));if(m){d=m[1];break}}
+            }
+            console.log(d)")
+          echo "webDir = $WEBDIR"
+          mkdir -p "$WEBDIR"
+          if [ ! -f "$WEBDIR/index.html" ]; then
+            SRC=$(ls index.html 2>/dev/null || ls *.html 2>/dev/null | head -1 || true)
+            [ -n "$SRC" ] || { echo "::error::HTML ဖိုင် မတွေ့ပါ (index.html ကို repo ထဲ ထည့်ပါ)"; exit 1; }
+            cp "$SRC" "$WEBDIR/index.html"
+          fi
+          python3 - "$WEBDIR/index.html" <<'PY'
+          import os, re, sys
+          p = sys.argv[1]
+          s = open(p, encoding='utf-8').read()
+          url, key = os.environ['SUPABASE_URL'], os.environ['SUPABASE_ANON_KEY']
+          # 1) Supabase ကို default အဖြစ် ထည့်ခြင်း
+          s, n1 = re.subn(r"DEFAULT:\{[^}]*\},", "DEFAULT:{url:'%s',key:'%s'}," % (url, key), s, count=1)
+          # 2) စမ်းသုံး (trial) session အတင်းထည့်တာကို ဖယ်ပြီး ကျန်နေသော trial session ကို ရှင်းမည်
+          forced = "try{if(!localStorage.getItem(SK))localStorage.setItem(SK,'trial-c')}catch(e){}"
+          clean = "try{const t0=localStorage.getItem(SK);if(t0==='trial'||t0==='trial-c')localStorage.removeItem(SK)}catch(e){}"
+          n2 = s.count(forced)
+          s = s.replace(forced, clean)
+          # 3) Owner ➜ Cashier စမ်းသုံးခလုတ်ကို ဖယ်ခြင်း
+          a = s.find("(function(){const bt=document.createElement('button');const owner=()=>")
+          n3 = 0
+          if a >= 0:
+              end = "document.body.appendChild(bt)})()"
+              b = s.find(end, a)
+              if b >= 0:
+                  s = s[:a] + s[b + len(end):]
+                  n3 = 1
+          open(p, 'w', encoding='utf-8').write(s)
+          print("patched: supabase=%d trial-session=%d toggle-btn=%d" % (n1, n2, n3))
+          if url not in s:
+              sys.exit("Supabase URL မထည့်နိုင်ပါ")
+          PY
+          # အင်တာနက်မရှိချိန်လည်း ဖွင့်နိုင်ရန် supabase library ကို app ထဲ ထည့်ထားမည်
+          npm install --no-save @supabase/supabase-js@2.45.4
+          mkdir -p "$WEBDIR/vendor"
+          cp node_modules/@supabase/supabase-js/dist/umd/supabase.js "$WEBDIR/vendor/supabase.min.js"
+
+      - name: Create Android project
+        run: |
+          if [ -d android ]; then echo "android/ ရှိပြီးသား"; else npx cap add android; fi
+
+      - name: Add native plugins (print / Bluetooth) and permissions
+        run: |
+          if [ -f scripts/patch-android.py ]; then python3 scripts/patch-android.py; else echo "scripts/patch-android.py မရှိ — ကျော်သွားသည်"; fi
+
+      - name: Sync web files
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk shoppos.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shoppos-apk
+          path: shoppos.apk
+
+      - name: Upload build reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: |
+            android/app/build/reports
+            android/build/reports
+          if-no-files-found: ignore
+
+      - name: Publish GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: shoppos.apk

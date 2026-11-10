@@ -512,6 +512,58 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 .cobar-in{max-width:480px}
 .sheet{max-width:480px}
 }
+
+/* ---- Order status tracking ---- */
+.pill.os{font-weight:700}
+.pill.os-c0{background:#FEF3C7;color:#92400E}
+.pill.os-c1{background:#DBEAFE;color:#1E40AF}
+.pill.os-c2{background:#FFEDD5;color:#9A3412}
+.pill.os-c3{background:#EDE9FE;color:#5B21B6}
+.pill.os-c4{background:#CCFBF1;color:#115E59}
+.pill.os-last{background:#DCFCE7;color:#166534}
+.pill.os-x{background:var(--tint);color:var(--mut)}
+.osbox{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0 4px;background:var(--tint)}
+.osbox .osh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-weight:700}
+.ossteps{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px}
+.ossteps button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 2px;font-size:12px;font-weight:700;line-height:1.35;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px}
+.ossteps button .n{width:20px;height:20px;border-radius:50%;background:var(--tint);display:grid;place-items:center;font-size:11px}
+.ossteps button[aria-pressed="true"]{background:var(--pri);color:var(--pri-fg);border-color:var(--pri)}
+.ossteps button[aria-pressed="true"] .n{background:rgba(255,255,255,.25)}
+.ossteps button.past{background:var(--tint2)}
+.osfil{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.osfil::-webkit-scrollbar{display:none}.osfil .seg{width:max-content;min-width:100%}.osfil .seg button{white-space:nowrap;padding-left:12px;padding-right:12px}
+.oslog{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.6}
+.ossub{font-size:13px;margin-top:8px;font-weight:600}
+
+/* ---- Tablet layout (iPad / Android tablet, portrait + landscape) ---- */
+@media (min-width:541px) and (min-height:561px){.col-price{display:table-cell}.sub-price{display:none}}
+@media (min-width:768px) and (min-height:561px){
+  .top-in,.view{max-width:1100px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+  .top-in{padding-block:12px}
+  .tabbar-in{max-width:760px}
+  .tab{font-size:12.5px}
+  .cobar-in{max-width:640px}
+  .card{padding:20px}
+  .tiles{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .fil{grid-template-columns:repeat(3,minmax(0,1fr))}
+  /* Fast checkout: products | cart side by side */
+  .sell{grid-template-columns:minmax(0,1fr);align-items:start;gap:18px}
+  .sell .tbl{width:100%}
+  .prods{grid-template-columns:repeat(4,minmax(0,1fr));max-height:min(380px,45vh);min-height:180px}
+  .prod{padding:12px 14px}
+  /* sheets become centred dialogs */
+  .sheet-root{align-items:center}
+  .sheet{max-width:680px;max-height:88%;border-radius:26px;transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1),opacity .25s}
+  .sheet-root.in .sheet{transform:none;opacity:1}
+  .grab{display:none}
+  .sheet-root.small .sheet{max-width:420px}
+  #toast{max-width:520px}
+}
+@media (min-width:1000px) and (min-height:561px){
+  .sell{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+  .sell .prods-card{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+  .prods{max-height:calc(100vh - 330px)}
+  .tabbar-in{max-width:860px}
+}
 </style>
 </head><body>
 
@@ -620,7 +672,7 @@ const Sb={
   K:'shoppos.sbcfg',
   SQL:"create table if not exists public.kv (\n  collection text not null,\n  id text not null,\n  data jsonb not null,\n  updated_at timestamptz not null default now(),\n  primary key (collection, id)\n);\nalter table public.kv enable row level security;\ndrop policy if exists pos_all on public.kv;\ncreate policy pos_all on public.kv for all to anon using (true) with check (true);\nalter publication supabase_realtime add table public.kv;",
   LIB:['vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'],
-  DEFAULT:{local:1},
+  DEFAULT:{url:'https://hlssypwqvvveuilhdsto.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsc3N5cHdxdnZ2ZXVpbGhkc3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDA5OTEsImV4cCI6MjEwNzg3Njk5MX0.9xo2KE3cu82J-CjlD4DHHnseJHkldMQlgNERZZcmGw8'},
   cfg(){let c=null;try{c=JSON.parse(localStorage.getItem(this.K)||'null')}catch(e){}return c||this.DEFAULT},
   save(c){try{localStorage.setItem(this.K,JSON.stringify(c))}catch(e){}},
   clear(){try{localStorage.removeItem(this.K)}catch(e){}},
@@ -1046,6 +1098,36 @@ function confirmBox(title,msg,okLabel){
 const seg=(key,opts,val)=>'<div class="seg" role="group">'+opts.map(o=>'<button type="button" data-act="seg" data-key="'+key+'" data-val="'+o[0]+'" aria-pressed="'+(String(val)===String(o[0]))+'">'+o[1]+'</button>').join('')+'</div>';
 const pill=v=>Sel.rem(v)<=0?'<span class="pill paid">'+ico('check','s')+'ငွေပေးပြီး</span>':'<span class="pill unpaid"><i class="dot"></i>ငွေမလွှဲရသေး</span>';
 const carriedTag=v=>(Sel.rem(v)>0&&v.date<today())?'<div class="tag">ယခင်ရက်မှ လွှဲပြောင်း · '+daysBetween(v.date,today())+' ရက်</div>':'';
+
+const OS_DEF=['ဒီဇိုင်းဆွဲနေဆဲ','စက်တင်နေဆဲ','ပြီးစီးပြီ'],OS_DONE_DEF='ထုတ်ယူပြီး',OS_LEG={designing:0,printing:1,ready:2,done:-1};
+/* Admin ပြင်နိုင်သော အော်ဒါအခြေအနေများ — နောက်ဆုံးတစ်ခုသည် "ပစ္စည်းထုတ်ယူပြီး" */
+const osList=()=>{const S=Store.d.settings;return (S.osList&&S.osList.length?S.osList:OS_DEF).concat([S.osDone||OS_DONE_DEF])};
+const osIdx=val=>{if(!val)return -1;const L=osList(),i=L.indexOf(val);if(i>=0)return i;if(Object.prototype.hasOwnProperty.call(OS_LEG,val)){const k=OS_LEG[val];return k<0?L.length-1:Math.min(k,L.length-2)}return -1};
+const osName=val=>{const i=osIdx(val);return i>=0?osList()[i]:(val||'')};
+const osCls=val=>{const i=osIdx(val),n=osList().length;return i<0?'os-x':i===n-1?'os-last':'os-c'+(i%5)};
+const osPill=v=>v.os?'<span class="pill os '+osCls(v.os)+'">'+esc(osName(v.os))+'</span>':'';
+const osDone=v=>!!v.os&&osIdx(v.os)===osList().length-1;
+const osOpen=v=>!!v.os&&!osDone(v);
+const osPick=v=>osDone(v)?'ပစ္စည်း ထုတ်ယူပြီး / ပို့ပြီး':'ပစ္စည်း မယူရသေး';
+function osSet(id,status){
+  const v=Store.get('vouchers',id);if(!v)return;
+  const nv=Object.assign({},v);
+  if(!status)delete nv.os;else nv.os=status;
+  nv.osLog=(v.osLog||[]).concat([{s:status||'',at:Date.now(),by:Auth.me?Auth.me.name:''}]);
+  Store.put('vouchers',nv);return nv;
+}
+function osBox(v){
+  const L=osList(),idx=osIdx(v.os),log=(v.osLog||[]).slice(-4).reverse();
+  return '<div class="osbox"><div class="osh"><span>အော်ဒါ အခြေအနေ</span>'+(v.os?'<button type="button" class="btn s out" id="osOff" style="padding:2px 10px">ခြေရာခံမှု ဖယ်မည်</button>':'')+'</div>'
+   +'<div class="ossteps" role="group" aria-label="အော်ဒါ အခြေအနေ">'+L.map((o,i)=>'<button type="button" data-os="'+i+'" aria-pressed="'+(idx===i)+'" class="'+(idx>i?'past':'')+'"><span class="n">'+(idx>i?'✓':i+1)+'</span>'+esc(o)+'</button>').join('')+'</div>'
+   +(v.os?'<div class="ossub">'+osPick(v)+'</div>':'<div class="sub" style="margin-top:8px">အော်ဒါ (ထုတ်လုပ်ရမည့် ပစ္စည်း) ဖြစ်လျှင် အခြေအနေ တစ်ခု ရွေးပါ — ရွေးမှသာ ခြေရာခံမည်။</div>')
+   +(log.length?'<div class="oslog">'+log.map(l=>fmtD(dstr(new Date(l.at)))+' '+fmtT(l.at)+' · '+(l.s?esc(osName(l.s)):'ခြေရာခံမှု ဖယ်ထားသည်')+(l.by?' · '+esc(l.by):'')).join('<br>')+'</div>':'')
+   +'</div>';
+}
+function osRename(o,n){
+  if(!o||o===n)return;
+  Store.list('vouchers').forEach(v=>{if(v.os===o||(v.osLog||[]).some(l=>l.s===o))Store.put('vouchers',Object.assign({},v,{os:v.os===o?n:v.os,osLog:(v.osLog||[]).map(l=>l.s===o?Object.assign({},l,{s:n}):l)}))});
+}
 const emptyBox=(icon,t,sub)=>'<div class="empty">'+ico(icon)+'<div>'+esc(t)+'</div>'+(sub?'<div class="sm">'+esc(sub)+'</div>':'')+'</div>';
 
 /* ================= Receipts & printing ================= */
@@ -1483,7 +1565,7 @@ function customerDetail(id){
      +(due>0?'<div class="sec-t">ကြွေးရှင်းမည်</div><div class="rowf" style="flex-wrap:nowrap"><input class="inp" id="dAmt" inputmode="numeric" placeholder="ပေးသွင်းငွေ (ကျပ်)" style="flex:1;min-width:0"><button class="btn pri" id="dGo">သွင်းမည်</button></div><div style="margin-top:8px">'+methodPickerShell('cM')+'</div><div class="sub" style="margin-top:4px">အဟောင်းဆုံး ဘောက်ချာမှ စတင်၍ နှုတ်သွားပါမည်။ <a href="#" id="dAll" style="color:var(--act);font-weight:700">အားလုံးရှင်းမည်</a></div>':'')
      +'<div class="sec-t">ဘောက်ချာ စာရင်း</div>'
      +(vs.length?'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ရက်စွဲ</th><th class="r">ပမာဏ</th><th class="r">ကျန်ငွေ</th><th>အခြေအနေ</th></tr></thead><tbody>'
-       +vs.map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'"><td><div class="nm">'+fmtD(v.date)+'</div><div class="sub">#'+esc(v.no)+'</div></td><td class="r">'+ks(v.total)+'</td><td class="r">'+ks(Sel.rem(v))+'</td><td>'+pill(v)+'</td></tr>').join('')+'</tbody></table></div>':emptyBox('receipt','ဘောက်ချာ မရှိသေးပါ'));
+       +vs.map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'"><td><div class="nm">'+fmtD(v.date)+'</div><div class="sub">#'+esc(v.no)+'</div></td><td class="r">'+ks(v.total)+'</td><td class="r">'+ks(Sel.rem(v))+'</td><td>'+pill(v)+(v.os?'<div style="margin-top:3px">'+osPill(v)+'</div>':'')+'</td></tr>').join('')+'</tbody></table></div>':emptyBox('receipt','ဘောက်ချာ မရှိသေးပါ'));
   };
   const ctl=Sheet.open({title:'ဖောက်သည် စာရင်းချုပ်',body:draw(),
     onMount(el,c){
@@ -1521,8 +1603,8 @@ function voucherSheet(id){
     if('vTitle' in D&&!D.vTitle)D.vTitle='ဘောက်ချာ';
     Store.putSettings(Object.assign({},Store.d.settings,D));D={};paintChrome();
   };
-  const detail=v=>{const rem=Sel.rem(v),cust=v.customerId?Store.get('customers',v.customerId):null;return '<div class="rowf" style="justify-content:space-between;margin-bottom:6px"><div><div class="nm" style="font-size:17px">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+' · '+fmtT(v.createdAt)+(v.byName?' · ဖြတ်သူ '+esc(v.byName):'')+'</div></div>'+pill(v)+'</div>'
-     +carriedTag(v)
+  const detail=v=>{const rem=Sel.rem(v),cust=v.customerId?Store.get('customers',v.customerId):null;return '<div class="rowf" style="justify-content:space-between;margin-bottom:6px"><div><div class="nm" style="font-size:17px">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+' · '+fmtT(v.createdAt)+(v.byName?' · ဖြတ်သူ '+esc(v.byName):'')+'</div></div>'+'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+pill(v)+osPill(v)+'</div></div>'
+     +carriedTag(v)+osBox(v)
      +'<dl class="kv"><dt>ဖောက်သည်</dt><dd>'+esc(Sel.cname(v))+(cust&&cust.phone?' · '+esc(cust.phone):'')+(cust&&cust.address?'<br><span class="sub">'+esc(cust.address)+'</span>':'')+'</dd></dl>'
      +'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ပစ္စည်း</th><th class="r">ဈေးနှုန်း</th><th class="c">အရေအတွက်</th><th class="r">ကျသင့်ငွေ</th></tr></thead><tbody>'
      +v.items.map(i=>'<tr><td class="nm">'+esc(i.name)+'</td><td class="r">'+ks(i.price)+'</td><td class="c">'+ks(i.qty)+(i.unit?' '+esc(i.unit):'')+'</td><td class="r">'+ks(i.price*i.qty)+'</td></tr>').join('')
@@ -1611,6 +1693,8 @@ function voucherSheet(id){
             let ap=0;parts.forEach(x=>{ap+=applyPayment(v(),x.a,x.m)});toast(money(ap)+' မှတ်ပြီးပါပြီ ('+parts.length+' နည်းလမ်း)');render();return;
           }
           const a=num(q('#vPay').value);if(a<=0){toast('ပမာဏ ထည့်ပါ');return}const ap=applyPayment(v(),a,vmp?vmp.get():DEFAULT_METHOD);toast(money(ap)+' မှတ်ပြီးပါပြီ');render()});
+        $$('[data-os]',el).forEach(b=>b.onclick=()=>{const cur=v(),nm=osList()[Number(b.dataset.os)];if(!nm||osIdx(cur.os)===Number(b.dataset.os))return;osSet(id,nm);toast(nm+' သို့ ပြောင်းပြီးပါပြီ');render();App.paint&&App.paint(false)});
+        on('#osOff',()=>{osSet(id,'');toast('ခြေရာခံမှု ဖယ်ပြီးပါပြီ');render();App.paint&&App.paint(false)});
         on('#vEdit',()=>voucherEditSheet(id,()=>render()));
         on('#vRet',()=>returnSheet(id,()=>render()));
         on('#vImg',()=>saveVoucherImage(v()));
@@ -1914,11 +1998,13 @@ function checkoutSheet(){
      +'<div class="field" id="ckSplit" hidden><label class="lbl">ငွေပေးချေမှု ခွဲပေးခြင်း (နည်းလမ်းတစ်ခုချင်း ပမာဏထည့်ပါ)</label><div id="ckRows"></div><button type="button" class="btn s" id="ckAddRow">'+ico('plus')+'နည်းလမ်း ထပ်ထည့်မည်</button></div>'
      +'<div class="field"><button type="button" class="btn s" id="ckSplitBtn">ငွေပေးနည်း ခွဲမည်</button></div>'
      +'<div class="field" id="ckMF"><label class="lbl">ငွေပေးချေမှု နည်းလမ်း</label>'+methodPickerShell('ckM')+'</div>'
-     +'<div class="sumbox" id="ckSum"></div>',
+     +'<div class="field" id="ckOS"><label class="lbl">အော်ဒါ အခြေအနေ (ထုတ်လုပ်ရမည့် ပစ္စည်းဆိုလျှင် ရွေးပါ)</label><div class="seg ossegc" role="group"><button type="button" data-ckos="" aria-pressed="true">ရောင်းချမှုသာ</button>'+osList().map((o,k)=>'<button type="button" data-ckos="'+k+'" aria-pressed="false">'+esc(o)+'</button>').join('')+'</div></div>'
+    +'<div class="sumbox" id="ckSum"></div>',
     footer:'<button class="btn pri block" id="ckGo">'+ico('check')+'ဘောက်ချာ ထုတ်မည်</button>',
     onMount(el,ctl){
       const q=s=>el.querySelector(s);
       const mp=methodPicker(el,'ckM',DEFAULT_METHOD);
+      $$('[data-ckos]',el).forEach(b=>b.onclick=()=>{st.os=b.dataset.ckos===''?'':osList()[Number(b.dataset.ckos)];$$('[data-ckos]',el).forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
       const sa=el.querySelector('#ckSellAll');
       if(sa)sa.addEventListener('change',()=>{const v=sa.value;if(!v||v==='__new')return;Cart.lines().forEach(l=>Cart.setSeller(l.p.id,v));el.querySelectorAll('select[data-cseller]').forEach(x=>{if(!Array.from(x.options).some(o=>o.value===v)){const op=document.createElement('option');op.value=v;op.textContent=v;x.insertBefore(op,x.querySelector('option[value="__new"]'))}x.value=v});try{redrawCart()}catch(e){}});
       const calc=()=>{
@@ -2005,6 +2091,7 @@ function checkoutSheet(){
         const fresh=Cart.lines();
         for(const l of fresh){if(l.qty>l.p.stock){toast(l.p.name+' လက်ကျန် မလုံလောက်ပါ');return}}
         const v=createVoucher({lines:fresh,customerId:st.custId,discount:c.disc,pointsUsed:c.pts,received:c.rec,method:mp.get(),payments:c.pays?c.pays.map(x=>({amount:x.amount,method:x.method})):undefined});
+        if(st.os){osSet(v.id,st.os)}
         Cart.clear();ctl.close();App.render();updateCobar();
         toast('ဘောက်ချာ ထုတ်ပြီးပါပြီ');autoLabel(v);autoReceipt(v);setTimeout(()=>voucherSheet(v.id),250);
       };
@@ -2079,6 +2166,7 @@ function settingsSheet(){
      +swrow('sAutoRcp','ဘောက်ချာ ထုတ်တိုင်း ဘောက်ချာ အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoReceipt===true)
      +swrow('sAutoLbl','ဘောက်ချာ ထုတ်တိုင်း Label အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoLabel!==false)
      +'<p class="sub" style="margin-bottom:8px">ဘောက်ချာ စာသား / လိုဂို အရွယ်အစားကို ဘောက်ချာဖွင့်ပြီး Print tab ထဲက ဘောက်ချာပေါ်တွင် တိုက်ရိုက်နှိပ်၍ ပြင်နိုင်ပါသည်။</p>'
+     +'<div class="sec-t">အော်ဒါ အခြေအနေများ</div><p class="sub" style="margin-bottom:6px">ထုတ်လုပ်နေဆဲ အဆင့်များ (ပြင်/ထည့်/ဖယ်နိုင်သည်)</p><div class="mpick" id="sOs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sONew" placeholder="အဆင့်အသစ် ထည့်ရန် (ဥပမာ - ဖြတ်တောက်နေဆဲ)" aria-label="အဆင့်အသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sOAdd">ထည့်မည်</button></div><div class="field"><label class="lbl" for="sODone">နောက်ဆုံးအဆင့် (ပစ္စည်း ထုတ်ယူပြီး / ပို့ပြီး)</label><input class="inp" id="sODone" value="'+esc(S.osDone||OS_DONE_DEF)+'"></div>'
      +'<div class="rowf"><button class="btn s" id="sDemo">နမူနာဒေတာ ထည့်မည်</button>'+(hasDemo?'<button class="btn s out" id="sDemoClr">နမူနာဒေတာ ဖျက်မည်</button>':'')+'</div>',
     footer:'<button class="btn pri block" id="sSave">သိမ်းမည်</button>',
     onMount(el){
@@ -2094,6 +2182,10 @@ function settingsSheet(){
       const cEd=chipEd(q('#sCs'),cs,1);
       q('#sCAdd').onclick=()=>{const n=q('#sCNew').value.trim();if(n&&cs.indexOf(n)<0){cs.push(n);q('#sCNew').value='';cEd.draw()}};
       cEd.draw();
+      let os=(Store.d.settings.osList&&Store.d.settings.osList.length?Store.d.settings.osList:OS_DEF).slice();
+      const oEd=chipEd(q('#sOs'),os,1);
+      q('#sOAdd').onclick=()=>{const n=q('#sONew').value.trim();if(n&&os.indexOf(n)<0&&n!==(q('#sODone').value.trim())){os.push(n);q('#sONew').value='';oEd.draw()}};
+      oEd.draw();
       let sl=(Store.d.settings.sellers||[]).slice();
       const sEd=chipEd(q('#sSl'),sl,0);
       q('#sSAdd').onclick=()=>{const n=q('#sSNew').value.trim();if(n&&sl.indexOf(n)<0){sl.push(n);q('#sSNew').value='';sEd.draw()}};
@@ -2110,12 +2202,15 @@ function settingsSheet(){
       q('#sbChg').onclick=async()=>{if(await confirmBox('Supabase ပြောင်းမည်','ပြန်ချိတ်ရန် စာမျက်နှာ ပြန်စပါမည်။ Owner ဖြင့် ပြန်ဝင်ရပါမည်။','ဆက်မည်')){Sb.save({});try{localStorage.removeItem(SK)}catch(x){}location.reload()}};
       q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
       q('#sSave').onclick=()=>{
-        const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
+        const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,osList:os.slice(),osDone:(q('#sODone').value.trim()||OS_DONE_DEF),phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
         Object.keys(mEd.orig).forEach(n=>{const o=mEd.orig[n];if(o===n)return;
           Store.list('vouchers').forEach(v=>{if((v.payments||[]).some(p=>p.method===o))Store.put('vouchers',Object.assign({},v,{payments:v.payments.map(p=>p.method===o?Object.assign({},p,{method:n}):p)}))});
           Store.list('expenses').forEach(x=>{if(x.method===o)Store.put('expenses',Object.assign({},x,{method:n}))})});
         Object.keys(sEd.orig).forEach(n=>{const o=sEd.orig[n];if(o===n)return;Store.list('vouchers').forEach(v=>{if((v.items||[]).some(i=>i.seller===o))Store.put('vouchers',Object.assign({},v,{items:v.items.map(i=>i.seller===o?Object.assign({},i,{seller:n}):i)}))})});
         Object.keys(cEd.orig).forEach(n=>{const o=cEd.orig[n];if(o===n)return;Store.list('expenses').forEach(x=>{if(x.category===o)Store.put('expenses',Object.assign({},x,{category:n}))})});
+        {const oldDone=Store.d.settings.osDone||OS_DONE_DEF;
+         Object.keys(oEd.orig).forEach(n=>{osRename(oEd.orig[n],n)});
+         if(oldDone!==ns.osDone)osRename(oldDone,ns.osDone)}
         Store.putSettings(ns);ctl.close();toast('ဆက်တင် သိမ်းပြီးပါပြီ');paintChrome();
       };
       q('#sPrn').onclick=()=>printerSheet();
@@ -2360,7 +2455,7 @@ const TABS=[
  {id:'stock',label:'ကုန်ပစ္စည်း',title:'ကုန်ပစ္စည်း လက်ကျန်',icon:'box'},
  {id:'reports',label:'Dashboard',title:'Dashboard',icon:'chart'}
 ];
-const F={dView:'v',vFrom:'',vTo:'',vMethod:'',vBy:'',vCust:'',vN:100,eRange:'month',eDate:'',eFrom:'',eTo:'',eCat:'',eBy:'',vStatus:'all',vRange:'month',vQuery:'',cQuery:'',cSort:'spent',pQuery:'',pLow:'all',posQuery:'',rRange:'day',rDate:'',rFrom:'',rTo:'',sRange:'month',sDate:'',sFrom:'',sTo:''};
+const F={dView:'v',vFrom:'',vTo:'',vMethod:'',vBy:'',vCust:'',vN:100,eRange:'month',eDate:'',eFrom:'',eTo:'',eCat:'',eBy:'',vStatus:'all',vOrder:'',vRange:'month',vQuery:'',cQuery:'',cSort:'spent',pQuery:'',pLow:'all',posQuery:'',rRange:'day',rDate:'',rFrom:'',rTo:'',sRange:'month',sDate:'',sFrom:'',sTo:''};
 
 function viewHome(part){
   const t=today(),sales=Sel.salesOn(t),coll=Sel.collectedOn(t),out=Sel.outstanding(),carried=Sel.carried(t),cnt=Sel.countOn(t),dc=Sel.debtCollectedOn(t);
@@ -2439,6 +2534,8 @@ function vFilt(){
   let list=Sel.vouchers();
   if(F.vStatus==='paid')list=list.filter(v=>Sel.rem(v)<=0);
   if(F.vStatus==='unpaid')list=list.filter(v=>Sel.rem(v)>0);
+  if(F.vOrder==='open')list=list.filter(osOpen);
+  else if(F.vOrder)list=list.filter(v=>osIdx(v.os)===Number(F.vOrder.slice(1)));
   const r=rangeFor('v');list=list.filter(v=>(!r[0]||v.date>=r[0])&&(!r[1]||v.date<=r[1]));
   if(F.vMethod)list=list.filter(v=>(v.payments||[]).some(p=>(p.method||DEFAULT_METHOD)===F.vMethod));
   if(F.vBy)list=list.filter(v=>v.by===F.vBy);
@@ -2455,13 +2552,15 @@ function vListHTML(){
   return '<div class="stat"><span>ဘောက်ချာ <b>'+list.length+'</b> စောင်</span><span>စုစုပေါင်း <b>'+ks(sum)+'</b> ကျပ်</span><span>ကျန်ငွေ <b>'+ks(rem)+'</b> ကျပ်</span></div>'
    +(Object.keys(bm).length?'<div class="sub" style="margin:-4px 0 10px">ရရှိငွေ — '+Object.keys(bm).sort((a,b)=>bm[b]-bm[a]).map(k=>esc(k)+' <b>'+ks(bm[k])+'</b>').join(' · ')+'</div>':'')
    +'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ဘောက်ချာ / ရက်စွဲ</th><th>ဖောက်သည်</th><th class="r">ပမာဏ</th><th>အခြေအနေ</th></tr></thead><tbody>'
-   +list.slice(0,F.vN||100).map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'" tabindex="0"><td><div class="nm">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+(v.byName?' · '+esc(v.byName):'')+'</div></td><td><div class="nm">'+esc(Sel.cname(v))+'</div>'+carriedTag(v)+'</td><td class="r"><b>'+ks(v.total)+'</b>'+(Sel.rem(v)>0?'<div class="sub w">ကျန် '+ks(Sel.rem(v))+'</div>':'')+'</td><td>'+pill(v)+'</td></tr>').join('')
+   +list.slice(0,F.vN||100).map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'" tabindex="0"><td><div class="nm">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+(v.byName?' · '+esc(v.byName):'')+'</div></td><td><div class="nm">'+esc(Sel.cname(v))+'</div>'+carriedTag(v)+'</td><td class="r"><b>'+ks(v.total)+'</b>'+(Sel.rem(v)>0?'<div class="sub w">ကျန် '+ks(Sel.rem(v))+'</div>':'')+'</td><td>'+pill(v)+(v.os?'<div style="margin-top:3px">'+osPill(v)+'</div>':'')+'</td></tr>').join('')
    +'</tbody></table></div>'+(list.length>(F.vN||100)?'<div class="rowf" style="justify-content:center;margin-top:10px"><button class="btn s" data-act="v-more">နောက်ထပ် ပြမည်</button></div>':'');
 }
 const selBox=(k,o,all)=>'<select class="inp" data-in="'+k+'" aria-label="'+all+'"><option value="">'+all+'</option>'+o.map(x=>'<option value="'+esc(x[0])+'"'+(F[k]===x[0]?' selected':'')+'>'+esc(x[1])+'</option>').join('')+'</select>';
 function viewVouchers(){
+  const oc=k=>Store.list('vouchers').filter(v=>k==='open'?osOpen(v):osIdx(v.os)===k).length;
   const rs=[['all','ရက်အားလုံး'],['today','ယနေ့'],['yday','မနေ့က'],['7','နောက်ဆုံး ၇ ရက်'],['month','ဤလ'],['lmonth','ပြီးခဲ့သောလ'],['custom','ရက်ရွေးမည်']];
   return '<div class="card"><div class="field" style="margin-bottom:10px">'+seg('vStatus',[['all','အားလုံး'],['paid','ငွေပေးပြီး'],['unpaid','ငွေမလွှဲရသေး']],F.vStatus)+'</div>'
+   +'<div class="field" style="margin-bottom:10px"><label class="lbl">အော်ဒါ အခြေအနေ</label>'+'<div class="osfil">'+seg('vOrder',[['','အားလုံး'],['open','မယူရသေး ('+oc('open')+')']].concat(osList().map((o,k)=>['i'+k,esc(o)+' ('+oc(k)+')'])),F.vOrder||'')+'</div></div>'
    +'<div class="search"><span aria-hidden="true">'+ico('search')+'</span><input class="inp" data-in="vQuery" placeholder="နံပါတ် / အမည် / ဖုန်း" value="'+esc(F.vQuery)+'" aria-label="ရှာမည်"></div>'
    +rangeBar('v',true)+'<div class="fil">'
    +selBox('vMethod',(Store.d.settings.methods||[]).map(m=>[m,m]),'ငွေပေးချေမှု အားလုံး')
@@ -3308,7 +3407,7 @@ const ACT={
   'add-custom':()=>customItemSheet(),
   'new-exp':()=>expenseSheet(null),
   'edit-exp':t=>expenseSheet(t.dataset.id),
-  'v-reset':()=>{Object.assign(F,{vStatus:'all',vRange:'month',vDate:'',vQuery:'',vFrom:'',vTo:'',vMethod:'',vBy:'',vCust:'',vN:100});App.paint(false)},
+  'v-reset':()=>{Object.assign(F,{vStatus:'all',vOrder:'',vRange:'month',vDate:'',vQuery:'',vFrom:'',vTo:'',vMethod:'',vBy:'',vCust:'',vN:100});App.paint(false)},
   'v-more':()=>{F.vN=(F.vN||100)+100;PARTIAL.vouchers()},
   'v-csv':()=>csvSave('vouchers.csv',[['နံပါတ်','ရက်စွဲ','အချိန်','ဖောက်သည်','ဖြတ်သူ','စုစုပေါင်း','ပေးငွေ','ကျန်ငွေ','ငွေပေးချေမှု']].concat(vFilt().map(v=>[v.no,v.date,fmtT(v.createdAt),Sel.cname(v),v.byName||'',v.total,v.paid||0,Sel.rem(v),methodsUsed(v)]))),
   'e-csv':()=>csvSave('expenses.csv',[['ရက်စွဲ','အမျိုးအစား','မှတ်ချက်','ငွေပေးချေမှု','မှတ်သူ','ပမာဏ']].concat(Ex.list().map(e=>[e.date,e.category,e.note||'',e.method||'',e.byName||'',e.amount])))
@@ -3380,7 +3479,8 @@ document.addEventListener('change',function(e){
     });
     paintChrome();
     PL.restoreAll();
-    if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen()
+    try{const t0=localStorage.getItem(SK);if(t0==='trial'||t0==='trial-c')localStorage.removeItem(SK)}catch(e){}
+    if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen();
   });
   setInterval(()=>{if(today()!==App.lastDay){App.lastDay=today();App.paint(false);toast('နောက်တစ်နေ့သို့ ရောက်ပါပြီ — မရှင်းရသေးသော ကြွေးများကို ယခင်ရက်မှ လွှဲပြောင်းဟု မှတ်ထားပါသည်')}},30000);
   let _cw=priceCol();window.addEventListener('resize',()=>{const w=priceCol();if(w===_cw)return;_cw=w;const cb=$('#cartBox');if(App.tab==='sell'&&cb&&!cb.contains(document.activeElement))cb.innerHTML=cartHTML()});

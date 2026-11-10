@@ -71,7 +71,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Login: Supabase URL (ပထမဆုံးအကြိမ်) → Owner/Cashier ရွေး → အကောင့်ဝင်ရန်/လျောက်ထားရန်
+      # index.html ကို မပြင်ဘဲ အတိုင်း APK ထဲ ထည့်မည် (UI / Login / Supabase စသည် index.html အတိုင်းပင်)
       - name: Prepare web app (Login flow)
         run: |
           WEBDIR=$(node -e "
@@ -94,42 +94,6 @@ jobs:
           fi
           [ -f "$WEBDIR/index.html" ] || { echo "::error::HTML ဖိုင် မတွေ့ပါ (index.html ကို repo ထဲ ထည့်ပါ)"; exit 1; }
           echo "using: ${SRC:-$WEBDIR/index.html}  ($(wc -c < "$WEBDIR/index.html") bytes)"
-          python3 - "$WEBDIR/index.html" <<'PY'
-          import re, sys
-          p = sys.argv[1]
-          s = open(p, encoding='utf-8').read()
-          done = []
-          def sub(name, old, new):
-              global s
-              if old in s:
-                  s = s.replace(old, new); done.append(name)
-          # 1) Supabase ကို ကြိုမထည့်ဘဲ ပထမဆုံးအကြိမ် URL / key ထည့်ခိုင်းမည် (တစ်ခါထည့်ပြီးရင် စက်ထဲမှာ မှတ်ထားမည်)
-          s, n = re.subn(r"DEFAULT:\{[^}]*\},", "DEFAULT:{},", s, count=1)
-          if n: done.append("supabase-setup-first")
-          # 2) စမ်းသုံး (trial) ဖြင့် Login ကျော်တာကို ဖယ်ပြီး ကျန်နေသော trial session ကို ရှင်းမည်
-          sub("no-forced-trial",
-              "try{if(!localStorage.getItem(SK))localStorage.setItem(SK,'trial-c')}catch(e){}",
-              "try{const t0=localStorage.getItem(SK);if(t0==='trial'||t0==='trial-c')localStorage.removeItem(SK)}catch(e){}")
-          # 3) Owner ➜ Cashier စမ်းသုံးခလုတ်ကို ဖယ်မည်
-          a = s.find("(function(){const bt=document.createElement('button');const owner=()=>")
-          if a >= 0:
-              end = "document.body.appendChild(bt)})()"
-              b = s.find(end, a)
-              if b >= 0:
-                  s = s[:a] + s[b + len(end):]; done.append("no-toggle-button")
-          # 4) Owner / Cashier ဘယ်တစ်ခုရွေးရွေး  "အကောင့်ဝင်ရန် / အကောင့်လျောက်ထားရန်" နှစ်ခု ပေါ်မည်
-          sub("tabs-for-both-roles", "(asOwner()||first||rec?'':'<div class=\"seg\"", "(first||rec?'':'<div class=\"seg\"")
-          sub("tab-label-in", "id=\"tIn\" aria-pressed=\"'+!up+'\">ဝင်ရောက်မည်</button>", "id=\"tIn\" aria-pressed=\"'+!up+'\">အကောင့်ဝင်ရန်</button>")
-          sub("tab-label-up", "id=\"tUp\" aria-pressed=\"'+up+'\">အကောင့်အသစ်ဖွင့်မည်</button>", "id=\"tUp\" aria-pressed=\"'+up+'\">အကောင့်လျောက်ထားရန်</button>")
-          sub("apply-button-label", "up?(own1?'ဆိုင်ပိုင်ရှင် အကောင့် ဖွင့်မည်':'အကောင့် ဖွင့်မည်')", "up?(own1?'ဆိုင်ပိုင်ရှင် အကောင့် ဖွင့်မည်':'လျောက်ထားမည်')")
-          # 5) ရွေးထားတဲ့ role အတိုင်း လျောက်ထားမည်၊ Owner ခွင့်ပြုမှ ဝင်နိုင်မည်
-          sub("apply-as-chosen-role", "await Auth.make(nm,u,p,own1?'owner':'accountant')", "await Auth.make(nm,u,p,asOwner()?'owner':'accountant')")
-          sub("pending-any-role", "if(a.role!=='owner'&&a.pending===true)waitScreen(a);else enter();", "if(a.pending===true)waitScreen(a);else enter();")
-          open(p, 'w', encoding='utf-8').write(s)
-          print("patched:", ", ".join(done) if done else "(nothing)")
-          if "DEFAULT:{}," not in s:
-              sys.exit("Supabase default ပြင်၍ မရပါ")
-          PY
           # အင်တာနက်မရှိချိန်လည်း ဖွင့်နိုင်ရန် supabase library ကို app ထဲ ထည့်ထားမည်
           npm install --no-save @supabase/supabase-js@2.45.4
           mkdir -p "$WEBDIR/vendor"

@@ -1,0 +1,178 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # package.json / capacitor.config မရှိမှသာ အလိုအလျောက် ဖန်တီးမည်
+      - name: Bootstrap Capacitor project (only if missing)
+        run: |
+          if [ ! -f package.json ]; then
+            cat > package.json <<'JSON'
+          {
+            "name": "shoppos",
+            "version": "1.0.0",
+            "private": true,
+            "dependencies": {
+              "@capacitor/android": "^7.0.0",
+              "@capacitor/core": "^7.0.0",
+              "@capacitor/filesystem": "^7.0.0",
+              "@capacitor/share": "^7.0.0"
+            },
+            "devDependencies": {
+              "@capacitor/cli": "^7.0.0"
+            }
+          }
+          JSON
+          fi
+          if ! ls capacitor.config.* >/dev/null 2>&1; then
+            cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "com.shoppos.app",
+            "appName": "Shop POS",
+            "webDir": "www",
+            "server": { "androidScheme": "https" }
+          }
+          JSON
+          fi
+
+      # Capacitor 7+ => Java 21, အရင်ဗားရှင်း => Java 17
+      - name: Pick Java version
+        id: jv
+        run: |
+          V=$(node -e "try{const p=require('./package.json');const d=Object.assign({},p.dependencies,p.devDependencies);const v=String(d['@capacitor/android']||d['@capacitor/core']||'7').replace(/[^0-9.]/g,'');console.log(parseInt(v)||7)}catch(e){console.log(7)}")
+          if [ "$V" -ge 7 ]; then echo "java=21" >> "$GITHUB_OUTPUT"; else echo "java=17" >> "$GITHUB_OUTPUT"; fi
+          echo "Capacitor major: $V"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.jv.outputs.java }}
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Install dependencies
+        run: npm install
+
+      # Login: Supabase URL (ပထမဆုံးအကြိမ်) → Owner/Cashier ရွေး → အကောင့်ဝင်ရန်/လျောက်ထားရန်
+      - name: Prepare web app (Login flow)
+        run: |
+          WEBDIR=$(node -e "
+            const fs=require('fs');let d='www';
+            for(const f of ['capacitor.config.json','capacitor.config.ts','capacitor.config.js']){
+              if(fs.existsSync(f)){const m=/webDir\s*['\"]?\s*[:=]\s*['\"]([^'\"]+)['\"]/.exec(fs.readFileSync(f,'utf8'));if(m){d=m[1];break}}
+            }
+            console.log(d)")
+          echo "webDir = $WEBDIR"
+          mkdir -p "$WEBDIR"
+          # repo root ရှိ index.html ကို build တိုင်း $WEBDIR ထဲ အသစ်ပြန်ကူးမည် (အဟောင်း www/index.html ကို မသုံးတော့)
+          SRC=$(ls index.html 2>/dev/null || true)
+          if [ -z "$SRC" ] && [ ! -f "$WEBDIR/index.html" ]; then
+            SRC=$(ls *.html 2>/dev/null | head -1 || true)
+          fi
+          if [ -n "$SRC" ]; then
+            if [ "$(realpath "$SRC")" != "$(realpath "$WEBDIR/index.html" 2>/dev/null)" ]; then
+              cp "$SRC" "$WEBDIR/index.html"
+            fi
+          fi
+          [ -f "$WEBDIR/index.html" ] || { echo "::error::HTML ဖိုင် မတွေ့ပါ (index.html ကို repo ထဲ ထည့်ပါ)"; exit 1; }
+          echo "using: ${SRC:-$WEBDIR/index.html}  ($(wc -c < "$WEBDIR/index.html") bytes)"
+          python3 - "$WEBDIR/index.html" <<'PY'
+          import re, sys
+          p = sys.argv[1]
+          s = open(p, encoding='utf-8').read()
+          done = []
+          def sub(name, old, new):
+              global s
+              if old in s:
+                  s = s.replace(old, new); done.append(name)
+          # 1) Supabase ကို ကြိုမထည့်ဘဲ ပထမဆုံးအကြိမ် URL / key ထည့်ခိုင်းမည် (တစ်ခါထည့်ပြီးရင် စက်ထဲမှာ မှတ်ထားမည်)
+          s, n = re.subn(r"DEFAULT:\{[^}]*\},", "DEFAULT:{},", s, count=1)
+          if n: done.append("supabase-setup-first")
+          # 2) စမ်းသုံး (trial) ဖြင့် Login ကျော်တာကို ဖယ်ပြီး ကျန်နေသော trial session ကို ရှင်းမည်
+          sub("no-forced-trial",
+              "try{if(!localStorage.getItem(SK))localStorage.setItem(SK,'trial-c')}catch(e){}",
+              "try{const t0=localStorage.getItem(SK);if(t0==='trial'||t0==='trial-c')localStorage.removeItem(SK)}catch(e){}")
+          # 3) Owner ➜ Cashier စမ်းသုံးခလုတ်ကို ဖယ်မည်
+          a = s.find("(function(){const bt=document.createElement('button');const owner=()=>")
+          if a >= 0:
+              end = "document.body.appendChild(bt)})()"
+              b = s.find(end, a)
+              if b >= 0:
+                  s = s[:a] + s[b + len(end):]; done.append("no-toggle-button")
+          # 4) Owner / Cashier ဘယ်တစ်ခုရွေးရွေး  "အကောင့်ဝင်ရန် / အကောင့်လျောက်ထားရန်" နှစ်ခု ပေါ်မည်
+          sub("tabs-for-both-roles", "(asOwner()||first||rec?'':'<div class=\"seg\"", "(first||rec?'':'<div class=\"seg\"")
+          sub("tab-label-in", "id=\"tIn\" aria-pressed=\"'+!up+'\">ဝင်ရောက်မည်</button>", "id=\"tIn\" aria-pressed=\"'+!up+'\">အကောင့်ဝင်ရန်</button>")
+          sub("tab-label-up", "id=\"tUp\" aria-pressed=\"'+up+'\">အကောင့်အသစ်ဖွင့်မည်</button>", "id=\"tUp\" aria-pressed=\"'+up+'\">အကောင့်လျောက်ထားရန်</button>")
+          sub("apply-button-label", "up?(own1?'ဆိုင်ပိုင်ရှင် အကောင့် ဖွင့်မည်':'အကောင့် ဖွင့်မည်')", "up?(own1?'ဆိုင်ပိုင်ရှင် အကောင့် ဖွင့်မည်':'လျောက်ထားမည်')")
+          # 5) ရွေးထားတဲ့ role အတိုင်း လျောက်ထားမည်၊ Owner ခွင့်ပြုမှ ဝင်နိုင်မည်
+          sub("apply-as-chosen-role", "await Auth.make(nm,u,p,own1?'owner':'accountant')", "await Auth.make(nm,u,p,asOwner()?'owner':'accountant')")
+          sub("pending-any-role", "if(a.role!=='owner'&&a.pending===true)waitScreen(a);else enter();", "if(a.pending===true)waitScreen(a);else enter();")
+          open(p, 'w', encoding='utf-8').write(s)
+          print("patched:", ", ".join(done) if done else "(nothing)")
+          if "DEFAULT:{}," not in s:
+              sys.exit("Supabase default ပြင်၍ မရပါ")
+          PY
+          # အင်တာနက်မရှိချိန်လည်း ဖွင့်နိုင်ရန် supabase library ကို app ထဲ ထည့်ထားမည်
+          npm install --no-save @supabase/supabase-js@2.45.4
+          mkdir -p "$WEBDIR/vendor"
+          cp node_modules/@supabase/supabase-js/dist/umd/supabase.js "$WEBDIR/vendor/supabase.min.js"
+
+      - name: Create Android project
+        run: |
+          if [ -d android ]; then echo "android/ ရှိပြီးသား"; else npx cap add android; fi
+
+      - name: Add native plugins (print / Bluetooth) and permissions
+        run: |
+          if [ -f scripts/patch-android.py ]; then python3 scripts/patch-android.py; else echo "scripts/patch-android.py မရှိ — ကျော်သွားသည်"; fi
+
+      - name: Sync web files
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk shoppos.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shoppos-apk
+          path: shoppos.apk
+
+      - name: Upload build reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: |
+            android/app/build/reports
+            android/build/reports
+          if-no-files-found: ignore
+
+      - name: Publish GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: shoppos.apk

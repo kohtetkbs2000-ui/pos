@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="my"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<script>(function(){try{var c=window.Capacitor;if(!c||!c.registerPlugin)return;["NativePrint","BtPrinter","Filesystem","Share","App"].forEach(function(n){if(!c.Plugins||!c.Plugins[n])c.registerPlugin(n)})}catch(e){}})();</script>
 <meta name="theme-color" content="#0A192F"><meta name="color-scheme" content="light"><title>ဆိုင် POS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap">
 <style>:root{color-scheme:light}[hidden]:not([hidden=until-found i]){display:none!important}img{max-width:100%}</style>
@@ -515,16 +516,13 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 
 /* ---- Order status tracking ---- */
 .pill.os{font-weight:700}
-.pill.os-c0{background:#FEF3C7;color:#92400E}
-.pill.os-c1{background:#DBEAFE;color:#1E40AF}
-.pill.os-c2{background:#FFEDD5;color:#9A3412}
-.pill.os-c3{background:#EDE9FE;color:#5B21B6}
-.pill.os-c4{background:#CCFBF1;color:#115E59}
-.pill.os-last{background:#DCFCE7;color:#166534}
-.pill.os-x{background:var(--tint);color:var(--mut)}
+.pill.os-designing{background:#FEF3C7;color:#92400E}
+.pill.os-printing{background:#DBEAFE;color:#1E40AF}
+.pill.os-ready{background:#FFEDD5;color:#9A3412}
+.pill.os-done{background:#DCFCE7;color:#166534}
 .osbox{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0 4px;background:var(--tint)}
 .osbox .osh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-weight:700}
-.ossteps{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px}
+.ossteps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .ossteps button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 2px;font-size:12px;font-weight:700;line-height:1.35;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px}
 .ossteps button .n{width:20px;height:20px;border-radius:50%;background:var(--tint);display:grid;place-items:center;font-size:11px}
 .ossteps button[aria-pressed="true"]{background:var(--pri);color:var(--pri-fg);border-color:var(--pri)}
@@ -533,37 +531,59 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 .osfil{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.osfil::-webkit-scrollbar{display:none}.osfil .seg{width:max-content;min-width:100%}.osfil .seg button{white-space:nowrap;padding-left:12px;padding-right:12px}
 .oslog{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.6}
 .ossub{font-size:13px;margin-top:8px;font-weight:600}
-
-/* ---- Tablet layout (iPad / Android tablet, portrait + landscape) ---- */
-@media (min-width:541px) and (min-height:561px){.col-price{display:table-cell}.sub-price{display:none}}
-@media (min-width:768px) and (min-height:561px){
-  .top-in,.view{max-width:1100px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
-  .top-in{padding-block:12px}
-  .tabbar-in{max-width:760px}
-  .tab{font-size:12.5px}
-  .cobar-in{max-width:640px}
-  .card{padding:20px}
-  .tiles{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-  .fil{grid-template-columns:repeat(3,minmax(0,1fr))}
-  /* Fast checkout: products | cart side by side */
-  .sell{grid-template-columns:minmax(0,1fr);align-items:start;gap:18px}
-  .sell .tbl{width:100%}
-  .prods{grid-template-columns:repeat(4,minmax(0,1fr));max-height:min(380px,45vh);min-height:180px}
-  .prod{padding:12px 14px}
-  /* sheets become centred dialogs */
-  .sheet-root{align-items:center}
-  .sheet{max-width:680px;max-height:88%;border-radius:26px;transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1),opacity .25s}
-  .sheet-root.in .sheet{transform:none;opacity:1}
-  .grab{display:none}
-  .sheet-root.small .sheet{max-width:420px}
-  #toast{max-width:520px}
-}
-@media (min-width:1000px) and (min-height:561px){
-  .sell{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
-  .sell .prods-card{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
-  .prods{max-height:calc(100vh - 330px)}
-  .tabbar-in{max-width:860px}
-}
+.cartbtn{position:relative}
+.cbadge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#B91C1C;color:#fff;font:800 11px/18px var(--font);text-align:center;font-style:normal;box-shadow:0 0 0 2px var(--card,#fff);font-variant-numeric:tabular-nums}
+.cbadge.bump{animation:bump .4s ease-out}
+.cartbtn.wig{animation:cartWig .5s ease-out}
+@keyframes cartWig{0%,100%{transform:none}25%{transform:rotate(-14deg) scale(1.12)}60%{transform:rotate(10deg) scale(1.12)}}
+.sell.solo{display:block;height:auto}
+.sell.solo>section{display:block;overflow:visible}
+.sell.solo .prods{max-height:none;overflow:visible;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;margin-top:12px}
+.sell.solo .prod{padding:12px}
+.cs-f{display:flex;align-items:center;gap:8px}
+.cs-f .t{flex:1;min-width:0;line-height:1.4}
+.cs-f .t b{display:block;white-space:nowrap;font:800 18px/1.4 var(--font);font-variant-numeric:tabular-nums}
+.cs-f .t span{font-size:12px;color:var(--mut);white-space:nowrap}
+.cs-f .btn{padding-left:12px;padding-right:12px;white-space:nowrap;flex:none}
+@media (max-width:480px){body.on-sell .top-r .chip span{display:none}body.on-sell .top-r .chip{padding:2px 8px}body.on-sell .top-r{gap:6px}}
+.sheet #cartBox{padding-bottom:0;overflow:visible}
+@media (prefers-reduced-motion:reduce){.cbadge.bump,.cartbtn.wig{animation:none}}
+.osh{flex-wrap:wrap}.osh-r{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.osbox{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+.osp{margin:0 0 12px}
+.osp-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:700;margin-bottom:6px}
+.osp-n{font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}
+.osp-t,.osm-t{position:relative;overflow:hidden;border-radius:99px;background:var(--line)}
+.osp-t{height:12px}
+.osp-t i,.osm-t i{display:block;height:100%;width:var(--w);border-radius:99px;overflow:hidden;position:relative;animation:osFill 1s cubic-bezier(.2,.8,.2,1) both}
+.osp-t i::after,.osm-t i::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);animation:osSheen 1.9s 1s ease-in-out infinite}
+.osp.full .osp-n{color:#15803D;animation:pop .6s .8s both}
+.osp.full .osp-t i::after,.osm.full i::after{animation-iteration-count:2}
+.osm{display:flex;align-items:center;gap:6px;margin-top:5px;min-width:84px}
+.osm-t{flex:1;height:5px}
+.osm b{font-size:11px;font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
+@keyframes osFill{from{width:0}to{width:var(--w)}}
+@keyframes osSheen{0%{transform:translateX(-120%)}60%,100%{transform:translateX(120%)}}
+@keyframes osRing{0%{box-shadow:0 0 0 0 var(--ac,rgba(30,58,138,.5))}100%{box-shadow:0 0 0 10px rgba(30,58,138,0)}}
+.ossteps.scroll{overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.ossteps.scroll::-webkit-scrollbar{display:none}
+.ossteps button{animation:rise .4s calc(var(--i,0)*70ms + .1s) both;transition:transform .15s,background .25s,color .25s,border-color .25s}
+.ossteps button:active{transform:scale(.95)}
+.ossteps button small{font-size:10.5px;font-weight:700;opacity:.7;font-variant-numeric:tabular-nums}
+.ossteps button[aria-pressed="true"]{animation:rise .4s calc(var(--i,0)*70ms + .1s) both,osRing 1.8s .7s ease-out infinite}
+.ossteps button[aria-pressed="true"] .n{animation:pop .5s .25s both}
+.ossteps button.past .n{background:var(--grn,#15803D);color:#fff;animation:pop .45s calc(var(--i,0)*70ms + .3s) both}
+.osed{border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px;background:var(--card);animation:rise .35s calc(var(--i,0)*50ms) both}
+.osed-h{display:flex;align-items:center;gap:8px}
+.osed-h .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.osed-h>.inp{flex:1;min-width:0}
+.osed-p{display:flex;align-items:center;gap:4px;font-weight:700;flex:none}
+.osed-p .inp{width:64px;text-align:center;padding:8px 4px}
+.osed-f{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.oscs{display:flex;gap:7px;flex-wrap:wrap}
+.osc{width:22px;height:22px;border-radius:50%;border:0;padding:0;transition:transform .15s,box-shadow .15s}
+.osc.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--fg,#0A192F);transform:scale(1.12)}
+.osed .x-btn[disabled]{opacity:.3}
+@media (prefers-reduced-motion:reduce){.osbox,.ossteps button,.osed,.osp-t i,.osm-t i,.osp-t i::after,.osm-t i::after,.osp.full .osp-n,.ossteps button .n{animation:none!important}}
 </style>
 </head><body>
 
@@ -572,6 +592,7 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
     <div class="ttl"><div class="shop" id="shopName"></div><h1 id="pageTitle">ဆိုင် POS</h1></div>
     <div class="top-r">
       <button class="chip" id="syncChip" data-act="settings" aria-label="သိမ်းဆည်းမှု အခြေအနေ"></button>
+      <button class="icon-btn cartbtn" data-act="open-cart" aria-label="ရောင်းထားသော ပစ္စည်းများ ကြည့်မည်" id="cartBtn" hidden></button>
       <button class="icon-btn" data-act="new-label" aria-label="Label ထုတ်မည်" id="lblBtn"></button>
       <button class="icon-btn" data-act="refresh" aria-label="Refresh" id="refBtn"></button>
       <button class="icon-btn" data-act="settings" aria-label="ဆက်တင်များ" id="gearBtn"></button>
@@ -670,9 +691,9 @@ const Dl={async save(o){
 }};
 const Sb={
   K:'shoppos.sbcfg',
-  SQL:"create table if not exists public.kv (\n  collection text not null,\n  id text not null,\n  data jsonb not null,\n  updated_at timestamptz not null default now(),\n  primary key (collection, id)\n);\nalter table public.kv enable row level security;\ndrop policy if exists pos_all on public.kv;\ncreate policy pos_all on public.kv for all to anon using (true) with check (true);\nalter publication supabase_realtime add table public.kv;",
+  SQL:"create table if not exists public.kv (\n  collection text not null,\n  id text not null,\n  data jsonb not null,\n  updated_at timestamptz not null default now(),\n  primary key (collection, id)\n);\nalter table public.kv enable row level security;\ndrop policy if exists pos_all on public.kv;\ncreate policy pos_all on public.kv for all to anon using (true) with check (true);\ndo $$ begin if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='kv') then alter publication supabase_realtime add table public.kv; end if; end $$;\nalter table public.kv replica identity full;",
   LIB:['vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'],
-  DEFAULT:{url:'https://hlssypwqvvveuilhdsto.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsc3N5cHdxdnZ2ZXVpbGhkc3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDA5OTEsImV4cCI6MjEwNzg3Njk5MX0.9xo2KE3cu82J-CjlD4DHHnseJHkldMQlgNERZZcmGw8'},
+  DEFAULT:{local:1},
   cfg(){let c=null;try{c=JSON.parse(localStorage.getItem(this.K)||'null')}catch(e){}return c||this.DEFAULT},
   save(c){try{localStorage.setItem(this.K,JSON.stringify(c))}catch(e){}},
   clear(){try{localStorage.removeItem(this.K)}catch(e){}},
@@ -897,7 +918,7 @@ const Store={
           this.apply(all);
           this.synced=true;this.lastSync=Date.now();this.persist();
           if(JSON.stringify([COLLS.map(c=>this.d[c]),this.d.settings])!==before)this.emit();
-          if(!this.ch)this.listen();
+          if(!this.ch||this.rt==='off')this.listen();
         }while(this.again);
         const wasOff=!this.online||this.syncErr;
         this.online=true;this.syncErr='';
@@ -923,7 +944,7 @@ const Store={
     setInterval(()=>{
       if(this.run)return;
       if(this.pendingCount()>0||!this.online||this.syncErr){this.sync();return}
-      if(!document.hidden&&Date.now()-this.lastSync>45000)this.sync();
+      if(!document.hidden&&Date.now()-this.lastSync>(this.rt==='live'?120000:45000))this.sync();
     },10000);
     paintChrome();
     this.sync();
@@ -935,8 +956,21 @@ const Store={
   },
   listen(){
     try{
-      this.ch=this.db.channel('pos-kv').on('postgres_changes',{event:'*',schema:'public',table:'kv'},p=>this.onChange(p)).subscribe();
-    }catch(e){console.error(e)}
+      if(this.ch){const o=this.ch;this.ch=null;try{this.db.removeChannel(o)}catch(e){}}
+      clearTimeout(this.rtT);
+      const ch=this.db.channel('pos-kv-'+Math.random().toString(36).slice(2,7)).on('postgres_changes',{event:'*',schema:'public',table:'kv'},p=>this.onChange(p));
+      this.ch=ch;this.rt='connecting';
+      ch.subscribe(st=>{
+        if(this.ch!==ch)return;
+        if(st==='SUBSCRIBED'){const first=!this.rtSeen;this.rt='live';this.rtFails=0;this.rtSeen=true;paintChrome();if(!first)this.sync()}
+        else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED'){this.rt='off';paintChrome();this.relisten()}
+      });
+    }catch(e){console.error(e);this.rt='off';this.relisten()}
+  },
+  relisten(){
+    clearTimeout(this.rtT);
+    this.rtFails=(this.rtFails||0)+1;
+    this.rtT=setTimeout(()=>{if(this.mode==='cloud'&&this.db&&this.online!==false)this.listen()},Math.min(30000,1500*Math.pow(2,this.rtFails)));
   },
   onChange(p){
     const t=p.eventType,row=t==='DELETE'?p.old:p.new;
@@ -1099,34 +1133,119 @@ const seg=(key,opts,val)=>'<div class="seg" role="group">'+opts.map(o=>'<button 
 const pill=v=>Sel.rem(v)<=0?'<span class="pill paid">'+ico('check','s')+'ငွေပေးပြီး</span>':'<span class="pill unpaid"><i class="dot"></i>ငွေမလွှဲရသေး</span>';
 const carriedTag=v=>(Sel.rem(v)>0&&v.date<today())?'<div class="tag">ယခင်ရက်မှ လွှဲပြောင်း · '+daysBetween(v.date,today())+' ရက်</div>':'';
 
-const OS_DEF=['ဒီဇိုင်းဆွဲနေဆဲ','စက်တင်နေဆဲ','ပြီးစီးပြီ'],OS_DONE_DEF='ထုတ်ယူပြီး',OS_LEG={designing:0,printing:1,ready:2,done:-1};
-/* Admin ပြင်နိုင်သော အော်ဒါအခြေအနေများ — နောက်ဆုံးတစ်ခုသည် "ပစ္စည်းထုတ်ယူပြီး" */
-const osList=()=>{const S=Store.d.settings;return (S.osList&&S.osList.length?S.osList:OS_DEF).concat([S.osDone||OS_DONE_DEF])};
-const osIdx=val=>{if(!val)return -1;const L=osList(),i=L.indexOf(val);if(i>=0)return i;if(Object.prototype.hasOwnProperty.call(OS_LEG,val)){const k=OS_LEG[val];return k<0?L.length-1:Math.min(k,L.length-2)}return -1};
-const osName=val=>{const i=osIdx(val);return i>=0?osList()[i]:(val||'')};
-const osCls=val=>{const i=osIdx(val),n=osList().length;return i<0?'os-x':i===n-1?'os-last':'os-c'+(i%5)};
-const osPill=v=>v.os?'<span class="pill os '+osCls(v.os)+'">'+esc(osName(v.os))+'</span>':'';
-const osDone=v=>!!v.os&&osIdx(v.os)===osList().length-1;
-const osOpen=v=>!!v.os&&!osDone(v);
-const osPick=v=>osDone(v)?'ပစ္စည်း ထုတ်ယူပြီး / ပို့ပြီး':'ပစ္စည်း မယူရသေး';
+const OS_DEF=[['designing','ဒီဇိုင်းဆွဲနေဆဲ',25,0,'ပစ္စည်း မယူရသေး — ဒီဇိုင်းဆွဲနေဆဲ'],['printing','စက်တင်နေဆဲ',50,1,'ပစ္စည်း မယူရသေး — စက်တင်နေဆဲ'],['ready','ပြီးစီးပြီ',75,2,'ပစ္စည်း မယူရသေး — ယူရန် အဆင်သင့်'],['done','ထုတ်ယူပြီး',100,3,'ပစ္စည်း ထုတ်ယူပြီး / ပို့ပြီး']];
+const OS_COL=[['#FEF3C7','#92400E','#F59E0B'],['#DBEAFE','#1E40AF','#3B82F6'],['#FFEDD5','#9A3412','#F97316'],['#DCFCE7','#166534','#22C55E'],['#EDE9FE','#5B21B6','#8B5CF6'],['#FCE7F3','#9D174D','#EC4899'],['#CCFBF1','#115E59','#14B8A6'],['#E5E7EB','#374151','#6B7280']];
+const OS=[],OS_NAME={},OS_PCT={},OS_HINT={},OS_C={};
+function osNorm(a){
+  const n=a.length;
+  return a.map((o,i)=>{
+    const p=(o[2]===''||o[2]==null)?NaN:Number(o[2]);
+    return [String(o[0]),String(o[1]||'').trim(),Number.isFinite(p)?Math.max(0,Math.min(100,Math.round(p))):Math.round((i+1)/n*100),(((Number(o[3])||0)%OS_COL.length)+OS_COL.length)%OS_COL.length,String(o[4]||'').trim()];
+  });
+}
+function osSync(){
+  const S=Store.d&&Store.d.settings,raw=S&&Array.isArray(S.osSteps)&&S.osSteps.length?S.osSteps:OS_DEF;
+  const a=osNorm(raw);
+  OS.length=0;[OS_NAME,OS_PCT,OS_HINT,OS_C].forEach(m=>Object.keys(m).forEach(k=>delete m[k]));
+  a.forEach(o=>{OS.push(o);OS_NAME[o[0]]=o[1];OS_PCT[o[0]]=o[2];OS_HINT[o[0]]=o[4];OS_C[o[0]]=OS_COL[o[3]]});
+  return OS;
+}
+osSync();
+function osIsDone(id){osSync();const i=OS.findIndex(o=>o[0]===id);return i<0?id==='done':(OS[i][2]>=100||i===OS.length-1)}
+const osPill=v=>{osSync();return v.os&&OS_NAME[v.os]?'<span class="pill os" style="background:'+OS_C[v.os][0]+';color:'+OS_C[v.os][1]+'">'+esc(OS_NAME[v.os])+'</span>':''};
+const osPick=v=>{osSync();if(!v.os||!OS_NAME[v.os])return '';return esc(OS_HINT[v.os]||(osIsDone(v.os)?OS_NAME[v.os]:'ပစ္စည်း မယူရသေး — '+OS_NAME[v.os]))};
+const osOpen=v=>!!v.os&&!osIsDone(v.os);
+const osPct=v=>{osSync();return v.os&&OS_PCT[v.os]!==undefined?OS_PCT[v.os]:null};
+function osBar(v,mini){
+  const p=osPct(v);if(p===null)return '';
+  const c=OS_C[v.os][2],full=p>=100||osIsDone(v.os);
+  if(mini)return '<div class="osm'+(full?' full':'')+'"><div class="osm-t"><i style="--w:'+p+'%;background:'+c+'"></i></div><b>'+p+'%</b></div>';
+  return '<div class="osp'+(full?' full':'')+'"><div class="osp-h"><span>'+(full?'✓ အော်ဒါ ပြီးဆုံးပြီ':'အော်ဒါ ပြီးစီးမှု')+'</span><b class="osp-n"><span data-count="'+p+'">'+p+'</span>%</b></div><div class="osp-t"><i style="--w:'+p+'%;background:'+c+'"></i></div></div>';
+}
+function osAnim(root){
+  if(!root)return;
+  const red=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  root.querySelectorAll('[data-count]').forEach(n=>{
+    const to=Number(n.dataset.count)||0;if(red||to<=0){n.textContent=to;return}
+    const t0=performance.now(),d=900;n.textContent='0';
+    const step=t=>{const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);n.textContent=Math.round(to*e);if(k<1&&n.isConnected)requestAnimationFrame(step)};
+    requestAnimationFrame(step);
+  });
+}
 function osSet(id,status){
   const v=Store.get('vouchers',id);if(!v)return;
   const nv=Object.assign({},v);
-  if(!status)delete nv.os;else nv.os=status;
-  nv.osLog=(v.osLog||[]).concat([{s:status||'',at:Date.now(),by:Auth.me?Auth.me.name:''}]);
+  if(!status){delete nv.os;nv.osLog=(v.osLog||[]).concat([{s:'',at:Date.now(),by:Auth.me?Auth.me.name:''}])}
+  else{nv.os=status;nv.osLog=(v.osLog||[]).concat([{s:status,at:Date.now(),by:Auth.me?Auth.me.name:''}])}
   Store.put('vouchers',nv);return nv;
 }
 function osBox(v){
-  const L=osList(),idx=osIdx(v.os),log=(v.osLog||[]).slice(-4).reverse();
-  return '<div class="osbox"><div class="osh"><span>အော်ဒါ အခြေအနေ</span>'+(v.os?'<button type="button" class="btn s out" id="osOff" style="padding:2px 10px">ခြေရာခံမှု ဖယ်မည်</button>':'')+'</div>'
-   +'<div class="ossteps" role="group" aria-label="အော်ဒါ အခြေအနေ">'+L.map((o,i)=>'<button type="button" data-os="'+i+'" aria-pressed="'+(idx===i)+'" class="'+(idx>i?'past':'')+'"><span class="n">'+(idx>i?'✓':i+1)+'</span>'+esc(o)+'</button>').join('')+'</div>'
+  osSync();
+  const idx=OS.findIndex(o=>o[0]===v.os),log=(v.osLog||[]).slice(-4).reverse(),n=OS.length;
+  const cols=n<=4?'repeat('+n+',1fr)':'repeat('+n+',minmax(80px,1fr))';
+  return '<div class="osbox"><div class="osh"><span>အော်ဒါ အခြေအနေ</span><span class="osh-r">'
+   +(Auth.owner()?'<button type="button" class="btn s" id="osEdit" style="padding:2px 10px">'+ico('edit','s')+'စာသား ပြင်/ထည့်</button>':'')
+   +(v.os?'<button type="button" class="btn s out" id="osOff" style="padding:2px 10px">ခြေရာခံမှု ဖယ်မည်</button>':'')+'</span></div>'
+   +osBar(v)
+   +'<div class="ossteps'+(n>4?' scroll':'')+'" style="grid-template-columns:'+cols+'" role="group" aria-label="အော်ဒါ အခြေအနေ">'+OS.map((o,i)=>'<button type="button" data-os="'+esc(o[0])+'" aria-pressed="'+(v.os===o[0])+'" class="'+(idx>i?'past':'')+'" style="--i:'+i+(v.os===o[0]?';--ac:'+OS_COL[o[3]][2]+'88':'')+'"><span class="n">'+(idx>i?'✓':i+1)+'</span>'+esc(o[1])+'<small>'+o[2]+'%</small></button>').join('')+'</div>'
    +(v.os?'<div class="ossub">'+osPick(v)+'</div>':'<div class="sub" style="margin-top:8px">အော်ဒါ (ထုတ်လုပ်ရမည့် ပစ္စည်း) ဖြစ်လျှင် အခြေအနေ တစ်ခု ရွေးပါ — ရွေးမှသာ ခြေရာခံမည်။</div>')
-   +(log.length?'<div class="oslog">'+log.map(l=>fmtD(dstr(new Date(l.at)))+' '+fmtT(l.at)+' · '+(l.s?esc(osName(l.s)):'ခြေရာခံမှု ဖယ်ထားသည်')+(l.by?' · '+esc(l.by):'')).join('<br>')+'</div>':'')
+   +(log.length?'<div class="oslog">'+log.map(l=>fmtD(dstr(new Date(l.at)))+' '+fmtT(l.at)+' · '+(l.s?esc(OS_NAME[l.s]||l.s):'ခြေရာခံမှု ဖယ်ထားသည်')+(l.by?' · '+esc(l.by):'')).join('<br>')+'</div>':'')
    +'</div>';
 }
-function osRename(o,n){
-  if(!o||o===n)return;
-  Store.list('vouchers').forEach(v=>{if(v.os===o||(v.osLog||[]).some(l=>l.s===o))Store.put('vouchers',Object.assign({},v,{os:v.os===o?n:v.os,osLog:(v.osLog||[]).map(l=>l.s===o?Object.assign({},l,{s:n}):l)}))});
+/* Admin: order status စာသား / ရာခိုင်နှုန်း ပြင်/ထည့် */
+function osEditSheet(after){
+  if(!Auth.owner()){toast('Admin (ဆိုင်ပိုင်ရှင်) သာ ပြင်နိုင်ပါသည်');return}
+  osSync();
+  let st=OS.map(o=>o.slice());
+  const used=id=>Store.list('vouchers').filter(v=>v.os===id).length;
+  const draw=()=>{
+    const rows=st.map((o,i)=>{
+      const sw=OS_COL.map((c,k)=>'<button type="button" class="osc'+(o[3]===k?' on':'')+'" data-oc="'+i+':'+k+'" style="background:'+c[2]+'" aria-label="အရောင် '+(k+1)+'"></button>').join('');
+      return '<div class="osed" data-row="'+i+'" style="--i:'+i+'"><div class="osed-h"><span class="n" style="background:'+OS_COL[o[3]][0]+';color:'+OS_COL[o[3]][1]+'">'+(i+1)+'</span>'
+       +'<input class="inp" data-f="name" value="'+esc(o[1])+'" placeholder="အခြေအနေ အမည်" aria-label="အခြေအနေ အမည်">'
+       +'<div class="osed-p"><input class="inp" data-f="pct" inputmode="numeric" value="'+o[2]+'" placeholder="%" aria-label="ရာခိုင်နှုန်း"><span>%</span></div></div>'
+       +'<input class="inp" data-f="hint" value="'+esc(o[4])+'" placeholder="ဘောက်ချာတွင် ပြမည့် မှတ်ချက်စာသား (မဖြည့်လည်းရ)" aria-label="မှတ်ချက်စာသား" style="margin-top:8px">'
+       +'<div class="osed-f"><div class="oscs">'+sw+'</div><div class="rowf" style="gap:4px;flex-wrap:nowrap"><button type="button" class="x-btn" data-up="'+i+'" aria-label="အပေါ်သို့" '+(i===0?'disabled':'')+'>▲</button><button type="button" class="x-btn" data-dn="'+i+'" aria-label="အောက်သို့" '+(i===st.length-1?'disabled':'')+'>▼</button><button type="button" class="x-btn" data-del="'+i+'" aria-label="ဖျက်မည်">'+ico('trash','s')+'</button></div></div></div>';
+    }).join('');
+    return '<p class="sub" style="margin-bottom:10px">အခြေအနေ အမည်၊ မှတ်ချက်စာသား၊ ရာခိုင်နှုန်း (ဘောက်ချာအောက်တွင် ပြမည်) ကို ပြင်နိုင်ပါသည်။ အသစ်လည်း ထည့်နိုင်ပြီး ▲▼ ဖြင့် အစဉ် ရွှေ့နိုင်ပါသည်။</p>'+rows
+     +'<div class="rowf" style="margin-top:10px"><button type="button" class="btn s" id="osAdd">'+ico('plus','s')+'အခြေအနေ အသစ်ထည့်မည်</button><button type="button" class="btn s out" id="osRst">မူလအတိုင်း</button></div>';
+  };
+  Sheet.open({title:'အော်ဒါ အခြေအနေ စီမံမည်',body:draw(),footer:'<button class="btn pri block" id="osSave">'+ico('check')+'သိမ်းမည်</button>',
+    onMount(el,ctl){
+      const pull=()=>{ctl.body.querySelectorAll('.osed').forEach(r=>{const i=Number(r.dataset.row);if(!st[i])return;st[i][1]=r.querySelector('[data-f="name"]').value;const pv=r.querySelector('[data-f="pct"]').value.trim();st[i][2]=pv===''?'':Math.max(0,Math.min(100,Math.round(num(pv))));st[i][4]=r.querySelector('[data-f="hint"]').value})};
+      const redraw=()=>ctl.setBody(draw());
+      el.addEventListener('click',async e=>{
+        const t=e.target.closest('button');if(!t)return;
+        const d=t.dataset;
+        if(d.oc!==undefined){pull();const p=d.oc.split(':').map(Number);st[p[0]][3]=p[1];redraw()}
+        else if(d.up!==undefined){pull();const i=Number(d.up);if(i>0){const x=st[i];st[i]=st[i-1];st[i-1]=x}redraw()}
+        else if(d.dn!==undefined){pull();const i=Number(d.dn);if(i<st.length-1){const x=st[i];st[i]=st[i+1];st[i+1]=x}redraw()}
+        else if(d.del!==undefined){
+          pull();const i=Number(d.del);
+          if(st.length<=1){toast('အနည်းဆုံး အခြေအနေ ၁ ခု ရှိရပါမည်',true);return}
+          const n=used(st[i][0]);
+          if(n>0){toast('"'+(st[i][1]||'အခြေအနေ')+'" ကို သုံးထားသော ဘောက်ချာ '+n+' စောင် ရှိနေသည် — ဖျက်၍ မရပါ',true);return}
+          st.splice(i,1);redraw();
+        }
+        else if(t.id==='osAdd'){pull();st.push(['s'+Date.now().toString(36),'','',st.length%OS_COL.length,'']);redraw();const last=ctl.body.querySelector('.osed:last-of-type [data-f="name"]');if(last)last.focus()}
+        else if(t.id==='osRst'){if(await confirmBox('မူလအတိုင်း ပြန်ထားမည်','အခြေအနေ စာသား၊ ရာခိုင်နှုန်း အားလုံးကို မူလအတိုင်း ပြန်ထားမည်။ သုံးထားသော ဘောက်ချာများ၏ အခြေအနေ ပျောက်သွားနိုင်ပါသည်။','ပြန်ထားမည်')){const keep=st.filter(o=>OS_DEF.every(d2=>d2[0]!==o[0])&&used(o[0])>0);st=OS_DEF.map(o=>o.slice()).concat(keep);redraw()}}
+        else if(t.id==='osSave'){
+          pull();
+          const names={};
+          for(let i=0;i<st.length;i++){
+            const nm=String(st[i][1]||'').trim();
+            if(!nm){toast('အခြေအနေ အမည် ထည့်ပါ',true);return}
+            if(names[nm.toLowerCase()]){toast('"'+nm+'" အမည် ထပ်နေသည် — ပြောင်းပါ',true);return}
+            names[nm.toLowerCase()]=1;
+          }
+          const norm=osNorm(st);
+          Store.putSettings(Object.assign({},Store.d.settings,{osSteps:norm}));
+          osSync();ctl.close();toast('အော်ဒါ အခြေအနေ သိမ်းပြီးပါပြီ');
+          if(after)after();
+          try{App.paint&&App.paint(false)}catch(x){}
+        }
+      });
+    }});
 }
 const emptyBox=(icon,t,sub)=>'<div class="empty">'+ico(icon)+'<div>'+esc(t)+'</div>'+(sub?'<div class="sm">'+esc(sub)+'</div>':'')+'</div>';
 
@@ -1306,7 +1425,7 @@ const PrnProto={
       const hh=Math.min(128,h-y0);out.push(0x1D,0x76,0x30,0x00,wb&255,wb>>8,hh&255,hh>>8);
       for(let y=0;y<hh;y++)for(let xb=0;xb<wb;xb++){let b=0;for(let k=0;k<8;k++){const x=xb*8+k;b<<=1;if(x<w){const i=((y0+y)*w+x)*4,a=px[i+3]/255,g=(px[i]*.3+px[i+1]*.59+px[i+2]*.11)*a+255*(1-a);if(g<165)b|=1}}out.push(b)}
     }
-    out.push(0x1B,0x64,0x04);if(this.cfg.cut)out.push(0x1D,0x56,0x42,0x00);
+    out.push(0x1B,0x64,0x05);if(this.cfg.cut)out.push(0x1D,0x56,0x42,0x00,0x1D,0x56,0x00);
     return new Uint8Array(out);
   },
   /* HTML receipt -> canvas (vector scaled to printer dots) */
@@ -1565,7 +1684,7 @@ function customerDetail(id){
      +(due>0?'<div class="sec-t">ကြွေးရှင်းမည်</div><div class="rowf" style="flex-wrap:nowrap"><input class="inp" id="dAmt" inputmode="numeric" placeholder="ပေးသွင်းငွေ (ကျပ်)" style="flex:1;min-width:0"><button class="btn pri" id="dGo">သွင်းမည်</button></div><div style="margin-top:8px">'+methodPickerShell('cM')+'</div><div class="sub" style="margin-top:4px">အဟောင်းဆုံး ဘောက်ချာမှ စတင်၍ နှုတ်သွားပါမည်။ <a href="#" id="dAll" style="color:var(--act);font-weight:700">အားလုံးရှင်းမည်</a></div>':'')
      +'<div class="sec-t">ဘောက်ချာ စာရင်း</div>'
      +(vs.length?'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ရက်စွဲ</th><th class="r">ပမာဏ</th><th class="r">ကျန်ငွေ</th><th>အခြေအနေ</th></tr></thead><tbody>'
-       +vs.map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'"><td><div class="nm">'+fmtD(v.date)+'</div><div class="sub">#'+esc(v.no)+'</div></td><td class="r">'+ks(v.total)+'</td><td class="r">'+ks(Sel.rem(v))+'</td><td>'+pill(v)+(v.os?'<div style="margin-top:3px">'+osPill(v)+'</div>':'')+'</td></tr>').join('')+'</tbody></table></div>':emptyBox('receipt','ဘောက်ချာ မရှိသေးပါ'));
+       +vs.map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'"><td><div class="nm">'+fmtD(v.date)+'</div><div class="sub">#'+esc(v.no)+'</div></td><td class="r">'+ks(v.total)+'</td><td class="r">'+ks(Sel.rem(v))+'</td><td>'+pill(v)+(v.os?'<div style="margin-top:3px">'+osPill(v)+osBar(v,1)+'</div>':'')+'</td></tr>').join('')+'</tbody></table></div>':emptyBox('receipt','ဘောက်ချာ မရှိသေးပါ'));
   };
   const ctl=Sheet.open({title:'ဖောက်သည် စာရင်းချုပ်',body:draw(),
     onMount(el,c){
@@ -1629,7 +1748,7 @@ function voucherSheet(id){
   const body=v=>tabsH()+(tab==='d'?detail(v):printTab(v));
   const v0=Store.get('vouchers',id);if(!v0){toast('ဘောက်ချာ မတွေ့ပါ');return}
   Sheet.open({title:'ဘောက်ချာ အသေးစိတ်',body:body(v0),
-    footer:(vCan(v0)?'<div class="row2"><button class="btn out" id="vDel">'+ico('trash')+'ဖျက်မည်</button><button class="btn pri" id="vGoPrint">'+ico('print')+'Print</button></div>':'<button class="btn pri block" id="vGoPrint">'+ico('print')+'Print</button>')+'<button class="btn block" id="vLabel" style="margin-top:8px">'+ico('receipt')+'Create Label</button>',
+    footer:(Auth.owner()?'<div class="row2"><button class="btn out" id="vDel">'+ico('trash')+'ဖျက်မည်</button><button class="btn pri" id="vGoPrint">'+ico('print')+'Print</button></div>':'<button class="btn pri block" id="vGoPrint">'+ico('print')+'Print</button>')+'<button class="btn block" id="vLabel" style="margin-top:8px">'+ico('receipt')+'Create Label</button>',
     onClose(){flush()},
     onMount(e0,c){
       el=e0;
@@ -1693,7 +1812,9 @@ function voucherSheet(id){
             let ap=0;parts.forEach(x=>{ap+=applyPayment(v(),x.a,x.m)});toast(money(ap)+' မှတ်ပြီးပါပြီ ('+parts.length+' နည်းလမ်း)');render();return;
           }
           const a=num(q('#vPay').value);if(a<=0){toast('ပမာဏ ထည့်ပါ');return}const ap=applyPayment(v(),a,vmp?vmp.get():DEFAULT_METHOD);toast(money(ap)+' မှတ်ပြီးပါပြီ');render()});
-        $$('[data-os]',el).forEach(b=>b.onclick=()=>{const cur=v(),nm=osList()[Number(b.dataset.os)];if(!nm||osIdx(cur.os)===Number(b.dataset.os))return;osSet(id,nm);toast(nm+' သို့ ပြောင်းပြီးပါပြီ');render();App.paint&&App.paint(false)});
+        osAnim(el);
+        $$('[data-os]',el).forEach(b=>b.onclick=()=>{const cur=v();if(cur.os===b.dataset.os)return;osSet(id,b.dataset.os);osSync();toast(OS_NAME[b.dataset.os]+' ('+OS_PCT[b.dataset.os]+'%) သို့ ပြောင်းပြီးပါပြီ');render();App.paint&&App.paint(false)});
+        on('#osEdit',()=>osEditSheet(()=>render()));
         on('#osOff',()=>{osSet(id,'');toast('ခြေရာခံမှု ဖယ်ပြီးပါပြီ');render();App.paint&&App.paint(false)});
         on('#vEdit',()=>voucherEditSheet(id,()=>render()));
         on('#vRet',()=>returnSheet(id,()=>render()));
@@ -1873,7 +1994,7 @@ function labelSheet(v){
       q('#lbPrint').onclick=()=>go(labelPrint);
     }});
 }
-const vCan=v=>Auth.owner();
+const vCan=v=>Auth.owner()||(!!v&&v.date===today()&&!Sel.isClosed(v.date));
 function unapplyVoucher(v){
   (v.items||[]).forEach(i=>{const p=Store.get('products',i.pid);if(p)Store.put('products',Object.assign({},p,{stock:(p.stock||0)+i.qty}))});
   if(v.customerId){const c=Store.get('customers',v.customerId);if(c)Store.put('customers',Object.assign({},c,{points:Math.max(0,(c.points||0)+(v.pointsUsed||0)-(v.pointsEarned||0))}))}
@@ -1998,13 +2119,13 @@ function checkoutSheet(){
      +'<div class="field" id="ckSplit" hidden><label class="lbl">ငွေပေးချေမှု ခွဲပေးခြင်း (နည်းလမ်းတစ်ခုချင်း ပမာဏထည့်ပါ)</label><div id="ckRows"></div><button type="button" class="btn s" id="ckAddRow">'+ico('plus')+'နည်းလမ်း ထပ်ထည့်မည်</button></div>'
      +'<div class="field"><button type="button" class="btn s" id="ckSplitBtn">ငွေပေးနည်း ခွဲမည်</button></div>'
      +'<div class="field" id="ckMF"><label class="lbl">ငွေပေးချေမှု နည်းလမ်း</label>'+methodPickerShell('ckM')+'</div>'
-     +'<div class="field" id="ckOS"><label class="lbl">အော်ဒါ အခြေအနေ (ထုတ်လုပ်ရမည့် ပစ္စည်းဆိုလျှင် ရွေးပါ)</label><div class="seg ossegc" role="group"><button type="button" data-ckos="" aria-pressed="true">ရောင်းချမှုသာ</button>'+osList().map((o,k)=>'<button type="button" data-ckos="'+k+'" aria-pressed="false">'+esc(o)+'</button>').join('')+'</div></div>'
+     +'<div class="field" id="ckOS"><label class="lbl">အော်ဒါ အခြေအနေ (ထုတ်လုပ်ရမည့် ပစ္စည်းဆိုလျှင် ရွေးပါ)</label><div class="seg" role="group"><button type="button" data-ckos="" aria-pressed="true">ရောင်းချမှုသာ</button>'+osSync().map(o=>'<button type="button" data-ckos="'+esc(o[0])+'" aria-pressed="false">'+esc(o[1])+'</button>').join('')+'</div></div>'
     +'<div class="sumbox" id="ckSum"></div>',
     footer:'<button class="btn pri block" id="ckGo">'+ico('check')+'ဘောက်ချာ ထုတ်မည်</button>',
     onMount(el,ctl){
       const q=s=>el.querySelector(s);
       const mp=methodPicker(el,'ckM',DEFAULT_METHOD);
-      $$('[data-ckos]',el).forEach(b=>b.onclick=()=>{st.os=b.dataset.ckos===''?'':osList()[Number(b.dataset.ckos)];$$('[data-ckos]',el).forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+      $$('[data-ckos]',el).forEach(b=>b.onclick=()=>{st.os=b.dataset.ckos;$$('[data-ckos]',el).forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
       const sa=el.querySelector('#ckSellAll');
       if(sa)sa.addEventListener('change',()=>{const v=sa.value;if(!v||v==='__new')return;Cart.lines().forEach(l=>Cart.setSeller(l.p.id,v));el.querySelectorAll('select[data-cseller]').forEach(x=>{if(!Array.from(x.options).some(o=>o.value===v)){const op=document.createElement('option');op.value=v;op.textContent=v;x.insertBefore(op,x.querySelector('option[value="__new"]'))}x.value=v});try{redrawCart()}catch(e){}});
       const calc=()=>{
@@ -2092,7 +2213,7 @@ function checkoutSheet(){
         for(const l of fresh){if(l.qty>l.p.stock){toast(l.p.name+' လက်ကျန် မလုံလောက်ပါ');return}}
         const v=createVoucher({lines:fresh,customerId:st.custId,discount:c.disc,pointsUsed:c.pts,received:c.rec,method:mp.get(),payments:c.pays?c.pays.map(x=>({amount:x.amount,method:x.method})):undefined});
         if(st.os){osSet(v.id,st.os)}
-        Cart.clear();ctl.close();App.render();updateCobar();
+        Cart.clear();ctl.close();if(window._cartCtl)window._cartCtl.close();App.render();updateCobar();
         toast('ဘောက်ချာ ထုတ်ပြီးပါပြီ');autoLabel(v);autoReceipt(v);setTimeout(()=>voucherSheet(v.id),250);
       };
       paintCust();paintRes();setMode('paid');
@@ -2151,6 +2272,7 @@ function settingsSheet(){
      +'<div class="sec-t">ကုန်ကျစရိတ် အမျိုးအစားများ</div><div class="mpick" id="sCs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sCNew" placeholder="အမျိုးအစားအသစ် ထည့်ရန်" aria-label="အမျိုးအစားအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sCAdd">ထည့်မည်</button></div>'
      +'<div class="sec-t">နေ့စဉ် ရောင်းချမှု ပစ်မှတ်</div><div class="field"><label class="lbl" for="sTgt">တစ်ရက်စာ ပစ်မှတ် (ကျပ်)</label><input class="inp" id="sTgt" inputmode="numeric" value="'+(S.dailyTarget||'')+'" placeholder="ဥပမာ 500000"></div><p class="sub" style="margin:-4px 0 8px">Dashboard ရေပုလင်း ပြည့်မည့် ပမာဏ — ဆိုင်ပိုင်ရှင်သာ သတ်မှတ်နိုင်သည်။</p>'
      +'<div class="sec-t">ရောင်းသူများ</div><div class="mpick" id="sSl"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sSNew" placeholder="ရောင်းသူ အမည် ထည့်ရန်" aria-label="ရောင်းသူအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sSAdd">ထည့်မည်</button></div>'
+     +'<div class="sec-t">အော်ဒါ အခြေအနေ</div><p class="sub" style="margin-bottom:8px">ဘောက်ချာအောက်တွင် ပြမည့် အော်ဒါ အခြေအနေ စာသား၊ ရာခိုင်နှုန်း ပြင်ရန် / အသစ်ထည့်ရန် — Admin သာ။</p><div class="rowf" style="margin-bottom:8px"><button type="button" class="btn s" id="sOsEd">'+ico('edit','s')+'အခြေအနေ စာသား ပြင်/ထည့်မည်</button></div>'
      +'<div class="sec-t">လော်ရယ်တီ အမှတ်</div><div class="two"><div class="field"><label class="lbl" for="sEarn">ဝယ်ယူငွေ ကျပ် မည်မျှလျှင် ၁ မှတ်</label><input class="inp" id="sEarn" inputmode="numeric" value="'+S.earnPer+'"></div><div class="field"><label class="lbl" for="sPv">၁ မှတ်၏ တန်ဖိုး (ကျပ်)</label><input class="inp" id="sPv" inputmode="numeric" value="'+S.pointValue+'"></div></div>'
      +'<p class="sub">အမှတ်များကို ငွေရရှိသည့်အခါ တွက်ချက်၍ ထည့်ပေးပါသည်။ ကြွေးဖြင့်ရောင်းသော ပမာဏအတွက် ကြွေးရှင်းသည့်အခါမှ အမှတ်ရပါမည်။</p>'
      +'<div class="sec-t">ဒေတာ</div><p class="sub" style="margin-bottom:8px">'+(Store.mode==='cloud'?'ဒေတာများကို ဤဖုန်းထဲတွင်ပါ သိမ်းထားသဖြင့် အင်တာနက် မရှိလည်း သုံးနိုင်ပါသည်။ အင်တာနက် ပြန်ရသည်နှင့် Supabase သို့ အလိုအလျောက် တင်ပြီး အသစ်များကို ဒေါင်းလုပ် လုပ်ပါမည်။'+(Store.pendingCount()?' (မတင်ရသေးသော '+Store.pendingCount()+' ခု ရှိသည်)':'')+(Store.syncErr?' — '+Store.syncErr:''):'ဒေတာများကို ဤစက်၏ ဘရောက်ဇာထဲတွင်သာ သိမ်းဆည်းထားပါသည်။ အခြားစက်တွင် မမြင်ရပါ။')+'</p>'
@@ -2166,7 +2288,6 @@ function settingsSheet(){
      +swrow('sAutoRcp','ဘောက်ချာ ထုတ်တိုင်း ဘောက်ချာ အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoReceipt===true)
      +swrow('sAutoLbl','ဘောက်ချာ ထုတ်တိုင်း Label အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoLabel!==false)
      +'<p class="sub" style="margin-bottom:8px">ဘောက်ချာ စာသား / လိုဂို အရွယ်အစားကို ဘောက်ချာဖွင့်ပြီး Print tab ထဲက ဘောက်ချာပေါ်တွင် တိုက်ရိုက်နှိပ်၍ ပြင်နိုင်ပါသည်။</p>'
-     +'<div class="sec-t">အော်ဒါ အခြေအနေများ</div><p class="sub" style="margin-bottom:6px">ထုတ်လုပ်နေဆဲ အဆင့်များ (ပြင်/ထည့်/ဖယ်နိုင်သည်)</p><div class="mpick" id="sOs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sONew" placeholder="အဆင့်အသစ် ထည့်ရန် (ဥပမာ - ဖြတ်တောက်နေဆဲ)" aria-label="အဆင့်အသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sOAdd">ထည့်မည်</button></div><div class="field"><label class="lbl" for="sODone">နောက်ဆုံးအဆင့် (ပစ္စည်း ထုတ်ယူပြီး / ပို့ပြီး)</label><input class="inp" id="sODone" value="'+esc(S.osDone||OS_DONE_DEF)+'"></div>'
      +'<div class="rowf"><button class="btn s" id="sDemo">နမူနာဒေတာ ထည့်မည်</button>'+(hasDemo?'<button class="btn s out" id="sDemoClr">နမူနာဒေတာ ဖျက်မည်</button>':'')+'</div>',
     footer:'<button class="btn pri block" id="sSave">သိမ်းမည်</button>',
     onMount(el){
@@ -2182,10 +2303,6 @@ function settingsSheet(){
       const cEd=chipEd(q('#sCs'),cs,1);
       q('#sCAdd').onclick=()=>{const n=q('#sCNew').value.trim();if(n&&cs.indexOf(n)<0){cs.push(n);q('#sCNew').value='';cEd.draw()}};
       cEd.draw();
-      let os=(Store.d.settings.osList&&Store.d.settings.osList.length?Store.d.settings.osList:OS_DEF).slice();
-      const oEd=chipEd(q('#sOs'),os,1);
-      q('#sOAdd').onclick=()=>{const n=q('#sONew').value.trim();if(n&&os.indexOf(n)<0&&n!==(q('#sODone').value.trim())){os.push(n);q('#sONew').value='';oEd.draw()}};
-      oEd.draw();
       let sl=(Store.d.settings.sellers||[]).slice();
       const sEd=chipEd(q('#sSl'),sl,0);
       q('#sSAdd').onclick=()=>{const n=q('#sSNew').value.trim();if(n&&sl.indexOf(n)<0){sl.push(n);q('#sSNew').value='';sEd.draw()}};
@@ -2202,18 +2319,16 @@ function settingsSheet(){
       q('#sbChg').onclick=async()=>{if(await confirmBox('Supabase ပြောင်းမည်','ပြန်ချိတ်ရန် စာမျက်နှာ ပြန်စပါမည်။ Owner ဖြင့် ပြန်ဝင်ရပါမည်။','ဆက်မည်')){Sb.save({});try{localStorage.removeItem(SK)}catch(x){}location.reload()}};
       q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
       q('#sSave').onclick=()=>{
-        const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,osList:os.slice(),osDone:(q('#sODone').value.trim()||OS_DONE_DEF),phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
+        const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
         Object.keys(mEd.orig).forEach(n=>{const o=mEd.orig[n];if(o===n)return;
           Store.list('vouchers').forEach(v=>{if((v.payments||[]).some(p=>p.method===o))Store.put('vouchers',Object.assign({},v,{payments:v.payments.map(p=>p.method===o?Object.assign({},p,{method:n}):p)}))});
           Store.list('expenses').forEach(x=>{if(x.method===o)Store.put('expenses',Object.assign({},x,{method:n}))})});
         Object.keys(sEd.orig).forEach(n=>{const o=sEd.orig[n];if(o===n)return;Store.list('vouchers').forEach(v=>{if((v.items||[]).some(i=>i.seller===o))Store.put('vouchers',Object.assign({},v,{items:v.items.map(i=>i.seller===o?Object.assign({},i,{seller:n}):i)}))})});
         Object.keys(cEd.orig).forEach(n=>{const o=cEd.orig[n];if(o===n)return;Store.list('expenses').forEach(x=>{if(x.category===o)Store.put('expenses',Object.assign({},x,{category:n}))})});
-        {const oldDone=Store.d.settings.osDone||OS_DONE_DEF;
-         Object.keys(oEd.orig).forEach(n=>{osRename(oEd.orig[n],n)});
-         if(oldDone!==ns.osDone)osRename(oldDone,ns.osDone)}
         Store.putSettings(ns);ctl.close();toast('ဆက်တင် သိမ်းပြီးပါပြီ');paintChrome();
       };
       q('#sPrn').onclick=()=>printerSheet();
+      q('#sOsEd').onclick=()=>osEditSheet();
       $$('[data-ex]',el).forEach(b=>b.onclick=()=>exportData(b.dataset.ex));
       q('#sRestF').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)restoreBackup(f)};
       q('#sDemo').onclick=()=>{loadDemo();ctl.close()};
@@ -2497,10 +2612,18 @@ function cartHTML(){
 }
 function viewSell(){
   const cl=Sel.isClosed(today())?'<section class="card" style="margin-bottom:12px"><div class="nm">ယနေ့ စာရင်းပိတ်ပြီးပါပြီ</div><div class="sub">ဘောက်ချာ ထပ်ဖြတ်၍ မရတော့ပါ။ မှားနှိပ်မိလျှင် Dashboard တွင် ဆိုင်ပိုင်ရှင်ထံ ခွင့်ပြုချက် တောင်းပါ။</div></section>':'';
-  return cl+'<div class="sell"><section class="card prods-card"><div class="card-h"><h3>ကုန်ပစ္စည်း ရွေးရန်</h3></div>'
+  return cl+'<div class="sell solo"><section class="card prods-card"><div class="card-h"><h3>ကုန်ပစ္စည်း ရွေးရန်</h3></div>'
    +'<div class="search"><span aria-hidden="true">'+ico('search')+'</span><input class="inp" id="posQ" data-in="posQuery" placeholder="ပစ္စည်းအမည် သို့မဟုတ် ကုဒ်ဖြင့် ရှာမည်" value="'+esc(F.posQuery)+'"></div>'
-   +'<div class="prods" id="posList">'+posListHTML()+'</div></section>'
-   +'<section class="card"><div class="card-h"><h3>ဘောက်ချာ ဇယား</h3><div class="rowf"><button class="btn s" data-act="checkout">'+ico('receipt')+'ဘောက်ချာဖြတ်မည်</button>'+(Cart.items.length?'<button class="btn s" data-act="cart-clear">ရှင်းလင်းမည်</button>':'')+'</div>'+'</div><div id="cartBox">'+cartHTML()+'</div></section></div>';
+   +'<div class="prods" id="posList">'+posListHTML()+'</div></section></div>';
+}
+/* ခြင်းတောင်း — ညာဘက်အပေါ် icon နှိပ်မှ ရောင်းထားသော ပစ္စည်းများ ပေါ်မည် */
+function cartSheet(){
+  if(window._cartCtl&&!window._cartCtl.closed)return;
+  window._cartCtl=Sheet.open({title:'ရောင်းထားသော ပစ္စည်းများ',
+    body:'<div id="cartBox">'+cartHTML()+'</div>',
+    footer:'<div class="cs-f"><div class="t"><b id="cartTotB"></b><span id="cartTotS"></span></div><button class="btn s out" data-act="cart-clear">ရှင်းလင်းမည်</button><button class="btn pri" data-act="checkout">'+ico('check')+'ငွေရှင်းမည်</button></div>',
+    onMount(){updateCobar()},
+    onClose(){window._cartCtl=null}});
 }
 function cartPriceSheet(pid){
   const it=Cart.items.find(i=>i.pid===pid),p=Cart.P(pid);if(!it||!p)return;
@@ -2519,11 +2642,17 @@ function cartPriceSheet(pid){
     }});
 }
 function updateCobar(){
-  const el=$('#cobar'),n=Cart.count();
-  if(App.tab!=='sell'||!n){el.hidden=true;el.innerHTML='';return}
-  const wasHid=el.hidden,oldTot=el.dataset.tot;el.hidden=false;el.dataset.tot=Cart.subtotal();
-  el.innerHTML='<div class="cobar-in'+(wasHid?'':' still')+'"><div class="t"><b>'+ks(Cart.subtotal())+' ကျပ်</b><span>ပစ္စည်း '+Cart.items.length+' မျိုး · '+ks(n)+' ခု</span></div><button class="btn" data-act="checkout">ငွေရှင်းမည်</button></div>';
-  if(!wasHid&&oldTot!==el.dataset.tot){const bb=el.querySelector('.t b');if(bb)bb.classList.add('bump')}
+  const el=$('#cobar');if(el){el.hidden=true;el.innerHTML=''}
+  const n=Cart.count(),on=App.tab==='sell',b=$('#cartBtn'),bd=$('#cbadge');document.body.classList.toggle('on-sell',on);
+  if(b){
+    b.hidden=!on;
+    if(bd){
+      const txt=n>99?'99+':String(n),prev=bd.dataset.n;
+      bd.textContent=txt;bd.hidden=!n;bd.dataset.n=txt;
+      if(on&&n&&prev!==undefined&&prev!==txt){bd.classList.remove('bump');void bd.offsetWidth;bd.classList.add('bump');b.classList.remove('wig');void b.offsetWidth;b.classList.add('wig')}
+    }
+  }
+  const tb=$('#cartTotB');if(tb){tb.textContent=ks(Cart.subtotal())+' ကျပ်';const ts=$('#cartTotS');if(ts)ts.textContent='ပစ္စည်း '+Cart.items.length+' မျိုး · '+ks(n)+' ခု'}
 }
 
 function rangeOf(r,f,t2){const t=today(),m=t.slice(0,8)+'01';
@@ -2535,7 +2664,8 @@ function vFilt(){
   if(F.vStatus==='paid')list=list.filter(v=>Sel.rem(v)<=0);
   if(F.vStatus==='unpaid')list=list.filter(v=>Sel.rem(v)>0);
   if(F.vOrder==='open')list=list.filter(osOpen);
-  else if(F.vOrder)list=list.filter(v=>osIdx(v.os)===Number(F.vOrder.slice(1)));
+  else if(F.vOrder==='track')list=list.filter(v=>!!v.os);
+  else if(F.vOrder)list=list.filter(v=>v.os===F.vOrder);
   const r=rangeFor('v');list=list.filter(v=>(!r[0]||v.date>=r[0])&&(!r[1]||v.date<=r[1]));
   if(F.vMethod)list=list.filter(v=>(v.payments||[]).some(p=>(p.method||DEFAULT_METHOD)===F.vMethod));
   if(F.vBy)list=list.filter(v=>v.by===F.vBy);
@@ -2552,15 +2682,15 @@ function vListHTML(){
   return '<div class="stat"><span>ဘောက်ချာ <b>'+list.length+'</b> စောင်</span><span>စုစုပေါင်း <b>'+ks(sum)+'</b> ကျပ်</span><span>ကျန်ငွေ <b>'+ks(rem)+'</b> ကျပ်</span></div>'
    +(Object.keys(bm).length?'<div class="sub" style="margin:-4px 0 10px">ရရှိငွေ — '+Object.keys(bm).sort((a,b)=>bm[b]-bm[a]).map(k=>esc(k)+' <b>'+ks(bm[k])+'</b>').join(' · ')+'</div>':'')
    +'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ဘောက်ချာ / ရက်စွဲ</th><th>ဖောက်သည်</th><th class="r">ပမာဏ</th><th>အခြေအနေ</th></tr></thead><tbody>'
-   +list.slice(0,F.vN||100).map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'" tabindex="0"><td><div class="nm">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+(v.byName?' · '+esc(v.byName):'')+'</div></td><td><div class="nm">'+esc(Sel.cname(v))+'</div>'+carriedTag(v)+'</td><td class="r"><b>'+ks(v.total)+'</b>'+(Sel.rem(v)>0?'<div class="sub w">ကျန် '+ks(Sel.rem(v))+'</div>':'')+'</td><td>'+pill(v)+(v.os?'<div style="margin-top:3px">'+osPill(v)+'</div>':'')+'</td></tr>').join('')
+   +list.slice(0,F.vN||100).map(v=>'<tr data-act="open-voucher" data-id="'+v.id+'" tabindex="0"><td><div class="nm">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+(v.byName?' · '+esc(v.byName):'')+'</div></td><td><div class="nm">'+esc(Sel.cname(v))+'</div>'+carriedTag(v)+'</td><td class="r"><b>'+ks(v.total)+'</b>'+(Sel.rem(v)>0?'<div class="sub w">ကျန် '+ks(Sel.rem(v))+'</div>':'')+'</td><td>'+pill(v)+(v.os?'<div style="margin-top:3px">'+osPill(v)+osBar(v,1)+'</div>':'')+'</td></tr>').join('')
    +'</tbody></table></div>'+(list.length>(F.vN||100)?'<div class="rowf" style="justify-content:center;margin-top:10px"><button class="btn s" data-act="v-more">နောက်ထပ် ပြမည်</button></div>':'');
 }
 const selBox=(k,o,all)=>'<select class="inp" data-in="'+k+'" aria-label="'+all+'"><option value="">'+all+'</option>'+o.map(x=>'<option value="'+esc(x[0])+'"'+(F[k]===x[0]?' selected':'')+'>'+esc(x[1])+'</option>').join('')+'</select>';
 function viewVouchers(){
-  const oc=k=>Store.list('vouchers').filter(v=>k==='open'?osOpen(v):osIdx(v.os)===k).length;
+  const oc=k=>Store.list('vouchers').filter(v=>k==='open'?osOpen(v):v.os===k).length;
   const rs=[['all','ရက်အားလုံး'],['today','ယနေ့'],['yday','မနေ့က'],['7','နောက်ဆုံး ၇ ရက်'],['month','ဤလ'],['lmonth','ပြီးခဲ့သောလ'],['custom','ရက်ရွေးမည်']];
   return '<div class="card"><div class="field" style="margin-bottom:10px">'+seg('vStatus',[['all','အားလုံး'],['paid','ငွေပေးပြီး'],['unpaid','ငွေမလွှဲရသေး']],F.vStatus)+'</div>'
-   +'<div class="field" style="margin-bottom:10px"><label class="lbl">အော်ဒါ အခြေအနေ</label>'+'<div class="osfil">'+seg('vOrder',[['','အားလုံး'],['open','မယူရသေး ('+oc('open')+')']].concat(osList().map((o,k)=>['i'+k,esc(o)+' ('+oc(k)+')'])),F.vOrder||'')+'</div></div>'
+   +'<div class="field" style="margin-bottom:10px"><label class="lbl">အော်ဒါ အခြေအနေ</label>'+'<div class="osfil">'+seg('vOrder',[['','အားလုံး'],['open','မယူရသေး ('+oc('open')+')']].concat(osSync().map(o=>[o[0],esc(o[1])+' ('+oc(o[0])+')'])),F.vOrder||'')+'</div></div>'
    +'<div class="search"><span aria-hidden="true">'+ico('search')+'</span><input class="inp" data-in="vQuery" placeholder="နံပါတ် / အမည် / ဖုန်း" value="'+esc(F.vQuery)+'" aria-label="ရှာမည်"></div>'
    +rangeBar('v',true)+'<div class="fil">'
    +selBox('vMethod',(Store.d.settings.methods||[]).map(m=>[m,m]),'ငွေပေးချေမှု အားလုံး')
@@ -3344,12 +3474,12 @@ function paintChrome(){
   else if(!Store.online){cls+=' local';txt='အော့ဖ်လိုင်း'+(n?' · '+n+' ခု စောင့်':'')}
   else if(Store.run){txt='ချိန်ညှိနေသည်…'}
   else if(n){txt='ပို့ရန် '+n+' ခု'}
-  else txt='အွန်လိုင်း သိမ်းဆည်း';
+  else txt=Store.rt==='live'?'Realtime · အွန်လိုင်း':'အွန်လိုင်း သိမ်းဆည်း';
   chip.className=cls;
   chip.innerHTML='<i></i><span>'+txt+'</span>';
 }
 const PARTIAL={sell:()=>{$('#posList').innerHTML=posListHTML()},vouchers:()=>{$('#vList').innerHTML=vListHTML()},customers:()=>{$('#cList').innerHTML=cListHTML()},stock:()=>{$('#sList').innerHTML=sListHTML()},exp:()=>{$('#eList').innerHTML=eListHTML()}};
-function redrawCart(){$('#cartBox').innerHTML=cartHTML();updateCobar();const h=$('.card-h .btn[data-act="cart-clear"]');if(!h&&Cart.items.length||h&&!Cart.items.length)App.paint(false)}
+function redrawCart(){const cb=$('#cartBox');if(cb)cb.innerHTML=cartHTML();updateCobar()}
 
 let refBusy=false;
 async function doRefresh(){
@@ -3386,7 +3516,8 @@ const ACT={
   'qty-rm':t=>{Cart.remove(t.dataset.id);redrawCart()},
   'cart-price':t=>cartPriceSheet(t.dataset.id),
   'cart-whole':t=>cartPriceSheet(t.dataset.id),
-  'cart-clear':()=>{Cart.items=[];App.paint(false)},
+  'cart-clear':()=>{Cart.items=[];redrawCart()},
+  'open-cart':()=>cartSheet(),
   'checkout':()=>checkoutSheet(),
   'close-day':()=>closeDay(),
   'req-reopen':()=>reqReopen(),
@@ -3465,7 +3596,7 @@ document.addEventListener('change',function(e){
     onClose(){if(!done)back()}});
 },true);
 (function boot(){
-  $('#gearBtn').innerHTML=ico('sliders');$('#refBtn').innerHTML=ico('refresh');$('#lblBtn').innerHTML=ico('print');
+  $('#cartBtn').innerHTML=ico('cart')+'<i class="cbadge" id="cbadge" hidden></i>';$('#gearBtn').innerHTML=ico('sliders');$('#refBtn').innerHTML=ico('refresh');$('#lblBtn').innerHTML=ico('print');
   document.body.classList.add('noauth');
   $('#tabbarIn').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)App.go(b.dataset.tab)});
   $('#view').innerHTML='<div class="skel"></div><div class="skel" style="height:110px"></div><div class="skel"></div>';
@@ -3479,8 +3610,8 @@ document.addEventListener('change',function(e){
     });
     paintChrome();
     PL.restoreAll();
-    try{const t0=localStorage.getItem(SK);if(t0==='trial'||t0==='trial-c')localStorage.removeItem(SK)}catch(e){}
-    if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen();
+    try{if(!localStorage.getItem(SK))localStorage.setItem(SK,'trial-c')}catch(e){}
+    if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen();(function(){const bt=document.createElement('button');const owner=()=>{try{return localStorage.getItem(SK)==='trial'}catch(e){return false}};bt.textContent=owner()?'Owner ➜ Cashier':'Cashier ➜ Owner';bt.style.cssText='position:fixed;right:10px;bottom:calc(var(--tabh,66px) + 84px + env(safe-area-inset-bottom,0px));z-index:90;border:0;border-radius:999px;padding:6px 12px;font:700 12px/1.4 sans-serif;background:rgba(10,25,47,.78);color:#fff;opacity:.85';bt.onclick=()=>{try{localStorage.setItem(SK,owner()?'trial-c':'trial')}catch(e){}location.reload()};document.body.appendChild(bt)})()
   });
   setInterval(()=>{if(today()!==App.lastDay){App.lastDay=today();App.paint(false);toast('နောက်တစ်နေ့သို့ ရောက်ပါပြီ — မရှင်းရသေးသော ကြွေးများကို ယခင်ရက်မှ လွှဲပြောင်းဟု မှတ်ထားပါသည်')}},30000);
   let _cw=priceCol();window.addEventListener('resize',()=>{const w=priceCol();if(w===_cw)return;_cw=w;const cb=$('#cartBox');if(App.tab==='sell'&&cb&&!cb.contains(document.activeElement))cb.innerHTML=cartHTML()});

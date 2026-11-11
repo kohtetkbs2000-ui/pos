@@ -273,6 +273,8 @@ a.btn{text-decoration:none}
 .flip{transform:scaleX(-1)}
 /* print area (on-screen hidden; shown only when printing) */
 #printArea{display:none}
+#syncPg{position:fixed;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:60;font-size:10px;line-height:1.4;padding:2px 7px;border-radius:8px;background:rgba(0,0,0,.7);color:#fff;pointer-events:none;font-variant-numeric:tabular-nums}
+#syncPg[hidden]{display:none}
 @media print{
   html,body{background:#fff!important}
   body::before{display:none}
@@ -604,7 +606,7 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 <nav class="tabbar" id="tabbar" aria-label="ပင်မမီနူး"><div class="tabbar-in" id="tabbarIn"></div></nav>
 <div id="toast" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:calc(var(--tabh) + 84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);z-index:300;max-width:min(92vw,420px);padding:10px 18px;border-radius:16px;background:var(--pri);color:var(--pri-fg);font-size:14px;line-height:1.6;box-shadow:0 10px 30px rgba(10,25,47,.35);opacity:0;pointer-events:none;transition:opacity .25s,transform .3s cubic-bezier(.2,.9,.25,1);text-align:center"></div>
 <div id="auth" hidden></div>
-<div id="printArea"></div>
+<div id="printArea"></div><div id="syncPg" hidden></div>
 
 <script>
 
@@ -792,7 +794,7 @@ const Store={
   mode:'local',db:null,dl:null,d:{products:{},customers:{},vouchers:{},expenses:{},accounts:{},closings:{},settings:Object.assign({},DEFAULTS)},
   subs:[],ready:{},ch:null,failed:false,
   ob:{},obN:0,          /* outbox: changes made on this phone that Supabase has not received yet */
-  pk:'',cfg:null,synced:false,lastSync:0,
+  pk:'',cfg:null,synced:false,lastSync:0,pg:{up:0,upT:0,dn:0,dnT:0},manual:false,
   online:true,syncErr:'',run:null,again:false,started:false,persistT:null,syncT:null,hadPending:false,
   on(f){this.subs.push(f)},
   emit(){this.subs.forEach(f=>{try{f()}catch(e){console.error(e)}})},
@@ -859,10 +861,12 @@ const Store={
   },
   async loadAll(){
     const db=await this.client();
+    try{const cr=await db.from('kv').select('*',{count:'exact',head:true});if(!cr.error&&cr.count!=null){this.pg.dnT=cr.count;this.pg.dn=0;paintPg()}}catch(e){}
     const m={};COLLS.forEach(c=>{m[c]={}});let settings=null;
     for(let from=0;;from+=1000){
       const r=await db.from('kv').select('collection,id,data').order('collection').order('id').range(from,from+999);
       if(r.error)throw r.error;
+      this.pg.dn+=(r.data||[]).length;paintPg();
       (r.data||[]).forEach(x=>{
         if(x.collection==='meta'){if(x.id==='settings')settings=x.data}
         else if(m[x.collection])m[x.collection][x.id]=Object.assign({},x.data,{id:x.id});
@@ -887,18 +891,19 @@ const Store={
   async flush(db){
     const ents=Object.values(this.ob).sort((a,b)=>a.n-b.n);
     if(!ents.length)return;
+    this.pg.upT=ents.length;this.pg.up=0;paintPg();
     const done=e=>{const k=e.c+'/'+e.id,cur=this.ob[k];if(cur&&cur.n===e.n)delete this.ob[k]};
     const puts=ents.filter(e=>e.op==='put');
     for(let i=0;i<puts.length;i+=100){
       const ch=puts.slice(i,i+100),now=new Date().toISOString();
       const r=await db.from('kv').upsert(ch.map(e=>({collection:e.c,id:e.id,data:e.data,updated_at:now})));
       if(r.error)throw r.error;
-      ch.forEach(done);this.persist();
+      ch.forEach(done);this.pg.up+=ch.length;paintPg();this.persist();
     }
     for(const e of ents.filter(e=>e.op==='del')){
       const r=await db.from('kv').delete().eq('collection',e.c).eq('id',e.id);
       if(r.error)throw r.error;
-      done(e);this.persist();
+      done(e);this.pg.up++;paintPg();this.persist();
     }
   },
   /* upload what is waiting, then download everything new. Safe to call at any time. */
@@ -911,6 +916,7 @@ const Store={
       try{
         do{
           this.again=false;
+          this.pg={up:0,upT:0,dn:0,dnT:0};paintPg();
           const db=await this.client();
           await this.flush(db);
           const all=await this.loadAll();
@@ -928,7 +934,7 @@ const Store={
         if(isNetErr(e)){this.online=false;this.syncErr=''}
         else{this.online=true;this.syncErr=Sb.explain(e);console.error(e)}
         if(this.pendingCount())this.hadPending=true;
-      }finally{this.run=null;paintChrome()}
+      }finally{this.run=null;paintChrome();this.pg.end=true;this.pg.done=this.online&&!this.syncErr;paintPg()}
       return this.online&&!this.syncErr;
     })();
     return this.run;
@@ -1335,14 +1341,20 @@ async function doPrint(v,mode){
       await NP('NativePrint').print({html:html,name:'voucher-'+v.no,size:mode==='a4'?'a4':'th'});return;
     }catch(e){console.error(e);toast('ပရင့်ထုတ်၍ မရပါ')}
   }
+  const inPage=()=>{
+    const area=$('#printArea');area.innerHTML=receiptHTML(v,mode);
+    let st=$('#dynPage');if(!st){st=document.createElement('style');st.id='dynPage';document.head.appendChild(st)}
+    st.textContent=mode==='a4'?'@page{size:A4;margin:12mm}':'@page{size:80mm auto;margin:3mm}';
+    window.print();
+  };
+  /* browser / tablet: open the print dialog directly (80mm page) - no file download */
+  if(!NATIVE()){try{inPage();return}catch(e){console.error(e)}}
+  /* last resort (app without a print plugin): save / share the voucher file */
   if(Store.dl){
     try{await Store.dl.save({filename:'voucher-'+v.no+'-'+label+'.html',data:printDoc(v,mode)});toast('ဖိုင်သိမ်းပြီးပါပြီ။ ဖိုင်ကို ဖွင့်လျှင် ပရင့်ထုတ်ရန် ပေါ်လာပါမည်');return}
     catch(e){if(e&&e.code==='declined')return}
   }
-  const area=$('#printArea');area.innerHTML=receiptHTML(v,mode);
-  let st=$('#dynPage');if(!st){st=document.createElement('style');st.id='dynPage';document.head.appendChild(st)}
-  st.textContent=mode==='a4'?'@page{size:A4;margin:12mm}':'@page{size:80mm auto;margin:3mm}';
-  try{window.print()}catch(e){toast('ဤနေရာတွင် ပရင့်ထုတ်၍ မရပါ')}
+  try{inPage()}catch(e){toast('ဤနေရာတွင် ပရင့်ထုတ်၍ မရပါ')}
 }
 /* ================= Printer driver (ESC/POS over USB / Bluetooth / Serial) ================= */
 const PRN_KEY='shoppos.printer';
@@ -3481,19 +3493,31 @@ function paintChrome(){
 const PARTIAL={sell:()=>{$('#posList').innerHTML=posListHTML()},vouchers:()=>{$('#vList').innerHTML=vListHTML()},customers:()=>{$('#cList').innerHTML=cListHTML()},stock:()=>{$('#sList').innerHTML=sListHTML()},exp:()=>{$('#eList').innerHTML=eListHTML()}};
 function redrawCart(){const cb=$('#cartBox');if(cb)cb.innerHTML=cartHTML();updateCobar()}
 
+let _pgT;
+function paintPg(){
+  const el=document.getElementById('syncPg'),p=Store.pg;if(!el||!p)return;
+  clearTimeout(_pgT);
+  if(!(Store.manual||p.upT>0)){el.hidden=true;return}
+  const tot=p.upT+p.dnT,pct=p.done?100:(tot?Math.min(99,Math.round((p.up+p.dn)/tot*100)):0);
+  el.hidden=false;el.textContent='↑ '+p.up+'/'+p.upT+' · ↓ '+p.dn+'/'+p.dnT+' · '+pct+'%';
+  if(p.end)_pgT=setTimeout(()=>{el.hidden=true},5000);
+}
 let refBusy=false;
 async function doRefresh(){
   if(refBusy)return;refBusy=true;
   const b=$('#refBtn');if(b)b.classList.add('spin');
   try{
     if(Store.mode==='cloud'){
-      toast('Refresh လုပ်နေသည်...');
+      Store.manual=true;
+      const n0=Store.pendingCount();
+      toast(n0?'Supabase သို့ '+n0+' ခု ပို့နေသည်...':'Refresh လုပ်နေသည်...');
       const ok=await Store.sync();
-      toast(Store.syncErr||(ok?'Refresh ပြီးပါပြီ':'အင်တာနက် မရှိသေးပါ — ရသည်နှင့် အလိုအလျောက် ချိန်ညှိပါမည်'));
+      const left=Store.pendingCount();
+      toast(Store.syncErr||(ok?(n0?'Supabase သို့ '+(n0-left)+' ခု ပို့ပြီးပါပြီ':'Refresh ပြီးပါပြီ'):'အင်တာနက် မရှိသေးပါ'+(left?' — ဖုန်းထဲတွင် '+left+' ခု သိမ်းထားသည်၊ ရသည်နှင့် အလိုအလျောက် ပို့ပါမည်':' — ရသည်နှင့် အလိုအလျောက် ချိန်ညှိပါမည်')));
     }else toast('Refresh ပြီးပါပြီ');
     paintChrome();if(Auth.me)App.render();
   }catch(e){toast('Refresh လုပ်၍ မရပါ')}
-  finally{refBusy=false;if(b)b.classList.remove('spin')}
+  finally{Store.manual=false;refBusy=false;if(b)b.classList.remove('spin')}
 }
 const ACT={
   'refresh':()=>doRefresh(),

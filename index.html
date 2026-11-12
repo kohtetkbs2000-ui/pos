@@ -161,7 +161,7 @@ h1{font-size:23px;font-weight:800;line-height:1.5;letter-spacing:-.01em;text-wra
 .stepper button{width:30px;height:32px;border:0;background:transparent;font-size:18px;line-height:1;border-radius:11px}
 .stepper input{width:36px;text-align:center;border:0;background:transparent;font-weight:700;padding:0;outline:0;font-variant-numeric:tabular-nums}
 .x-btn{border:0;background:transparent;color:var(--faint);padding:2px;display:inline-grid;place-items:center;vertical-align:middle}
-@media (max-width:99999px){.col-price{display:none}.sub-price{display:block}}
+@media (max-width:767px),(max-height:560px){.col-price{display:none}.sub-price{display:block}}
 
 /* sell */
 .sell{display:grid;gap:14px}
@@ -175,7 +175,7 @@ h1{font-size:23px;font-weight:800;line-height:1.5;letter-spacing:-.01em;text-wra
 .prod .pp{font:700 14px/1.5 var(--font);font-variant-numeric:tabular-nums}
 .prod .ps{font-size:11.5px;color:var(--mut)}
 .prod.added{animation:pop .3s}
-@media (min-width:99999px){.sell{grid-template-columns:1.05fr 1fr;align-items:start}.prods{max-height:none;grid-template-columns:repeat(3,1fr)}.prods-card{position:static}}
+@media (min-width:768px) and (min-height:561px){.sell{grid-template-columns:1.05fr 1fr;align-items:start}.prods{max-height:none;grid-template-columns:repeat(3,1fr)}.prods-card{position:static}}
 .cobar{position:fixed;z-index:55;left:0;right:0;bottom:calc(var(--tabh) + 12px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
 .cobar-in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:20px;background:var(--pri);color:var(--pri-fg);box-shadow:0 12px 30px rgba(10,25,47,.35);pointer-events:auto;animation:rise .35s both}
 .cobar-in .t{flex:1;min-width:0;line-height:1.4}
@@ -235,7 +235,7 @@ h1{font-size:23px;font-weight:800;line-height:1.5;letter-spacing:-.01em;text-wra
 .sheet-root.small{align-items:center}
 .sheet-root.small.in .sheet{transform:none;opacity:1}
 .sheet-root.small .grab{display:none}
-@media (min-width:99999px){.sheet-root{align-items:center}.sheet{border-radius:26px;transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1),opacity .25s}.sheet-root.in .sheet{opacity:1}.grab{display:none}}
+@media (min-width:768px) and (min-height:561px){.sheet-root{align-items:center}.sheet{border-radius:26px;transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.25,1),opacity .25s}.sheet-root.in .sheet{opacity:1}.grab{display:none}}
 .msg{padding:6px 0 4px;line-height:1.8}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:14px;margin:8px 0 12px}
 .kv dt{color:var(--mut)} .kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -509,12 +509,7 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 .seg button{transition:background .25s,color .25s,box-shadow .25s,transform .15s}.seg button:active{transform:scale(.96)}
 
 /* ===== Phone-layout lock: tablet/wide screens show the same layout as phone ===== */
-@media not all and (orientation:landscape) and (max-height:560px){
-.top-in,.view{max-width:480px}
-.tabbar-in{max-width:480px}
-.cobar-in{max-width:480px}
-.sheet{max-width:480px}
-}
+/* (tablet/wide layout enabled: phone-layout lock removed) */
 
 /* ---- Order status tracking ---- */
 .pill.os{font-weight:700}
@@ -791,7 +786,7 @@ const isNetErr=e=>{
 const Store={
   mode:'local',db:null,dl:null,d:{products:{},customers:{},vouchers:{},expenses:{},accounts:{},closings:{},settings:Object.assign({},DEFAULTS)},
   subs:[],ready:{},ch:null,failed:false,
-  ob:{},obN:0,          /* outbox: changes made on this phone that Supabase has not received yet */
+  ob:{},obN:0,tomb:{},backMerged:false,          /* outbox: changes made on this phone that Supabase has not received yet */
   pk:'',cfg:null,synced:false,lastSync:0,pg:{up:0,upT:0,dn:0,dnT:0},manual:false,
   online:true,syncErr:'',run:null,again:false,started:false,persistT:null,syncT:null,hadPending:false,
   on(f){this.subs.push(f)},
@@ -858,7 +853,7 @@ const Store={
     if(!s||!s.d)return false;
     COLLS.forEach(c=>{this.d[c]=s.d[c]||{}});
     this.d.settings=Object.assign({},DEFAULTS,s.d.settings||{});
-    this.ob=s.ob||{};this.obN=Object.values(this.ob).reduce((a,o)=>Math.max(a,o.n||0),0);
+    this.tomb=s.tomb||{};this.ob=s.ob||{};this.obN=Object.values(this.ob).reduce((a,o)=>Math.max(a,o.n||0),0);
     this.lastSync=s.lastSync||0;this.synced=!!s.synced;
     return this.synced;
   },
@@ -867,7 +862,8 @@ const Store={
     clearTimeout(this.persistT);
     if(!this.pk)return;
     try{
-      await Idb.set(this.pk,{d:this.d,ob:this.ob,synced:this.synced,lastSync:this.lastSync});
+      await Idb.set(this.pk,{d:this.d,ob:this.ob,tomb:this.tomb,synced:this.synced,lastSync:this.lastSync});
+      try{AB.kick()}catch(e){}
       if(this.failed){this.failed=false;paintChrome()}
     }catch(e){this.failed=true;console.error(e);paintChrome();toast('ဖုန်းထဲတွင် သိမ်း၍ မရပါ — နေရာ ပြည့်နေနိုင်သည်')}
   },
@@ -881,18 +877,18 @@ const Store={
   async loadAll(){
     const db=await this.client();
     try{const cr=await db.from('kv').select('*',{count:'exact',head:true});if(!cr.error&&cr.count!=null){this.pg.dnT=cr.count;this.pg.dn=0;paintPg()}}catch(e){}
-    const m={};COLLS.forEach(c=>{m[c]={}});let settings=null;
+    const m={},tomb={};COLLS.forEach(c=>{m[c]={}});let settings=null;
     for(let from=0;;from+=1000){
       const r=await db.from('kv').select('collection,id,data').order('collection').order('id').range(from,from+999);
       if(r.error)throw r.error;
       this.pg.dn+=(r.data||[]).length;paintPg();
       (r.data||[]).forEach(x=>{
-        if(x.collection==='meta'){if(x.id==='settings')settings=x.data}
+        if(x.collection==='meta'){if(x.id==='settings')settings=x.data;else if(String(x.id).indexOf('del:')===0)tomb[String(x.id).slice(4)]=1}
         else if(m[x.collection])m[x.collection][x.id]=Object.assign({},x.data,{id:x.id});
       });
       if(!r.data||r.data.length<1000)break;
     }
-    return {m:m,settings:settings};
+    return {m:m,settings:settings,tomb:tomb};
   },
   /* put what is waiting in the outbox on top of freshly downloaded data, so unsent work is never overwritten */
   overlay(){
@@ -903,7 +899,21 @@ const Store={
     });
   },
   apply(all){
-    COLLS.forEach(c=>{this.d[c]=all.m[c];this.ready[c]=1});
+    Object.assign(this.tomb,all.tomb||{});
+    COLLS.forEach(c=>{
+      const srv=all.m[c];
+      /* two-way safety: a record this phone has but the server does not (and that nobody deleted on purpose)
+         is uploaded again instead of being dropped */
+      if(srv){
+        const loc=this.d[c]||{};let n=0;
+        Object.keys(loc).forEach(id=>{
+          const k=c+'/'+id;
+          if(srv[id]||this.ob[k]||this.tomb[k])return;
+          srv[id]=loc[id];this.ob[k]={c:c,id:id,op:'put',data:Object.assign({},loc[id]),n:++this.obN};n++;
+        });
+        if(n){this.again=true;this.healN=(this.healN||0)+n}
+      }
+      this.d[c]=srv;this.ready[c]=1});
     if(all.settings)this.d.settings=Object.assign({},DEFAULTS,all.settings);
     this.overlay();
   },
@@ -942,6 +952,8 @@ const Store={
           const before=JSON.stringify([COLLS.map(c=>this.d[c]),this.d.settings]);
           this.apply(all);
           this.synced=true;this.lastSync=Date.now();this.persist();
+          if(this.healN){const hn=this.healN;this.healN=0;setTimeout(()=>toast('Server တွင် မရှိသော ဒေတာ '+hn+' ခုကို ပြန်တင်နေသည်'),800)}
+          if(!this.backMerged){this.backMerged=true;try{await AB.mergeBack()}catch(e){console.error(e)}}
           if(JSON.stringify([COLLS.map(c=>this.d[c]),this.d.settings])!==before)this.emit();
           if(!this.ch||this.rt==='off')this.listen();
         }while(this.again);
@@ -1002,6 +1014,7 @@ const Store={
     if(!row||!row.collection||!row.id)return;
     const c=row.collection,id=row.id;
     if(this.ob[c+'/'+id])return;
+    if(c==='meta'&&String(id).indexOf('del:')===0){if(t!=='DELETE'){this.tomb[String(id).slice(4)]=1;const p2=String(id).slice(4).split('/');if(this.d[p2[0]]&&this.d[p2[0]][p2[1]]&&!this.ob[p2[0]+'/'+p2[1]]){delete this.d[p2[0]][p2[1]];this.persist();this.emit()}}return}
     if(c==='meta'){if(id==='settings'&&t!=='DELETE'&&row.data){this.d.settings=Object.assign({},DEFAULTS,row.data);this.persist();this.emit()}return}
     if(!this.d[c])return;
     if(t==='DELETE')delete this.d[c][id];else if(row.data)this.d[c][id]=Object.assign({},row.data,{id:id});else return;
@@ -1017,13 +1030,14 @@ const Store={
   },
   put(c,obj){
     const clean=JSON.parse(JSON.stringify(obj));
-    this.d[c][clean.id]=clean;this.emit();
+    this.d[c][clean.id]=clean;delete this.tomb[c+'/'+clean.id];this.emit();
     this.track(c,clean.id,'put',clean);
     return Promise.resolve();
   },
   del(c,id){
-    delete this.d[c][id];this.emit();
+    delete this.d[c][id];this.tomb[c+'/'+id]=1;this.emit();
     this.track(c,id,'del',null);
+    this.track('meta','del:'+c+'/'+id,'put',{c:c,id:id,at:Date.now()});
     return Promise.resolve();
   },
   putSettings(s){
@@ -1032,6 +1046,157 @@ const Store={
     return Promise.resolve();
   }
 };
+
+
+/* ================= Auto backup (every change -> this device) =================
+   latest.json  : always the newest copy
+   day-DATE.json: first copy of each day (kept 14 days)
+   before-loss-*.json: copy saved automatically when the number of records DROPS (kept 10)
+   Stored in IndexedDB (backup:*) and, on the Android app, in Documents/ShopPOS */
+const AB={
+  t:null,busy:false,
+  snap(){const d={};['products','customers','vouchers','expenses','closings'].forEach(c=>d[c]=Store.list(c));const st=Object.assign({},Store.d.settings);delete st.tgToken;delete st.tgChat;return {app:'shoppos',version:1,auto:true,exportedAt:Date.now(),data:d,settings:st}},
+  cnt(j){return j&&j.data?['products','customers','vouchers','expenses','closings'].reduce((a,c)=>a+(j.data[c]||[]).length,0):0},
+  vcnt(j){return j&&j.data&&j.data.vouchers?j.data.vouchers.length:0},
+  lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}},
+  lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  kick(){clearTimeout(this.t);this.t=setTimeout(()=>this.run(),3000)},
+  async file(name,txt){
+    const F=NATIVE()&&NP('Filesystem');if(!F)return false;
+    try{await F.writeFile({path:'ShopPOS/'+name,data:txt,directory:'DOCUMENTS',encoding:'utf8',recursive:true});return true}
+    catch(e){try{await F.writeFile({path:'ShopPOS/'+name,data:txt,directory:'DATA',encoding:'utf8',recursive:true});return true}catch(x){console.error(x);return false}}
+  },
+  async rm(name){const F=NATIVE()&&NP('Filesystem');if(!F)return;for(const d of ['DOCUMENTS','DATA']){try{await F.deleteFile({path:'ShopPOS/'+name,directory:d})}catch(e){}}},
+  async run(){
+    if(this.busy){this.kick();return}
+    if(!Store.pk)return;
+    this.busy=true;
+    try{
+      const j=this.snap(),n=this.cnt(j);
+      if(!n)return;                         /* never replace a backup with an empty one */
+      const txt=JSON.stringify(j),day=dstr(new Date()),pk=Store.pk;
+      let prev=null;try{prev=await Idb.get('backup:latest:'+pk)}catch(e){}
+      /* records dropped (deleted / lost / overwritten by sync) -> keep the old copy separately */
+      if(prev&&(this.vcnt(prev)>this.vcnt(j)||this.cnt(prev)>this.cnt(j)+3)){
+        const nm='before-loss-'+day+'-'+pad(new Date().getHours(),2)+pad(new Date().getMinutes(),2)+'.json';
+        try{await Idb.set('backup:loss:'+pk,prev)}catch(e){}
+        if(await this.file(nm,JSON.stringify(prev))){
+          const L=this.lsGet('shoppos.ab.loss');L.push(nm);while(L.length>10)await this.rm(L.shift());this.lsSet('shoppos.ab.loss',L);
+        }
+      }
+      try{await Idb.set('backup:latest:'+pk,j)}catch(e){console.error(e)}
+      await this.file('latest.json',txt);
+      const D=this.lsGet('shoppos.ab.days');
+      if(D.indexOf(day)<0){
+        if(await this.file('day-'+day+'.json',txt)){D.push(day);while(D.length>14)await this.rm('day-'+D.shift()+'.json');this.lsSet('shoppos.ab.days',D)}
+      }
+      try{localStorage.setItem('shoppos.ab.last',String(Date.now()))}catch(e){}
+    }catch(e){console.error(e)}
+    finally{this.busy=false}
+  },
+  /* records that exist only in the local auto-backups (not here, not on the server, not deleted on purpose) are brought back and uploaded */
+  async mergeBack(){
+    const pk=Store.pk;let n=0;
+    for(const key of ['backup:loss:'+pk,'backup:latest:'+pk]){
+      let b=null;try{b=await Idb.get(key)}catch(e){}
+      if(!b||!b.data)continue;
+      ['products','customers','vouchers','expenses','closings'].forEach(c=>(b.data[c]||[]).forEach(o=>{
+        if(!o||!o.id)return;const k=c+'/'+o.id;
+        if(Store.d[c][o.id]||Store.tomb[k]||Store.ob[k])return;
+        Store.d[c][o.id]=JSON.parse(JSON.stringify(o));
+        Store.ob[k]={c:c,id:o.id,op:'put',data:JSON.parse(JSON.stringify(o)),n:++Store.obN};n++;
+      }));
+    }
+    if(n){Store.persist();Store.again=true;setTimeout(()=>{Store.emit();toast('Backup မှ ဒေတာ '+n+' ခု ပြန်ရပြီး Server သို့ တင်နေသည်')},900)}
+  },
+  async restoreAuto(){
+    const pk=Store.pk;let a=null,b=null;
+    try{a=await Idb.get('backup:latest:'+pk);b=await Idb.get('backup:loss:'+pk)}catch(e){}
+    const opts=[];
+    if(b&&this.cnt(b))opts.push({j:b,t:'ဒေတာ မလျော့ခင် Backup (ဘောက်ချာ '+this.vcnt(b)+')'});
+    if(a&&this.cnt(a))opts.push({j:a,t:'နောက်ဆုံး Backup (ဘောက်ချာ '+this.vcnt(a)+')'});
+    if(!opts.length){toast('Auto backup မရှိသေးပါ');return}
+    const pick=opts[0];
+    if(!(await confirmBox('Auto backup ပြန်သွင်းမည်',pick.t+' ကို ပြန်သွင်းမည်။ အမှတ်စဉ်တူသော ဒေတာများကို Backup ထဲက အတိုင်း ပြန်ရေးပါမည်။','ပြန်သွင်းမည်')))return;
+    restoreData(pick.j);
+  }
+};
+
+
+/* ================= Telegram: send the day report + backup when the day is closed ================= */
+const TG={
+  cfg(){const S=Store.d.settings;return (S.tgToken&&S.tgChat)?{t:String(S.tgToken).trim(),c:String(S.tgChat).trim()}:null},
+  url(t,m){return 'https://api.telegram.org/bot'+t+'/'+m},
+  async call(t,m,form){
+    const r=await fetch(this.url(t,m),{method:'POST',body:form});
+    let j=null;try{j=await r.json()}catch(e){}
+    if(!j||!j.ok)throw new Error((j&&j.description)||('HTTP '+r.status));
+    return j.result;
+  },
+  /* after you send any message to your bot, this finds your chat id automatically */
+  async findChat(t){
+    const r=await fetch(this.url(t,'getUpdates'));const j=await r.json();
+    if(!j.ok)throw new Error(j.description||'token မှားနေသည်');
+    const u=(j.result||[]).slice().reverse().map(x=>(x.message||x.channel_post||(x.my_chat_member&&x.my_chat_member)||{}).chat).filter(Boolean)[0];
+    if(!u)throw new Error('Bot ကို Telegram ထဲမှာ စာတစ်ကြောင်း (ဥပမာ hi) အရင်ပို့ပါ');
+    return {id:String(u.id),name:u.title||u.first_name||u.username||''};
+  },
+  text(d){
+    const S=Store.d.settings,c=Store.get('closings',d)||{};
+    const sales=Sel.salesOn(d),col=Sel.collectedOn(d),ex=Ex.on(d);
+    return '📒 '+(S.shopName||'POS')+' — စာရင်းပိတ်\n'
+      +'ရက်စွဲ: '+fmtD(d)+'\n'
+      +'ဘောက်ချာ: '+Sel.countOn(d)+' စောင်\n'
+      +'ရောင်းရငွေ: '+ks(sales)+' ကျပ်\n'
+      +'ရရှိငွေ: '+ks(col)+' ကျပ်\n'
+      +'ကုန်ကျစရိတ်: '+ks(ex)+' ကျပ်\n'
+      +'လက်ကျန်ငွေ (ရရှိ − ကုန်ကျ): '+ks(col-ex)+' ကျပ်\n'
+      +'ကြွေးကျန် စုစုပေါင်း: '+ks(Sel.outstanding())+' ကျပ်'
+      +(c.byName?'\nပိတ်သူ: '+c.byName:'');
+  },
+  file(chat,name,txt,type,cap){
+    const f=new FormData();f.append('chat_id',chat);if(cap)f.append('caption',cap);
+    f.append('document',new Blob([txt],{type:type}),name);return f;
+  },
+  async sendClose(d){
+    const k=this.cfg();if(!k)return false;
+    try{
+      const f=new FormData();f.append('chat_id',k.c);f.append('text',this.text(d));
+      await this.call(k.t,'sendMessage',f);
+      const bk=AB.snap();
+      await this.call(k.t,'sendDocument',this.file(k.c,'shoppos-backup-'+d+'.json',JSON.stringify(bk),'application/json','Backup '+d+' (Settings › Backup ပြန်သွင်းမည် ဖြင့် ပြန်ယူနိုင်သည်)'));
+      await this.call(k.t,'sendDocument',this.file(k.c,'shoppos-vouchers-'+d+'.csv',toCSV(csvRows('vouchers')),'text/csv','ဘောက်ချာများ (Excel ဖြင့် ဖွင့်နိုင်သည်)'));
+      try{localStorage.removeItem('shoppos.tg.pend')}catch(e){}
+      toast('Telegram သို့ ပို့ပြီးပါပြီ');return true;
+    }catch(e){
+      console.error(e);try{localStorage.setItem('shoppos.tg.pend',d)}catch(x){}
+      toast('Telegram သို့ ပို့၍ မရပါ — အင်တာနက် ပြန်ရလျှင် ထပ်ပို့ပါမည်');return false;
+    }
+  },
+  /* no bot: open the phone's Share sheet with the report + files; pick Telegram (your chat is listed first once used) */
+  async shareClose(d){
+    const text=this.text(d);
+    try{
+      if(NATIVE()&&NP('Filesystem')&&NP('Share')){
+        const wr=async(name,txt)=>(await NP('Filesystem').writeFile({path:name,data:txt,directory:'CACHE',encoding:'utf8'})).uri;
+        const bk=JSON.stringify(AB.snap());
+        const files=[await wr('shoppos-backup-'+d+'.json',bk),await wr('shoppos-vouchers-'+d+'.csv',toCSV(csvRows('vouchers')))];
+        await NP('Share').share({title:'စာရင်းပိတ် '+d,text:text,files:files,dialogTitle:'Telegram သို့ ပို့မည်'});
+      }else if(navigator.share){
+        await navigator.share({title:'စာရင်းပိတ် '+d,text:text});
+      }else{
+        await Dl.save({filename:'shoppos-backup-'+d+'.json',data:JSON.stringify(AB.snap())});
+      }
+    }catch(e){if(!/cancel|abort|declined/i.test(String((e&&(e.message||e.name||e.code))||e)))toast('Share ဖွင့်၍ မရပါ')}
+  },
+  async retry(){
+    if(!this.cfg()||this.busy)return;let d=null;try{d=localStorage.getItem('shoppos.tg.pend')}catch(e){}
+    if(!d||navigator.onLine===false)return;
+    this.busy=true;try{await this.sendClose(d)}finally{this.busy=false}
+  }
+};
+window.addEventListener('online',()=>setTimeout(()=>TG.retry(),1500));
+setTimeout(()=>TG.retry(),8000);
 
 /* ================= Selectors ================= */
 const Sel={
@@ -1519,7 +1684,7 @@ const PL={
   save(){try{localStorage.setItem('shoppos.printers',JSON.stringify(this.list.map(p=>p.cfg)))}catch(e){}},
   support(){return PrnProto.support()},
   connected(){return this.list.filter(p=>p.connected())},
-  add(p){const same=this.list.filter(x=>(x.cfg.label||'').replace(/ \(\d+\)$/,'')===(p.cfg.label||'')).length;if(same)p.cfg.label=p.cfg.label+' ('+(same+1)+')';this.list.push(p);this.save()},
+  add(p){if(p.cfg.addr&&this.list.some(x=>x.cfg.addr===p.cfg.addr)){this.list=this.list.map(x=>x.cfg.addr===p.cfg.addr?p:x);this.save();return}const same=this.list.filter(x=>(x.cfg.label||'').replace(/ \(\d+\)$/,'')===(p.cfg.label||'')).length;if(same)p.cfg.label=p.cfg.label+' ('+(same+1)+')';this.list.push(p);this.save()},
   async remove(p){await p.disconnect(true);this.list=this.list.filter(x=>x!==p);this.save()},
   async restoreAll(){for(const p of this.list){if(!p.connected())await p.restore()}}
 };
@@ -1817,7 +1982,7 @@ function voucherSheet(id){
       let selP=null;
       const paintTgt=()=>{
         const box=q('#vTgt'),go=q('#vGoT');if(!go)return;
-        const rp=rcpPrinters();if(!selP)selP=rp.map(x=>x.cfg.id);
+        const rp=rcpPrinters();if(!selP)selP=rp.slice(0,1).map(x=>x.cfg.id);
         const n=rp.filter(x=>selP.indexOf(x.cfg.id)>=0).length;
         if(box){box.hidden=mode==='a4';
           box.innerHTML=rp.length?'<div class="sub" style="margin:8px 0 2px">ပရင့်ထုတ်မည့် စက်များ</div>'+rp.map(x=>'<label class="swrow" style="border-top:0;padding:6px 0"><span>'+esc(prnTitle(x))+' <span class="sub">· '+(x.connected()?'ချိတ်ထားသည်':'မချိတ်ရသေး')+'</span></span><input type="checkbox" class="sw" data-tp="'+esc(x.cfg.id)+'"'+(selP.indexOf(x.cfg.id)>=0?' checked':'')+'></label>').join('')+'<button type="button" class="btn s" id="vTAdd" style="margin-bottom:8px">Printer ထပ်ချိတ်မည်</button>':'<p class="sub">Printer မချိတ်ရသေးပါ — ပရင့်ဒိုင်ယာလော့ဖြင့် ထုတ်ပါမည်။</p><button type="button" class="btn s" id="vTAdd" style="margin-bottom:8px">Printer ချိတ်မည်</button>'}
@@ -2300,6 +2465,10 @@ async function restoreBackup(file){
   if(!j||j.app!=='shoppos'||!j.data){toast('Backup ဖိုင် မမှန်ပါ');return}
   const n=['products','customers','vouchers','expenses','closings'].reduce((a,c)=>a+(j.data[c]||[]).length,0);
   if(!(await confirmBox('Backup ပြန်သွင်းမည်','ဒေတာ '+n+' ခု ပြန်သွင်းမည်။ အမှတ်စဉ်တူသော ဒေတာများကို Backup ထဲက အတိုင်း ပြန်ရေးပါမည်။ (အကောင့်များကို မထိပါ)','ပြန်သွင်းမည်')))return;
+  restoreData(j);
+}
+function restoreData(j){
+  const n=['products','customers','vouchers','expenses','closings'].reduce((a,c)=>a+(j.data[c]||[]).length,0);
   ['products','customers','vouchers','expenses','closings'].forEach(c=>(j.data[c]||[]).forEach(o=>{if(o&&o.id)Store.put(c,o)}));
   if(j.settings)Store.putSettings(Object.assign({},Store.d.settings,j.settings));
   toast('ပြန်သွင်းပြီးပါပြီ — ဒေတာ '+n+' ခု');
@@ -2330,6 +2499,8 @@ function settingsSheet(){
      +'<div class="rowf" style="margin-bottom:12px">'+(Store.mode==='cloud'?'<button class="btn s" id="sbSync">ယခု ချိန်ညှိမည်</button><button class="btn s" id="sbLink">ငွေကိုင်ဖုန်းအတွက် လင့်ခ် ကူးမည်</button>':'')+'<button class="btn s" id="sbChg">Supabase '+(Store.mode==='cloud'?'ပြောင်းမည်':'ချိတ်မည်')+'</button></div>'
      +'<div class="sec-t">Backup / Excel ထုတ်ရန်</div><p class="sub" style="margin-bottom:8px">Backup ဖိုင်ကို ဖုန်းပျောက်လျှင် ပြန်သွင်းရန် သိမ်းထားပါ။ CSV ဖိုင်ကို Excel / Google Sheets တွင် ဖွင့်နိုင်သည်။</p>'
      +'<div class="rowf" style="margin-bottom:8px"><button class="btn s pri" data-ex="backup">Backup ဖိုင် (JSON)</button><label class="btn s" for="sRestF">Backup ပြန်သွင်းမည်</label><input type="file" id="sRestF" accept=".json,application/json" hidden></div>'
+     +(Auth.owner()?'<div class="sec-t">စာရင်းပိတ်ပြီး Telegram သို့ ပို့ရန်</div><label class="swrow" style="border-top:0;padding:6px 0"><span>စာရင်းပိတ်တိုင်း Share ဖွင့်မည် (Bot မလို)</span><input type="checkbox" class="sw" id="tgShare"'+(S.tgShare===false?'':' checked')+'></label><p class="sub" style="margin:0 0 8px">စာရင်းပိတ်လိုက်တာနဲ့ Share ပြတင်းပေါက် ပေါ်မည် — Telegram ကိုရွေးပြီး ကိုယ့် Chat ကို နှိပ်ရုံပါ (တစ်ခါ ရွေးပြီးရင် နောက်တစ်ခါ Chat က အပေါ်ဆုံးမှာ ပေါ်တတ်သည်)။</p><details style="margin-bottom:10px"><summary class="sub">အလိုအလျောက် ပို့ရန် (Bot သုံးမည်ဆိုလျှင်)</summary><p class="sub" style="margin:6px 0">Bot ချိတ်ထားလျှင် Share မဖွင့်တော့ဘဲ Telegram သို့ တန်းပို့မည်။ (1) @BotFather ဖြင့် Bot ဆောက်ပြီး Token ထည့်ပါ (2) Bot ကို "hi" ပို့ပါ (3) "Chat ID ရှာမည်" နှိပ်ပါ။</p><div class="field"><label class="lbl" for="tgTok">Bot Token</label><input class="inp" id="tgTok" autocomplete="off" value="'+esc(S.tgToken||'')+'"></div><div class="field"><label class="lbl" for="tgChat">Chat ID</label><input class="inp" id="tgChat" inputmode="numeric" autocomplete="off" value="'+esc(S.tgChat||'')+'"></div><div class="rowf"><button class="btn s" id="tgFind" type="button">Chat ID ရှာမည်</button><button class="btn s" id="tgTest" type="button">စမ်းပို့မည်</button></div></details>':'')
+     +'<div class="rowf" style="margin-bottom:4px"><button class="btn s" id="sAutoRest">Auto backup မှ ပြန်ယူမည်</button></div><p class="sub" style="margin:0 0 10px">ဒေတာ ပြောင်းတိုင်း ဤစက်ထဲ (Documents/ShopPOS) တွင် အလိုအလျောက် သိမ်းထားသည်။</p>'
      +'<div class="rowf" style="margin-bottom:12px"><button class="btn s" data-ex="vouchers">ဘောက်ချာ CSV</button><button class="btn s" data-ex="products">ပစ္စည်း CSV</button><button class="btn s" data-ex="customers">ဖောက်သည် CSV</button><button class="btn s" data-ex="expenses">ကုန်ကျစရိတ် CSV</button></div>'
      +'<div class="sec-t">Print / Printer</div>'
      +'<div class="field"><label class="lbl">ပုံမှန် ပရင့်ထုတ်မည့် စက်</label><div class="seg" id="sPm"><button type="button" data-v="a4">A4 စာရွက်</button><button type="button" data-v="th">Thermal စက်</button></div></div>'
@@ -2371,6 +2542,7 @@ function settingsSheet(){
       q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
       q('#sSave').onclick=()=>{
         const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
+        if(q('#tgTok')){ns.tgToken=q('#tgTok').value.trim();ns.tgChat=q('#tgChat').value.trim();ns.tgShare=q('#tgShare').checked}
         Object.keys(mEd.orig).forEach(n=>{const o=mEd.orig[n];if(o===n)return;
           Store.list('vouchers').forEach(v=>{if((v.payments||[]).some(p=>p.method===o))Store.put('vouchers',Object.assign({},v,{payments:v.payments.map(p=>p.method===o?Object.assign({},p,{method:n}):p)}))});
           Store.list('expenses').forEach(x=>{if(x.method===o)Store.put('expenses',Object.assign({},x,{method:n}))})});
@@ -2381,6 +2553,9 @@ function settingsSheet(){
       q('#sPrn').onclick=()=>printerSheet();
       q('#sOsEd').onclick=()=>osEditSheet();
       $$('[data-ex]',el).forEach(b=>b.onclick=()=>exportData(b.dataset.ex));
+      if(q('#tgFind'))q('#tgFind').onclick=async()=>{const t=q('#tgTok').value.trim();if(!t){toast('Bot Token ထည့်ပါ');return}try{toast('ရှာနေသည်...');const r=await TG.findChat(t);q('#tgChat').value=r.id;toast('တွေ့ပြီ: '+(r.name||r.id)+' — "သိမ်းမည်" နှိပ်ပါ')}catch(e){toast('မတွေ့ပါ — '+(e.message||e))}};
+      if(q('#tgTest'))q('#tgTest').onclick=async()=>{const t=q('#tgTok').value.trim(),c=q('#tgChat').value.trim();if(!t||!c){toast('Token နှင့် Chat ID ထည့်ပါ');return}try{const f=new FormData();f.append('chat_id',c);f.append('text','✅ POS မှ စမ်းသပ်ပို့ခြင်း အောင်မြင်ပါသည်');await TG.call(t,'sendMessage',f);toast('Telegram သို့ ပို့ပြီးပါပြီ')}catch(e){toast('ပို့၍ မရပါ — '+(e.message||e))}};
+      q('#sAutoRest').onclick=()=>{ctl.close();AB.restoreAuto()};
       q('#sRestF').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)restoreBackup(f)};
       q('#sDemo').onclick=()=>{loadDemo();ctl.close()};
       const dc=q('#sDemoClr');if(dc)dc.onclick=async()=>{if(await confirmBox('နမူနာဒေတာ ဖျက်မည်','နမူနာအဖြစ် ထည့်ထားသော ကုန်ပစ္စည်း၊ ဖောက်သည်၊ ဘောက်ချာများကို ဖျက်မည်။ သင်ကိုယ်တိုင် ထည့်ထားသော ဒေတာကို မထိခိုက်ပါ။','ဖျက်မည်')){clearDemo();ctl.close()}};
@@ -2650,7 +2825,7 @@ function sellerSel(attr,val){
   const o=val&&ls.indexOf(val)<0?ls.concat([val]):ls;
   return '<div class="rowf" style="gap:6px;margin-top:6px;flex-wrap:nowrap"><span class="sub" style="flex:none">ရောင်းသူ</span><select class="inp" '+attr+' aria-label="ရောင်းသူ" style="flex:1;min-width:0;padding:6px 8px;font-size:14px"><option value="">— မရွေးရသေး —</option>'+o.map(n=>'<option value="'+esc(n)+'"'+(n===val?' selected':'')+'>'+esc(n)+'</option>').join('')+'<option value="__new">＋ အမည်အသစ် ထည့်မည်</option></select></div>';
 }
-const priceCol=()=>!(window.matchMedia&&matchMedia('(max-width:540px), (orientation:landscape) and (max-height:560px)').matches);
+const priceCol=()=>!(window.matchMedia&&matchMedia('(max-width:767px), (orientation:landscape) and (max-height:560px)').matches);
 let _prevCart=null;
 function cartHTML(){
   const lines=Cart.lines();const _was=_prevCart||(lines.length===1?new Set():null);_prevCart=new Set(lines.map(l=>l.p.id));
@@ -3241,6 +3416,7 @@ async function closeDay(){
   const old=Sel.closing(d)||{},me=Auth.me||{};
   Store.put('closings',Object.assign({},old,{id:d,date:d,status:'closed',closedAt:Date.now(),by:me.id||'',byName:me.name||'',count:Sel.countOn(d),sales:Sel.salesOn(d),collected:Sel.collectedOn(d),expenses:Ex.on(d),closeCount:(old.closeCount||0)+1,reqAt:null,reqBy:null,reqByName:null}));
   toast('ယနေ့ စာရင်း ပိတ်ပြီးပါပြီ');
+  if(TG.cfg())setTimeout(()=>TG.sendClose(d),600);else if(Store.d.settings.tgShare!==false)setTimeout(()=>TG.shareClose(d),600);
 }
 async function reqReopen(){
   const d=today(),c=Sel.closing(d);

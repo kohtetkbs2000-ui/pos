@@ -695,7 +695,7 @@ const Sb={
   K:'shoppos.sbcfg',
   SQL:"create table if not exists public.kv (\n  collection text not null,\n  id text not null,\n  data jsonb not null,\n  updated_at timestamptz not null default now(),\n  primary key (collection, id)\n);\nalter table public.kv enable row level security;\ndrop policy if exists pos_all on public.kv;\ncreate policy pos_all on public.kv for all to anon using (true) with check (true);\ndo $$ begin if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='kv') then alter publication supabase_realtime add table public.kv; end if; end $$;\nalter table public.kv replica identity full;",
   LIB:['vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'],
-  DEFAULT:{local:1},
+  DEFAULT:null,
   cfg(){let c=null;try{c=JSON.parse(localStorage.getItem(this.K)||'null')}catch(e){}return c||this.DEFAULT},
   save(c){try{localStorage.setItem(this.K,JSON.stringify(c))}catch(e){}},
   clear(){try{localStorage.removeItem(this.K)}catch(e){}},
@@ -737,15 +737,13 @@ const Sb={
       document.body.classList.add('noauth');el.hidden=false;
       const e2=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       el.innerHTML='<div class="auth"><h2>Supabase ချိတ်ဆက်ရန်</h2><p class="mut" style="text-align:center;margin-bottom:14px">ဒေတာများကို Supabase တွင် သိမ်းပြီး ဖုန်းအားလုံး တူညီစွာ မြင်ရပါမည်။ ပထမဆုံးအကြိမ် တစ်ခါသာ ထည့်ရပါမည်။</p>'
-       +'<div class="field"><label class="lbl" for="sbU">Supabase Project URL</label><input class="inp" id="sbU" type="url" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="https://xxxx.supabase.co" value="'+e2(old.url||'')+'"></div>'
+       +'<div class="field"><label class="lbl" for="sbU">Supabase Project URL</label><input class="inp" id="sbU" type="url" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="https://xxxx.supabase.co" value="'+e2(old.url||'https://hlssypwqvvveuilhdsto.supabase.co')+'"></div>'
        +'<div class="field"><label class="lbl" for="sbK">anon public key</label><input class="inp" id="sbK" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="eyJhbGciOi... (သို့) sb_publishable_..." value="'+e2(old.key||'')+'"></div>'
        +'<p class="w sm" id="sbE" style="min-height:22px">'+e2(err||'')+'</p>'
        +'<button type="button" class="btn pri block" id="sbGo">ချိတ်ဆက်မည်</button>'
-       +'<button type="button" class="btn block" id="sbLocal" style="margin-top:10px">'+(err?'ယခုတစ်ကြိမ်သာ — ဤစက်တွင် သုံးမည်':'ယခုမချိတ်သေးပါ — ဤစက်တွင်သာ သုံးမည်')+'</button>'
        +'<details style="margin-top:16px"><summary style="cursor:pointer;font-weight:600">ပထမဆုံး တစ်ခါ လုပ်ရန် — SQL (Supabase › SQL Editor)</summary><p class="sub" style="margin:8px 0">အောက်က SQL ကို ကူးပြီး SQL Editor တွင် Run လိုက်ပါ။ URL နှင့် key ကို Project Settings › API တွင် တွေ့ပါမည်။</p><pre id="sbSql" style="white-space:pre-wrap;word-break:break-all;font-size:12px;background:var(--card,#f3f4f6);border:1px solid var(--line,#ddd);border-radius:12px;padding:10px;user-select:all">'+e2(this.SQL)+'</pre><button type="button" class="btn s" id="sbCp" style="margin-top:8px">SQL ကူးမည်</button></details></div>';
       const q=s=>el.querySelector(s);
       q('#sbCp').onclick=async()=>{try{await navigator.clipboard.writeText(Sb.SQL);q('#sbCp').textContent='ကူးပြီးပါပြီ'}catch(x){const r=document.createRange();r.selectNodeContents(q('#sbSql'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}};
-      q('#sbLocal').onclick=()=>{const c={local:1};if(err)c.temp=1;else Sb.save(c);el.hidden=true;resolve(c)};
       q('#sbGo').onclick=async()=>{
         const url=Sb.norm(q('#sbU').value),key=q('#sbK').value.trim(),E=q('#sbE'),b=q('#sbGo');
         if(!url||!key){E.textContent='URL နှင့် key နှစ်ခုလုံး ထည့်ပါ';return}
@@ -821,6 +819,7 @@ const Store={
       try{
         await Sb.connect(cfg);
         const all=await this.loadAll();this.apply(all);
+        await this.migrateLocal();
         this.synced=true;this.lastSync=Date.now();this.persist();
         this.start();return;
       }catch(e){
@@ -828,6 +827,26 @@ const Store={
         err=isNetErr(e)?'ပထမဆုံးအကြိမ် အင်တာနက် လိုအပ်ပါသည် — အင်တာနက်ချိတ်ပြီး ထပ်ကြိုးစားပါ။ ('+Sb.explain(e)+')':Sb.explain(e);cfg=null;
       }
     }
+  },
+  /* data made in 'this device only' mode -> queue it for upload once, when Supabase is connected for the first time */
+  async migrateLocal(){
+    try{
+      const mk='shoppos.migrated:'+this.cfg.url;
+      if(localStorage.getItem(mk))return;
+      let s=null;try{s=await Idb.get('state:local')}catch(e){}
+      if(!s||!s.d){try{const raw=localStorage.getItem(LS_KEY);if(raw)s={d:JSON.parse(raw)}}catch(e){}}
+      if(!s||!s.d)return;
+      let n=0;
+      ['products','customers','vouchers','expenses','closings'].forEach(c=>{
+        Object.values(s.d[c]||{}).forEach(r=>{
+          if(!r||!r.id||this.d[c][r.id]||this.ob[c+'/'+r.id])return;
+          this.ob[c+'/'+r.id]={c:c,id:r.id,op:'put',data:Object.assign({},r),n:++this.obN};n++;
+        });
+      });
+      localStorage.setItem(mk,'1');
+      this.overlay();
+      if(n)setTimeout(()=>toast('ဤစက်ထဲက ဒေတာ '+n+' ခုကို Supabase သို့ တင်နေသည်'),1500);
+    }catch(e){console.error(e)}
   },
   async loadCache(){
     let s=null;
@@ -950,7 +969,7 @@ const Store={
     setInterval(()=>{
       if(this.run)return;
       if(this.pendingCount()>0||!this.online||this.syncErr){this.sync();return}
-      if(!document.hidden&&Date.now()-this.lastSync>(this.rt==='live'?120000:45000))this.sync();
+      if(!document.hidden&&Date.now()-this.lastSync>(this.rt==='live'?60000:15000))this.sync();
     },10000);
     paintChrome();
     this.sync();
@@ -1373,7 +1392,7 @@ const PrnProto={
       if(!navigator.serial)throw new Error('ဤ Browser တွင် Serial မရပါ — Chrome / Edge သုံးပါ');
       const p=await navigator.serial.requestPort();await this._openSerial(p);
     }else if(kind==='spp'){
-      await NP('BtPrinter').connect({address:arg.address});
+      await sppUse(arg.address);
       this.kind='spp';this.name=arg.name||arg.address;this.cfg.addr=arg.address;this.cfg.addrName=this.name;
     }else{
       if(!navigator.bluetooth)throw new Error('ဤ Browser တွင် Bluetooth မရပါ — Chrome / Edge သုံးပါ');
@@ -1413,7 +1432,7 @@ const PrnProto={
   async disconnect(quiet){
     try{if(this.kind==='usb'&&this.dev){try{await this.dev.releaseInterface(this.ifc)}catch(e){}await this.dev.close()}
       if(this.kind==='serial'&&this.port)await this.port.close();
-      if(this.kind==='spp')await NP('BtPrinter').disconnect({address:this.cfg.addr});
+      if(this.kind==='spp'){if(SPP_ACT===this.cfg.addr)SPP_ACT='';await NP('BtPrinter').disconnect({address:this.cfg.addr})}
       if(this.kind==='ble'&&this.dev&&this.dev.gatt.connected)this.dev.gatt.disconnect()}catch(e){}
     this.kind=null;this.dev=this.port=this.ch=this.ep=null;this.name='';
   },
@@ -1421,10 +1440,13 @@ const PrnProto={
     if(!this.kind)throw new Error('Printer မချိတ်ရသေးပါ');
     if(this.kind==='usb'){for(let i=0;i<bytes.length;i+=4096){const r=await this.dev.transferOut(this.ep,bytes.slice(i,i+4096));if(r.status!=='ok')throw new Error('USB ပို့၍ မရပါ')}}
     else if(this.kind==='spp'){
-      for(let i=0;i<bytes.length;i+=1024){
-        const c=bytes.subarray(i,i+1024);let bin='';for(let k=0;k<c.length;k++)bin+=String.fromCharCode(c[k]);
-        await NP('BtPrinter').write({data:btoa(bin),address:this.cfg.addr});
-      }
+      await sppUse(this.cfg.addr);
+      try{
+        for(let i=0;i<bytes.length;i+=1024){
+          const c=bytes.subarray(i,i+1024);let bin='';for(let k=0;k<c.length;k++)bin+=String.fromCharCode(c[k]);
+          await NP('BtPrinter').write({data:btoa(bin),address:this.cfg.addr});
+        }
+      }catch(e){SPP_ACT='';throw e}
     }
     else if(this.kind==='serial'){const w=this.port.writable.getWriter();try{for(let i=0;i<bytes.length;i+=1024){await w.write(bytes.slice(i,i+1024))}}finally{w.releaseLock()}}
     else{const nw=!!this.ch.properties.writeWithoutResponse;for(let i=0;i<bytes.length;i+=100){const c=bytes.slice(i,i+100);if(nw)await this.ch.writeValueWithoutResponse(c);else await this.ch.writeValue(c);await new Promise(r=>setTimeout(r,12))}}
@@ -1469,6 +1491,23 @@ function mkPrinter(cfg){
   const p=Object.create(PrnProto);
   p.cfg=Object.assign({id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),width:80,baud:9600,cut:true,role:'both',label:''},cfg||{});
   p.kind=null;p.name='';p.dev=p.ep=p.ifc=p.port=p.ch=null;return p;
+}
+/* Bluetooth (SPP) printers: the app may hold only one open connection at a time, so switch on demand */
+let SPP_ACT='';
+async function sppUse(addr){
+  const B=NP('BtPrinter');if(!B)throw new Error('BtPrinter plugin မရှိပါ');
+  if(SPP_ACT===addr)return;
+  if(SPP_ACT){try{await B.disconnect({address:SPP_ACT})}catch(e){}SPP_ACT=''}
+  try{await B.connect({address:addr})}
+  catch(e){
+    const m=String((e&&e.message)||e);
+    if(/BLUETOOTH_(SCAN|CONNECT)|permission/i.test(m)){
+      try{await B.requestPermissions();await B.connect({address:addr});SPP_ACT=addr;return}catch(e2){}
+      throw new Error('Bluetooth ခွင့်ပြုချက် မရှိပါ — Settings › Apps › ဤ app › Permissions › "Nearby devices" ကို Allow လုပ်ပါ');
+    }
+    throw e;
+  }
+  SPP_ACT=addr;
 }
 const PL={
   list:[],
@@ -2829,13 +2868,13 @@ const Auth={me:null,plat:null,
   },
   start(a){this.me=a;try{localStorage.setItem(SK,a.id)}catch(e){}},
   out(){this.me=null;try{localStorage.removeItem(SK)}catch(e){}location.reload()},
-  restore(){let id=null;try{id=localStorage.getItem(SK)}catch(e){}const a=id==='trial'?{id:'trial',name:'စမ်းသုံး',username:'trial',role:'owner',trial:true}:id==='trial-c'?{id:'trial-c',name:'စမ်းသုံး',username:'trial',role:'accountant',trial:true}:id&&Store.get('accounts',id);if(a&&a.active!==false){this.me=a;return true}return false},
+  restore(){let id=null;try{id=localStorage.getItem(SK)}catch(e){}const a=id&&Store.get('accounts',id);if(a&&a.active!==false){this.me=a;return true}return false},
   owner(){return !!this.me&&this.me.role==='owner'}};
 const rndCode=()=>Math.random().toString(36).slice(2,8).toUpperCase();
 const CASH_ORDER=['reports','sell','vouchers','exp','stock'];
 const tabOK=id=>Auth.owner()?id!=='sell'&&id!=='home':CASH_ORDER.indexOf(id)>=0;
 function buildTabs(){const T=TABS.filter(t=>tabOK(t.id)).sort((a,b)=>Auth.owner()?(a.id==='reports'?-1:b.id==='reports'?1:0):CASH_ORDER.indexOf(a.id)-CASH_ORDER.indexOf(b.id));$('#tabbarIn').innerHTML=T.map(t=>'<button class="tab" data-tab="'+t.id+'" aria-current="false"><span class="pl">'+ico(t.icon)+'</span><span>'+t.label+'</span></button>').join('');$('#tabbarIn').style.setProperty('--nt',T.length)}
-function enter(){if(Auth.me&&!Auth.me.trial&&Auth.me.role!=='owner'&&Auth.me.pending===true){waitScreen(Auth.me);return}document.body.classList.remove('noauth');$('#auth').hidden=true;buildTabs();paintChrome();App.go('reports')}
+function enter(){if(Auth.me&&Auth.me.role!=='owner'&&Auth.me.pending===true){waitScreen(Auth.me);return}document.body.classList.remove('noauth');$('#auth').hidden=true;buildTabs();paintChrome();App.go('reports')}
 let waitOn=false,waitT=null;
 function waitScreen(a){
   const el=$('#auth');el.hidden=false;document.body.classList.add('noauth');waitOn=true;
@@ -2855,7 +2894,7 @@ function authScreen(saved){
   let role=null,tab='in';el.hidden=false;
   const asOwner=()=>role==='owner';
   const pick=r=>{
-    if(saved&&saved.role===r&&(saved.trial||Store.get('accounts',saved.id))){Auth.me=saved;if(saved.pending){waitScreen(saved);return}enter();return}
+    if(saved&&saved.role===r&&Store.get('accounts',saved.id)){Auth.me=saved;if(saved.pending){waitScreen(saved);return}enter();return}
     role=r;tab=(first&&r==='owner')?'up':'in';draw();
   };
   const chooser=()=>{
@@ -2864,7 +2903,7 @@ function authScreen(saved){
     el.innerHTML='<div class="auth">'+(S.logo?'<img class="lg" alt="" src="'+esc(S.logo)+'">':'')+'<h2>'+esc(S.shopName)+'</h2><p class="mut" style="text-align:center;margin-bottom:18px">ဝင်ရောက်မည့်သူ ဘယ်သူလဲ ရွေးပါ</p>'
      +card('rOwner','users','ဆိုင်ပိုင်ရှင် (Owner)','စာရင်းချုပ် · အစီရင်ခံစာ · စီမံခန့်ခွဲမှု')
      +card('rCash','cart','ငွေကိုင် (Cashier)','ရောင်းချခြင်း · ဘောက်ချာ · ကြွေးကျန်')
-     +(saved&&!saved.trial?'<p class="sub" style="text-align:center;margin-top:12px">ဤစက်တွင် မှတ်ထားသည် — '+esc(saved.name)+'</p>':'')+'</div>';
+     +(saved?'<p class="sub" style="text-align:center;margin-top:12px">ဤစက်တွင် မှတ်ထားသည် — '+esc(saved.name)+'</p>':'')+'</div>';
     el.querySelector('#rOwner').onclick=()=>pick('owner');
     el.querySelector('#rCash').onclick=()=>pick('accountant');
   };
@@ -2963,7 +3002,7 @@ function chipEd(box,arr,minKeep){
 function pwSheet(a){Sheet.open({title:'စကားဝှက် ပြောင်းမည် — '+a.name,small:true,body:'<div class="field"><label class="lbl" for="pw1">စကားဝှက်အသစ်</label><input class="inp" id="pw1" type="password" autocomplete="new-password"></div>',footer:'<button class="btn pri block" id="pwGo">သိမ်းမည်</button>',
   onMount(el,c){el.querySelector('#pwGo').onclick=async()=>{const p=el.querySelector('#pw1').value;if(p.length<4){toast('အနည်းဆုံး ၄ လုံး ထည့်ပါ');return}const s2=uid('s');await Store.put('accounts',Object.assign({},Store.get('accounts',a.id),{salt:s2,hash:await Auth.hash(p,s2)}));c.close();toast('စကားဝှက် ပြောင်းပြီးပါပြီ')}}})}
 function nameSheet(){
-  const a0=Auth.me;if(!a0||a0.trial)return;
+  const a0=Auth.me;if(!a0)return;
   Sheet.open({title:'အမည် ပြောင်းမည်',small:true,body:'<div class="field"><label class="lbl" for="nmI">သင့်အမည်</label><input class="inp" id="nmI" value="'+esc(a0.name)+'"></div><p class="sub">အမည်အသစ်ကို နောက်ဖြတ်မည့် ဘောက်ချာများမှ စ၍ သုံးပါမည်။</p>',footer:'<button class="btn pri block" id="nmGo">သိမ်းမည်</button>',
     onMount(el,c){el.querySelector('#nmGo').onclick=()=>{
       const n=el.querySelector('#nmI').value.trim();if(!n){toast('အမည် ထည့်ပါ');return}
@@ -2973,7 +3012,7 @@ function nameSheet(){
       paintChrome();c.close();toast('အမည် ပြောင်းပြီးပါပြီ');
     }}});
 }
-function mySheet(){Sheet.open({title:'ကျွန်ုပ်၏ အကောင့်',small:true,body:'<p class="msg"><b>'+esc(Auth.me.name)+'</b>'+(Auth.me.device?'':' · @'+esc(Auth.me.username))+'<br>'+(Auth.owner()?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</p>',footer:(Auth.me.trial?'':'<button class="btn block" id="myNm" style="margin-bottom:8px">အမည် ပြောင်းမည်</button>')+'<button class="btn block" id="myPrn" style="margin-bottom:8px">'+ico('print')+'Printer ချိတ်ဆက်ရန်</button><div class="row2">'+(Auth.me.device||Auth.me.trial?'':'<button class="btn" id="myPw">စကားဝှက်ပြောင်းမည်</button>')+'<button class="btn out" id="myOut">ထွက်မည်</button></div>',
+function mySheet(){Sheet.open({title:'ကျွန်ုပ်၏ အကောင့်',small:true,body:'<p class="msg"><b>'+esc(Auth.me.name)+'</b>'+(Auth.me.device?'':' · @'+esc(Auth.me.username))+'<br>'+(Auth.owner()?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</p>',footer:'<button class="btn block" id="myNm" style="margin-bottom:8px">အမည် ပြောင်းမည်</button>'+'<button class="btn block" id="myPrn" style="margin-bottom:8px">'+ico('print')+'Printer ချိတ်ဆက်ရန်</button><div class="row2">'+(Auth.me.device?'':'<button class="btn" id="myPw">စကားဝှက်ပြောင်းမည်</button>')+'<button class="btn out" id="myOut">ထွက်မည်</button></div>',
   onMount(el){const on=(s,f)=>{const n=el.querySelector(s);if(n)n.onclick=f};on('#myNm',()=>nameSheet());on('#myPrn',()=>printerSheet());on('#myPw',()=>pwSheet(Auth.me));on('#myOut',()=>Auth.out())}})}
 function accountsSheet(){
   const body=()=>(pendingList().length?'<div class="sec-t" style="margin-top:0">ခွင့်ပြုချက် စောင့်နေသူများ</div>'+pendingList().map(a=>'<div class="rowf" style="justify-content:space-between;padding:8px 0"><div style="min-width:0"><div class="nm">'+esc(a.name)+'</div><div class="sub">'+esc(a.phone||'')+'</div></div><div class="rowf"><button class="btn pri s" data-ap="'+a.id+'">'+ico('check','s')+'ခွင့်ပြုမည်</button><button class="btn s out" data-rj="'+a.id+'">ပယ်မည်</button></div></div>').join('')+'<div style="height:10px"></div>':'')+'<p class="sub">ငွေကိုင်သည် အကောင့်အသစ်ဖွင့်ရန် ဤဖိတ်ကြားကုဒ်ကို သုံးရပါမည်</p><div class="rowf" style="margin:6px 0 12px;justify-content:space-between"><b style="font-size:24px;letter-spacing:.14em">'+esc(Store.d.settings.inviteCode||'—')+'</b><button class="btn s" id="acNew">ကုဒ်အသစ်</button></div>'
@@ -3628,14 +3667,13 @@ document.addEventListener('change',function(e){
   Store.init().then(async()=>{
     try{if(window.claude&&window.claude.use)Auth.plat=await window.claude.use('user')}catch(e){}
     Store.on(()=>{
-      if(Auth.me&&!Auth.me.trial){const a=Store.get('accounts',Auth.me.id);if(!a||a.active===false){Auth.out();return}Auth.me=a;if(waitOn&&!a.pending){waitOn=false;enter();return}if(waitOn)return}
+      if(Auth.me){const a=Store.get('accounts',Auth.me.id);if(!a||a.active===false){Auth.out();return}Auth.me=a;if(waitOn&&!a.pending){waitOn=false;enter();return}if(waitOn)return}
       if(Auth.owner()){const n=pendingList().length;if(n>lastPend)toast('ငွေကိုင် '+n+' ဦး ခွင့်ပြုချက် စောင့်နေသည် — ဆက်တင် › အကောင့်များ');lastPend=n}
       paintChrome();if(Auth.me)App.render();
     });
     paintChrome();
     PL.restoreAll();
-    try{if(!localStorage.getItem(SK))localStorage.setItem(SK,'trial-c')}catch(e){}
-    if(Auth.restore()){if(Auth.me.pending&&!Auth.me.trial)waitScreen(Auth.me);else enter()}else authScreen();(function(){const bt=document.createElement('button');const owner=()=>{try{return localStorage.getItem(SK)==='trial'}catch(e){return false}};bt.textContent=owner()?'Owner ➜ Cashier':'Cashier ➜ Owner';bt.style.cssText='position:fixed;right:10px;bottom:calc(var(--tabh,66px) + 84px + env(safe-area-inset-bottom,0px));z-index:90;border:0;border-radius:999px;padding:6px 12px;font:700 12px/1.4 sans-serif;background:rgba(10,25,47,.78);color:#fff;opacity:.85';bt.onclick=()=>{try{localStorage.setItem(SK,owner()?'trial-c':'trial')}catch(e){}location.reload()};document.body.appendChild(bt)})()
+    if(Auth.restore()){if(Auth.me.pending)waitScreen(Auth.me);else enter()}else authScreen();
   });
   setInterval(()=>{if(today()!==App.lastDay){App.lastDay=today();App.paint(false);toast('နောက်တစ်နေ့သို့ ရောက်ပါပြီ — မရှင်းရသေးသော ကြွေးများကို ယခင်ရက်မှ လွှဲပြောင်းဟု မှတ်ထားပါသည်')}},30000);
   let _cw=priceCol();window.addEventListener('resize',()=>{const w=priceCol();if(w===_cw)return;_cw=w;const cb=$('#cartBox');if(App.tab==='sell'&&cb&&!cb.contains(document.activeElement))cb.innerHTML=cartHTML()});

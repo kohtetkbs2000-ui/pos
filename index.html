@@ -1173,22 +1173,6 @@ const TG={
       toast('Telegram သို့ ပို့၍ မရပါ — အင်တာနက် ပြန်ရလျှင် ထပ်ပို့ပါမည်');return false;
     }
   },
-  /* no bot: open the phone's Share sheet with the report + files; pick Telegram (your chat is listed first once used) */
-  async shareClose(d){
-    const text=this.text(d);
-    try{
-      if(NATIVE()&&NP('Filesystem')&&NP('Share')){
-        const wr=async(name,txt)=>(await NP('Filesystem').writeFile({path:name,data:txt,directory:'CACHE',encoding:'utf8'})).uri;
-        const bk=JSON.stringify(AB.snap());
-        const files=[await wr('shoppos-backup-'+d+'.json',bk),await wr('shoppos-vouchers-'+d+'.csv',toCSV(csvRows('vouchers')))];
-        await NP('Share').share({title:'စာရင်းပိတ် '+d,text:text,files:files,dialogTitle:'Telegram သို့ ပို့မည်'});
-      }else if(navigator.share){
-        await navigator.share({title:'စာရင်းပိတ် '+d,text:text});
-      }else{
-        await Dl.save({filename:'shoppos-backup-'+d+'.json',data:JSON.stringify(AB.snap())});
-      }
-    }catch(e){if(!/cancel|abort|declined/i.test(String((e&&(e.message||e.name||e.code))||e)))toast('Share ဖွင့်၍ မရပါ')}
-  },
   async retry(){
     if(!this.cfg()||this.busy)return;let d=null;try{d=localStorage.getItem('shoppos.tg.pend')}catch(e){}
     if(!d||navigator.onLine===false)return;
@@ -2499,7 +2483,7 @@ function settingsSheet(){
      +'<div class="rowf" style="margin-bottom:12px">'+(Store.mode==='cloud'?'<button class="btn s" id="sbSync">ယခု ချိန်ညှိမည်</button><button class="btn s" id="sbLink">ငွေကိုင်ဖုန်းအတွက် လင့်ခ် ကူးမည်</button>':'')+'<button class="btn s" id="sbChg">Supabase '+(Store.mode==='cloud'?'ပြောင်းမည်':'ချိတ်မည်')+'</button></div>'
      +'<div class="sec-t">Backup / Excel ထုတ်ရန်</div><p class="sub" style="margin-bottom:8px">Backup ဖိုင်ကို ဖုန်းပျောက်လျှင် ပြန်သွင်းရန် သိမ်းထားပါ။ CSV ဖိုင်ကို Excel / Google Sheets တွင် ဖွင့်နိုင်သည်။</p>'
      +'<div class="rowf" style="margin-bottom:8px"><button class="btn s pri" data-ex="backup">Backup ဖိုင် (JSON)</button><label class="btn s" for="sRestF">Backup ပြန်သွင်းမည်</label><input type="file" id="sRestF" accept=".json,application/json" hidden></div>'
-     +(Auth.owner()?'<div class="sec-t">စာရင်းပိတ်ပြီး Telegram သို့ ပို့ရန်</div><label class="swrow" style="border-top:0;padding:6px 0"><span>စာရင်းပိတ်တိုင်း Share ဖွင့်မည် (Bot မလို)</span><input type="checkbox" class="sw" id="tgShare"'+(S.tgShare===false?'':' checked')+'></label><p class="sub" style="margin:0 0 8px">စာရင်းပိတ်လိုက်တာနဲ့ Share ပြတင်းပေါက် ပေါ်မည် — Telegram ကိုရွေးပြီး ကိုယ့် Chat ကို နှိပ်ရုံပါ (တစ်ခါ ရွေးပြီးရင် နောက်တစ်ခါ Chat က အပေါ်ဆုံးမှာ ပေါ်တတ်သည်)။</p><details style="margin-bottom:10px"><summary class="sub">အလိုအလျောက် ပို့ရန် (Bot သုံးမည်ဆိုလျှင်)</summary><p class="sub" style="margin:6px 0">Bot ချိတ်ထားလျှင် Share မဖွင့်တော့ဘဲ Telegram သို့ တန်းပို့မည်။ (1) @BotFather ဖြင့် Bot ဆောက်ပြီး Token ထည့်ပါ (2) Bot ကို "hi" ပို့ပါ (3) "Chat ID ရှာမည်" နှိပ်ပါ။</p><div class="field"><label class="lbl" for="tgTok">Bot Token</label><input class="inp" id="tgTok" autocomplete="off" value="'+esc(S.tgToken||'')+'"></div><div class="field"><label class="lbl" for="tgChat">Chat ID</label><input class="inp" id="tgChat" inputmode="numeric" autocomplete="off" value="'+esc(S.tgChat||'')+'"></div><div class="rowf"><button class="btn s" id="tgFind" type="button">Chat ID ရှာမည်</button><button class="btn s" id="tgTest" type="button">စမ်းပို့မည်</button></div></details>':'')
+     +(Auth.owner()?'<div class="sec-t">Telegram သို့ အလိုအလျောက် ပို့ရန်</div><p class="sub" style="margin:0 0 8px">စာရင်းပိတ်တိုင်း စာရင်းအကျဉ်း + Backup ဖိုင် + ဘောက်ချာ CSV ကို Telegram သို့ ပို့မည်။ တစ်ကြိမ်သာ ချိတ်ရန်လိုသည်။ (1) Telegram တွင် @BotFather ဖြင့် Bot ဆောက်ပြီး Token ကူးထည့်ပါ (2) ထို Bot ကို Telegram ထဲတွင် "hi" ပို့ပါ (3) "Chat ID ရှာမည်" နှိပ်ပါ။</p><div class="field"><label class="lbl" for="tgTok">Bot Token</label><input class="inp" id="tgTok" autocomplete="off" value="'+esc(S.tgToken||'')+'"></div><div class="field"><label class="lbl" for="tgChat">Chat ID</label><input class="inp" id="tgChat" inputmode="numeric" autocomplete="off" value="'+esc(S.tgChat||'')+'"></div><div class="rowf" style="margin-bottom:10px"><button class="btn s" id="tgFind" type="button">Chat ID ရှာမည်</button><button class="btn s" id="tgTest" type="button">စမ်းပို့မည်</button></div>':'')
      +'<div class="rowf" style="margin-bottom:4px"><button class="btn s" id="sAutoRest">Auto backup မှ ပြန်ယူမည်</button></div><p class="sub" style="margin:0 0 10px">ဒေတာ ပြောင်းတိုင်း ဤစက်ထဲ (Documents/ShopPOS) တွင် အလိုအလျောက် သိမ်းထားသည်။</p>'
      +'<div class="rowf" style="margin-bottom:12px"><button class="btn s" data-ex="vouchers">ဘောက်ချာ CSV</button><button class="btn s" data-ex="products">ပစ္စည်း CSV</button><button class="btn s" data-ex="customers">ဖောက်သည် CSV</button><button class="btn s" data-ex="expenses">ကုန်ကျစရိတ် CSV</button></div>'
      +'<div class="sec-t">Print / Printer</div>'
@@ -2542,7 +2526,7 @@ function settingsSheet(){
       q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
       q('#sSave').onclick=()=>{
         const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
-        if(q('#tgTok')){ns.tgToken=q('#tgTok').value.trim();ns.tgChat=q('#tgChat').value.trim();ns.tgShare=q('#tgShare').checked}
+        if(q('#tgTok')){ns.tgToken=q('#tgTok').value.trim();ns.tgChat=q('#tgChat').value.trim()}
         Object.keys(mEd.orig).forEach(n=>{const o=mEd.orig[n];if(o===n)return;
           Store.list('vouchers').forEach(v=>{if((v.payments||[]).some(p=>p.method===o))Store.put('vouchers',Object.assign({},v,{payments:v.payments.map(p=>p.method===o?Object.assign({},p,{method:n}):p)}))});
           Store.list('expenses').forEach(x=>{if(x.method===o)Store.put('expenses',Object.assign({},x,{method:n}))})});
@@ -3416,7 +3400,7 @@ async function closeDay(){
   const old=Sel.closing(d)||{},me=Auth.me||{};
   Store.put('closings',Object.assign({},old,{id:d,date:d,status:'closed',closedAt:Date.now(),by:me.id||'',byName:me.name||'',count:Sel.countOn(d),sales:Sel.salesOn(d),collected:Sel.collectedOn(d),expenses:Ex.on(d),closeCount:(old.closeCount||0)+1,reqAt:null,reqBy:null,reqByName:null}));
   toast('ယနေ့ စာရင်း ပိတ်ပြီးပါပြီ');
-  if(TG.cfg())setTimeout(()=>TG.sendClose(d),600);else if(Store.d.settings.tgShare!==false)setTimeout(()=>TG.shareClose(d),600);
+  setTimeout(()=>TG.sendClose(d),600);
 }
 async function reqReopen(){
   const d=today(),c=Sel.closing(d);

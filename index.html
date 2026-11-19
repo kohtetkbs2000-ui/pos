@@ -2543,7 +2543,8 @@ function checkoutSheet(){
       };
       const paintCust=()=>{
         const cust=st.custId?Store.get('customers',st.custId):null;
-        q('#ckSel').innerHTML=cust?'<div class="selchip"><div class="av" style="width:34px;height:34px">'+esc(initial(cust.name))+'</div><div class="mid"><div class="nm">'+esc(cust.name)+'</div><div class="sub">'+esc(cust.phone||'')+' · '+ks(cust.points||0)+' မှတ်'+(Sel.custDue(cust.id)>0?' · ကြွေး '+ks(Sel.custDue(cust.id)):'')+'</div></div><button type="button" class="icon-btn" id="ckClr" aria-label="ဖယ်ရှားမည်" style="width:34px;height:34px">'+ico('x')+'</button></div>':'<div class="selchip"><div class="mid">ဧည့်သည် (ဖောက်သည်မဟုတ်)</div></div>';
+        q('#ckSel').innerHTML=cust?'<div class="selchip"><div class="av" style="width:34px;height:34px">'+esc(initial(cust.name))+'</div><div class="mid"><div class="nm">'+esc(cust.name)+'</div><div class="sub">'+esc(cust.phone||'')+' · '+ks(cust.points||0)+' မှတ်'+(Sel.custDue(cust.id)>0?' · ကြွေး '+ks(Sel.custDue(cust.id)):'')+'</div></div><button type="button" class="icon-btn" id="ckEdit" aria-label="ပြင်ဆင်မည်" style="width:34px;height:34px">'+ico('edit')+'</button><button type="button" class="icon-btn" id="ckClr" aria-label="ဖယ်ရှားမည်" style="width:34px;height:34px">'+ico('x')+'</button></div>':'<div class="selchip"><div class="mid">ဧည့်သည် (ဖောက်သည်မဟုတ်)</div></div>';
+        const ce=q('#ckEdit');if(ce)ce.onclick=()=>customerSheet(st.custId,()=>{paintCust();paintRes();paintSum()});
         const cl=q('#ckClr');if(cl)cl.onclick=()=>{st.custId=null;Cart.customerId=null;q('#ckPts').value='';paintCust();paintRes();paintSum()};
         q('#ckPtsBox').hidden=!(cust&&(cust.points||0)>0&&S.pointValue>0);
         if(q('#ckPtsBox').hidden)q('#ckPts').value='';
@@ -2645,6 +2646,31 @@ function restoreData(j){
   if(j.settings)Store.putSettings(Object.assign({},Store.d.settings,j.settings,{logo:j.settings.logo||Store.d.settings.logo,logoSize:j.settings.logoSize||Store.d.settings.logoSize}));
   toast('ပြန်သွင်းပြီးပါပြီ — ဒေတာ '+n+' ခု');
 }
+const TabTheme={K:'shoppos.tabTheme',DEF:{bg:'#0A192F',fg:'#939AA3',act:'#FFFFFF'},
+  get(){try{const t=JSON.parse(LL.get(this.K)||'{}');return t&&typeof t==='object'?t:{}}catch(e){return {}}},
+  set(t){LL.put(this.K,JSON.stringify(t));this.apply()},
+  rgba(h,a){const m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return '';const n=parseInt(m[1],16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')'},
+  apply(){const t=this.get(),r=document.documentElement.style,sp=(k,v)=>{if(v)r.setProperty(k,v);else r.removeProperty(k)};
+    sp('--tab-bg',t.bg);sp('--tab-fg',t.fg);sp('--tab-act',t.act);sp('--tab-pill',t.act?this.rgba(t.act,.15):'');
+    const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t.bg||this.DEF.bg)}};
+TabTheme.apply();
+function colorSheet(){
+  const T=TabTheme,row=(id,lb)=>'<div class="rowf" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:12px"><label class="lbl" for="'+id+'" style="margin:0">'+lb+'</label><input type="color" id="'+id+'" style="width:60px;height:40px;border:0;padding:0;background:none;flex:none"></div>';
+  const presets=[['#0A192F','ပင်လယ်ရောင်'],['#111111','အနက်'],['#14532D','စိမ်း'],['#7F1D1D','အနီရင့်'],['#4C1D95','ခရမ်း'],['#0F766E','စိမ်းပြာ'],['#9A3412','လိမ္မော်ရင့်']];
+  Sheet.open({title:'Tab အရောင် ချိန်းမည်',small:true,
+    body:'<div style="background:var(--tab-bg);border-radius:16px;padding:12px 8px;display:flex;justify-content:space-around;margin-bottom:14px"><span style="color:var(--tab-act);font-weight:700">ရွေးထားသည့် Tab</span><span style="color:var(--tab-fg)">အခြား Tab</span></div>'
+     +row('tcBg','Tab နောက်ခံအရောင်')+row('tcFg','Tab စာသား (မရွေးထားသည့်)')+row('tcAct','Tab စာသား (ရွေးထားသည့်)')
+     +'<div class="lbl">အမြန်ရွေးရန် (နောက်ခံ)</div><div class="rowf" style="gap:8px;margin:6px 0 10px">'+presets.map(x=>'<button type="button" data-bg="'+x[0]+'" aria-label="'+x[1]+'" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:'+x[0]+'"></button>').join('')+'</div>'
+     +'<p class="sub">ဤဖုန်း/စက်ထဲတွင်သာ သိမ်းပါမည် — စက်တစ်လုံးချင်းစီ ကိုယ်ကြိုက်သလို ရွေးနိုင်ပါသည်။</p>',
+    footer:'<button class="btn block" id="tcReset">ပုံမှန်အရောင် ပြန်ထားမည်</button>',
+    onMount(el){
+      const g=id=>el.querySelector('#'+id),load=()=>{const t=T.get();g('tcBg').value=t.bg||T.DEF.bg;g('tcFg').value=t.fg||T.DEF.fg;g('tcAct').value=t.act||T.DEF.act};
+      load();
+      [['tcBg','bg'],['tcFg','fg'],['tcAct','act']].forEach(x=>g(x[0]).addEventListener('input',()=>{const t=T.get();t[x[1]]=g(x[0]).value;T.set(t)}));
+      el.querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>{const t=T.get();t.bg=b.dataset.bg;T.set(t);load()});
+      g('tcReset').onclick=()=>{LL.put(T.K,'');T.apply();load();toast('ပုံမှန်အရောင် ပြန်ထားပြီးပါပြီ')};
+    }});
+}
 function settingsSheet(){
   const S=Store.d.settings,LP=labelPrefs();
   const hasDemo=['products','customers','vouchers'].some(c=>Store.list(c).some(x=>x.demo));
@@ -2662,7 +2688,8 @@ function settingsSheet(){
      +'<div class="field"><label class="lbl"><input type="checkbox" id="sSign"'+(S.signBox!==false?' checked':'')+'> A4 တွင် လက်မှတ်နေရာ ပြမည်</label></div>'
      +'<div class="rowf"><button type="button" class="btn s" id="sPrev">'+ico('eye')+'နမူနာ ကြည့်မည်</button></div>'
      +'</div><div class="spage" data-pg="account" hidden>'
-     +'<div class="sec-t">အကောင့်</div><div class="rowf"><button type="button" class="btn s" id="sAcc">'+ico('users')+'အကောင့်များ စီမံမည်'+(pendingList().length?' ('+pendingList().length+' ခွင့်ပြုရန်)':'')+'</button><button type="button" class="btn s out" id="sOut">'+ico('logout')+'ထွက်မည်</button></div>'
+     +'<div class="sec-t">အရောင်</div><div class="rowf" style="margin-bottom:6px"><button type="button" class="btn s" id="sColor">'+ico('sliders')+'Tab / စာသား အရောင် ချိန်းမည်</button></div>'
+      +'<div class="sec-t">အကောင့်</div><div class="rowf"><button type="button" class="btn s" id="sAcc">'+ico('users')+'အကောင့်များ စီမံမည်'+(pendingList().length?' ('+pendingList().length+' ခွင့်ပြုရန်)':'')+'</button><button type="button" class="btn s out" id="sOut">'+ico('logout')+'ထွက်မည်</button></div>'
      +(Auth.owner()?'<div class="sec-t">ခွင့်ပြုချက်</div><label class="swrow" style="border-top:0;padding:6px 0"><span class="swl">'+ico('eye')+'<span>Cashier ကို ဝယ်ဈေး ကြည့်ခွင့်ပေးမည်</span></span><input type="checkbox" class="sw" id="sCashCost"'+(S.cashierCost===false?'':' checked')+'></label><p class="sub" style="margin:0 0 8px">ပိတ်ထားလျှင် Cashier ဘက်တွင် ဝယ်ဈေး မပေါ်ပါ၊ ပစ္စည်းအဝင်လည်း မှတ်၍ မရပါ။</p>':'')
      +'</div><div class="spage" data-pg="money" hidden>'
      +'<div class="sec-t">ငွေပေးချေမှု နည်းလမ်းများ</div><div class="mpick" id="sMs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sMNew" placeholder="နည်းလမ်းအသစ် ထည့်ရန် (ဥပမာ - AYA Pay)" aria-label="နည်းလမ်းအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sMAdd">'+ico('plus')+'ထည့်မည်</button></div>'
@@ -2741,7 +2768,7 @@ function settingsSheet(){
       if(q('#sbSync'))q('#sbSync').onclick=async()=>{toast('ချိန်ညှိနေသည်...');await Store.sync();toast(Store.syncErr||(Store.online?'ချိန်ညှိပြီးပါပြီ':'အင်တာနက် မရှိသေးပါ — ရသည်နှင့် အလိုအလျောက် ချိန်ညှိပါမည်'))};
       if(q('#sbLink'))q('#sbLink').onclick=async()=>{const c=Sb.cfg();if(!c||!c.url)return;const l=(NATIVE()?'https://localhost/':location.href.split('#')[0])+'#sb='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({url:c.url,key:c.key})))));try{await navigator.clipboard.writeText(l);toast('လင့်ခ် ကူးပြီးပါပြီ — ငွေကိုင်ဖုန်းများတွင် ဖွင့်ပါ')}catch(x){prompt('ဤလင့်ခ်ကို ကူးပါ',l)}};
       q('#sbChg').onclick=async()=>{if(await confirmBox('Supabase ပြောင်းမည်','ပြန်ချိတ်ရန် စာမျက်နှာ ပြန်စပါမည်။ Owner ဖြင့် ပြန်ဝင်ရပါမည်။','ဆက်မည်')){Sb.save({});try{localStorage.removeItem(SK)}catch(x){}location.reload()}};
-      q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
+      q('#sColor').onclick=()=>colorSheet();q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
       q('#sSave').onclick=()=>{
         const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
         if(q('#sCashCost'))ns.cashierCost=q('#sCashCost').checked;
@@ -3254,7 +3281,7 @@ const Auth={me:null,plat:null,
   restore(){let id=null;try{id=localStorage.getItem(SK)}catch(e){}const a=id&&Store.get('accounts',id);if(a&&a.active!==false){this.me=a;return true}return false},
   owner(){return !!this.me&&this.me.role==='owner'}};
 const rndCode=()=>Math.random().toString(36).slice(2,8).toUpperCase();
-const CASH_ORDER=['reports','sell','vouchers','exp','stock'];
+const CASH_ORDER=['reports','sell','vouchers','customers','exp','stock'];
 const tabOK=id=>Auth.owner()?id!=='sell'&&id!=='home':CASH_ORDER.indexOf(id)>=0;
 function buildTabs(){const T=TABS.filter(t=>tabOK(t.id)).sort((a,b)=>Auth.owner()?(a.id==='reports'?-1:b.id==='reports'?1:0):CASH_ORDER.indexOf(a.id)-CASH_ORDER.indexOf(b.id));$('#tabbarIn').innerHTML=T.map(t=>'<button class="tab" data-tab="'+t.id+'" aria-current="false"><span class="pl">'+ico(t.icon)+'</span><span>'+t.label+'</span></button>').join('');$('#tabbarIn').style.setProperty('--nt',T.length)}
 function enter(){if(Auth.me&&Auth.me.role!=='owner'&&Auth.me.pending===true){waitScreen(Auth.me);return}document.body.classList.remove('noauth');$('#auth').hidden=true;buildTabs();paintChrome();App.go('reports')}
@@ -3395,8 +3422,8 @@ function nameSheet(){
       paintChrome();c.close();toast('အမည် ပြောင်းပြီးပါပြီ');
     }}});
 }
-function mySheet(){Sheet.open({title:'ကျွန်ုပ်၏ အကောင့်',small:true,body:'<p class="msg"><b>'+esc(Auth.me.name)+'</b>'+(Auth.me.device?'':' · @'+esc(Auth.me.username))+'<br>'+(Auth.owner()?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</p>',footer:'<button class="btn block" id="myNm" style="margin-bottom:8px">အမည် ပြောင်းမည်</button>'+'<button class="btn block" id="myPrn" style="margin-bottom:8px">'+ico('print')+'Printer ချိတ်ဆက်ရန်</button><div class="row2">'+(Auth.me.device?'':'<button class="btn" id="myPw">စကားဝှက်ပြောင်းမည်</button>')+'<button class="btn out" id="myOut">ထွက်မည်</button></div>',
-  onMount(el){const on=(s,f)=>{const n=el.querySelector(s);if(n)n.onclick=f};on('#myNm',()=>nameSheet());on('#myPrn',()=>printerSheet());on('#myPw',()=>pwSheet(Auth.me));on('#myOut',()=>Auth.out())}})}
+function mySheet(){Sheet.open({title:'ကျွန်ုပ်၏ အကောင့်',small:true,body:'<p class="msg"><b>'+esc(Auth.me.name)+'</b>'+(Auth.me.device?'':' · @'+esc(Auth.me.username))+'<br>'+(Auth.owner()?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</p>',footer:'<button class="btn block" id="myNm" style="margin-bottom:8px">အမည် ပြောင်းမည်</button>'+'<button class="btn block" id="myClr" style="margin-bottom:8px">'+ico('sliders')+'Tab / စာသား အရောင် ချိန်းမည်</button>'+'<button class="btn block" id="myPrn" style="margin-bottom:8px">'+ico('print')+'Printer ချိတ်ဆက်ရန်</button><div class="row2">'+(Auth.me.device?'':'<button class="btn" id="myPw">စကားဝှက်ပြောင်းမည်</button>')+'<button class="btn out" id="myOut">ထွက်မည်</button></div>',
+  onMount(el){const on=(s,f)=>{const n=el.querySelector(s);if(n)n.onclick=f};on('#myNm',()=>nameSheet());on('#myPrn',()=>printerSheet());on('#myClr',()=>colorSheet());on('#myPw',()=>pwSheet(Auth.me));on('#myOut',()=>Auth.out())}})}
 function accountsSheet(){
   const body=()=>(pendingList().length?'<div class="sec-t" style="margin-top:0">ခွင့်ပြုချက် စောင့်နေသူများ</div>'+pendingList().map(a=>'<div class="rowf" style="justify-content:space-between;padding:8px 0"><div style="min-width:0"><div class="nm">'+esc(a.name)+'</div><div class="sub">'+esc(a.phone||'')+'</div></div><div class="rowf"><button class="btn pri s" data-ap="'+a.id+'">'+ico('check','s')+'ခွင့်ပြုမည်</button><button class="btn s out" data-rj="'+a.id+'">ပယ်မည်</button></div></div>').join('')+'<div style="height:10px"></div>':'')+'<p class="sub">ငွေကိုင်သည် အကောင့်အသစ်ဖွင့်ရန် ဤဖိတ်ကြားကုဒ်ကို သုံးရပါမည်</p><div class="rowf" style="margin:6px 0 12px;justify-content:space-between"><b style="font-size:24px;letter-spacing:.14em">'+esc(Store.d.settings.inviteCode||'—')+'</b><button class="btn s" id="acNew">ကုဒ်အသစ်</button></div>'
    +Store.list('accounts').sort((a,b)=>a.createdAt-b.createdAt).map(a=>'<div class="rowf" style="justify-content:space-between;border-top:1px solid var(--line);padding:8px 0"><div style="min-width:0"><div class="nm">'+esc(a.name)+(a.active===false?' <span class="w">(ပိတ်ထား)</span>':'')+(a.pending?' <span class="w">(စောင့်ဆိုင်းဆဲ)</span>':'')+'</div><div class="sub">'+(a.device?'ဖုန်း · '+esc(a.phone||a.username.replace('phone-','')):'ဖုန်း · '+esc(a.username))+' · '+(a.role==='owner'?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</div></div><div class="rowf"><button class="btn s" data-ae="'+a.id+'">ပြင်မည်</button>'+(a.device?'':'<button class="btn s" data-pw="'+a.id+'">စကားဝှက်</button>')+''+(a.role!=='owner'?'<button class="btn s out" data-ad="'+a.id+'">'+ico('trash','s')+'ဖျက်မည်</button>':'')+(a.role!=='owner'?'<button class="btn s out" data-tg="'+a.id+'">'+(a.active===false?'ပြန်ဖွင့်မည်':'ပိတ်မည်')+'</button>':'')+'</div></div>').join('');

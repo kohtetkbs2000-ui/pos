@@ -248,7 +248,7 @@ h1{font-size:23px;font-weight:800;line-height:1.5;letter-spacing:-.01em;text-wra
 .selchip{display:flex;align-items:center;gap:10px;background:var(--tint2);border-radius:14px;padding:8px 12px}
 .selchip .mid{flex:1;min-width:0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sec-t{font-size:14px;font-weight:700;margin:16px 0 8px}
+.sec-t{font-size:14px;font-weight:700;margin:16px 0 8px}.pv{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 2px;font:inherit;color:inherit;cursor:pointer}.pv:last-child{border-bottom:0}.pv .pn{font-size:12px;letter-spacing:.04em;color:var(--mut);text-transform:uppercase}.pv .pa{font-size:18px;font-weight:700}.pv .pa small{font-size:11px;font-weight:500;color:var(--faint)}.rcv .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;font:inherit;color:inherit;text-align:left}.rcv .row.btnr{cursor:pointer}.sec-t>.ic{width:18px;height:18px;margin-right:7px;vertical-align:-3px;color:var(--mut)}.swl{display:flex;align-items:center;gap:10px;min-width:0}.swl .ic{color:var(--mut);flex:none;width:20px;height:20px}
 .prev{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;position:relative;margin:8px 0 12px}
 .prev-in{transform-origin:top left;width:max-content;padding:10px}
 .prev.edt [data-ed]{cursor:pointer;outline:1px dashed rgba(10,25,47,.3);outline-offset:2px;border-radius:3px}
@@ -502,6 +502,35 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 .auth .rolebtn{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
 .auth .rolebtn:nth-of-type(2){animation-delay:90ms}.auth .rolebtn:nth-of-type(3){animation-delay:180ms}
 .auth h2,.auth img.lg{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+/* subscription block screen */
+.blk{text-align:center;padding-top:max(56px,env(safe-area-inset-top))}
+.blk-ic{position:relative;width:104px;height:104px;margin:0 auto 24px;display:grid;place-items:center;border-radius:50%;background:var(--redbg);color:var(--red);animation:blkPop .7s cubic-bezier(.2,.9,.3,1.3) both}
+.blk-ic.pend{background:rgba(217,119,6,.13);color:#B45309}
+.blk-ic svg{width:46px;height:46px}
+.blk-ic svg.flip{animation:blkFlip 3.2s cubic-bezier(.6,0,.3,1) 1s infinite}
+.blk-ic svg.tick{animation:blkTick 2.4s ease-in-out 1s infinite;transform-origin:center}
+.blk-ring{position:absolute;inset:0;border-radius:50%;border:2px solid currentColor;opacity:0;animation:blkRing 2.6s ease-out infinite}
+.blk-ring.r2{animation-delay:1.3s}
+.blk h2{margin-bottom:6px}
+.blk .blk-shop{font-size:14px;color:var(--mut);margin-bottom:10px}
+.blk .blk-msg{font-size:16px;line-height:1.7;margin:0 0 18px}
+.blk-card{background:var(--card);border:1px solid rgba(10,25,47,.1);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 6px 22px rgba(10,25,47,.07)}
+.blk-card .blk-t{font-size:13px;color:var(--mut)}
+.blk-card .blk-ph{font-size:28px;font-weight:800;letter-spacing:.5px;margin:4px 0 12px;color:var(--act);animation:blkGlow 2.4s ease-in-out infinite}
+.blk-card .rowf{justify-content:center;gap:10px}
+.blk-card .btn{min-width:130px;text-decoration:none;text-align:center}
+.blk>*:not(.blk-ic){animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.blk>h2{animation-delay:.15s}.blk>.blk-shop{animation-delay:.2s}.blk>.blk-msg{animation-delay:.28s}.blk>.blk-card{animation-delay:.4s}.blk>.btn{animation-delay:.5s}
+@keyframes blkPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@keyframes blkRing{0%{opacity:.5;transform:scale(1)}100%{opacity:0;transform:scale(1.75)}}
+@keyframes blkFlip{0%,55%{transform:rotate(0)}80%,100%{transform:rotate(180deg)}}
+@keyframes blkTick{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+@keyframes blkGlow{0%,100%{opacity:1}50%{opacity:.65}}
+@media (prefers-reduced-motion:reduce){.blk *{animation:none!important}}
+.subbar{height:8px;border-radius:99px;background:rgba(10,25,47,.1);overflow:hidden;margin:10px 0 8px}
+.subbar>i{display:block;height:100%;border-radius:99px;transform-origin:left;animation:subGrow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes subGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
 .btn.pri{background-image:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%);background-size:250% 100%;background-position:120% 0;transition:background-position .6s,transform .15s,opacity .2s}
 .btn.pri:hover{background-position:-20% 0}
 .tab .pl svg{transition:transform .25s cubic-bezier(.2,.9,.25,1)}
@@ -582,6 +611,7 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 .osed .x-btn[disabled]{opacity:.3}
 @media (prefers-reduced-motion:reduce){.osbox,.ossteps button,.osed,.osp-t i,.osm-t i,.osp-t i::after,.osm-t i::after,.osp.full .osp-n,.ossteps button .n{animation:none!important}}
 </style>
+<style>.sec-t .ic,.card-h h3 .ic{width:16px;height:16px;margin-right:6px;vertical-align:-3px;color:var(--pri,currentColor)}.btn.s .ic{width:16px;height:16px}.btn .ic.auto{margin-right:6px;vertical-align:-4px}</style>
 </head><body>
 
 <div id="app">
@@ -600,6 +630,7 @@ button,[data-act],.prod,.tab,.seg button,select,label{touch-action:manipulation}
 <div class="cobar" id="cobar" hidden></div>
 <nav class="tabbar" id="tabbar" aria-label="ပင်မမီနူး"><div class="tabbar-in" id="tabbarIn"></div></nav>
 <div id="toast" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:calc(var(--tabh) + 84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);z-index:300;max-width:min(92vw,420px);padding:10px 18px;border-radius:16px;background:var(--pri);color:var(--pri-fg);font-size:14px;line-height:1.6;box-shadow:0 10px 30px rgba(10,25,47,.35);opacity:0;pointer-events:none;transition:opacity .25s,transform .3s cubic-bezier(.2,.9,.25,1);text-align:center"></div>
+<style>#boot{position:fixed;inset:0;z-index:450;display:grid;place-content:center;justify-items:center;gap:16px;background:var(--bg,#fff);color:var(--fg,#0A192F);transition:opacity .3s}#boot.off{opacity:0;pointer-events:none}.spin-ring{width:44px;height:44px;border-radius:50%;border:4px solid rgba(10,25,47,.12);border-top-color:#2563eb;animation:spin .8s linear infinite}#boot p{margin:0;font-size:14px;opacity:.7}@media (prefers-reduced-motion:reduce){.spin-ring{animation-duration:2.4s}}</style><div id="boot" role="status" aria-live="polite"><div class="spin-ring"></div><p>ချိတ်ဆက်နေသည်...</p></div><script>window.bootHide=function(){var b=document.getElementById("boot");if(!b)return;b.classList.add("off");setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b)},350)};setTimeout(function(){var b=document.getElementById('boot');if(!b||b.classList.contains('off'))return;b.innerHTML='<p style="font-size:16px;font-weight:700;opacity:1">ချိတ်ဆက်၍ မရသေးပါ</p><p>အင်တာနက် စစ်ပြီး ပြန်ချိတ်ကြည့်ပါ</p><button type="button" style="padding:12px 22px;border:0;border-radius:12px;background:#2563eb;color:#fff;font:inherit;font-weight:700" onclick="location.reload()">ပြန်ချိတ်မည်</button>'},12000);</script>
 <div id="auth" hidden></div>
 <div id="printArea"></div><div id="syncPg" hidden></div>
 
@@ -664,11 +695,28 @@ const ICON={
  chev:'<path d="m9 5 7 7-7 7"/>',
  alert:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/>',
  refresh:'<path d="M20 11a8 8 0 0 0-14.2-4.6L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.2 4.6L20 15.5M20 20v-4.5h-4.5"/>',
- wallet:'<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3M4 7.5V17a2 2 0 0 0 2 2h14V8H6.5A2.5 2.5 0 0 1 4 7.5zM16 13.5h.01"/>'
+ wallet:'<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3M4 7.5V17a2 2 0 0 0 2 2h14V8H6.5A2.5 2.5 0 0 1 4 7.5zM16 13.5h.01"/>',
+ shop:'<path d="M4 9.5 5.5 4h13L20 9.5M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20"/>',
+ tag:'<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-5.6 5.6a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8" cy="8" r="1.3"/>',
+ image:'<rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 4.5-4.5 3.5 3.5 3-3 5 5"/>',
+ shield:'<path d="M12 3.5 5 6v5.5c0 4.2 2.8 7.2 7 9 4.2-1.8 7-4.8 7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+ target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+ gift:'<rect x="4" y="9" width="16" height="4" rx="1"/><path d="M5.5 13v7h13v-7M12 9v11M12 9S10.5 4 8.2 4.8C6.5 5.5 7.6 9 12 9zm0 0s1.5-5 3.8-4.2C17.5 5.5 16.4 9 12 9z"/>',
+ cloud:'<path d="M7 18.5a4 4 0 0 1-.6-7.9A5.5 5.5 0 0 1 17 9.5a4.5 4.5 0 0 1 .5 9z"/>',
+ download:'<path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 19.5h14"/>',
+ upload:'<path d="M12 16V5M7.5 9 12 4.5 16.5 9M5 19.5h14"/>',
+ file:'<path d="M6 3.5h8l4 4V20.5H6zM14 3.5v4h4M9 13h6M9 16.5h6"/>',
+ send:'<path d="M20.5 4 3.5 11l6.5 2.5L12.5 20zM10 13.5l5-5"/>',
+ list:'<path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>',
+ logout:'<path d="M10 4.5H6A1.5 1.5 0 0 0 4.5 6v12A1.5 1.5 0 0 0 6 19.5h4M14.5 8 19 12l-4.5 4M19 12H9.5"/>',
+ eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
 };
 const ico=(n,c)=>'<svg class="ic '+(n==='print'?'ic-print ':'')+(c||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[n]+'</svg>';
+window.__ico=ico;window.__ICON=ICON;
 
 /* ================= Supabase connection ================= */
+const canCost=()=>!!(Auth.owner&&Auth.owner())||Store.d.settings.cashierCost!==false;
 const COLLS=['products','customers','vouchers','expenses','accounts','closings'];
 const NATIVE=()=>{const c=window.Capacitor;return !!(c&&c.isNativePlatform&&c.isNativePlatform())};
 const NP=n=>{const c=window.Capacitor;return c&&c.Plugins&&c.Plugins[n]||null};
@@ -691,6 +739,31 @@ const Sb={
   SQL:'',
   LIB:['vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'],
   URL:'https://ngdpngcdkowozbfqgpuv.supabase.co',
+  CONTACT:'09682222347',
+  live(s){return (s.status==='active'||s.status==='trial')&&!(s.expires_at&&new Date(s.expires_at)<new Date())},
+  /* animated full-screen notice when the shop is suspended / expired / waiting for approval */
+  blockScreen(s,o){
+    o=o||{};try{bootHide()}catch(x){}
+    const el=document.getElementById('auth'),key=String(s.status)+'|'+String(s.expires_at||'');
+    if(el.dataset.blk===key&&el.querySelector('.blk'))return;
+    el.dataset.blk=key;
+    document.body.classList.add('noauth');el.hidden=false;
+    const e2=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const ph=this.CONTACT,tg='https://t.me/+95'+ph.replace(/^0/,'');
+    const pend=s.status==='pending',rej=s.status==='rejected',ban=s.status==='banned',kick=s.status==='kicked',over=s.status==='over';
+    const title=kick?'ဤစက်ကို ဖြုတ်ချလိုက်ပါပြီ':over?'စက်အရေအတွက် ပြည့်နေပါသည်':ban?'ဤအကောင့်ကို ပိတ်ထားပါသည်':pend?'Admin ခွင့်ပြုချက် စောင့်နေပါသည်':rej?'လျှောက်လွှာကို ပယ်ချထားပါသည်':'သက်တမ်းကုန်ဆုံးထားပါပြီ';
+    const msg=kick?'ဆိုင်ပိုင်ရှင် / Admin က ဤစက်ကို ထွက်ခိုင်းထားပါသည်။ ပြန်သုံးလိုလျှင် "ပြန်ဝင်မည်" ကို နှိပ်ပါ။':over?'ဤဆိုင်အတွက် ခွင့်ပြုထားသော စက် '+(s.max||'')+' လုံး ပြည့်နေပါသည်။ အခြားစက်တစ်လုံး ထွက်သွားလျှင် အလိုအလျောက် ဝင်နိုင်ပါမည်။ စက်ပိုလိုလျှင် Admin ကို ဆက်သွယ်ပါ။':ban?'ဆိုင်ပိုင်ရှင်က ဤအကောင့်ကို ပိတ်ထားပါသည်။ ပြန်ဖွင့်ပေးသည်နှင့် အလိုအလျောက် ဝင်နိုင်ပါမည်။':pend?'ခွင့်ပြုပြီးသည်နှင့် ဖုန်းနံပါတ် / စကားဝှက်ဖြင့် ဝင်နိုင်ပါမည်။ အမြန်ခွင့်ပြုစေလိုလျှင် ဆက်သွယ်ပါ။':rej?'အသေးစိတ် သိလိုလျှင် Admin ကို ဆက်သွယ်ပါ။':'သက်တမ်းတိုးရန် '+ph+' (Telegram/phone) ကို ဆက်သွယ်ပါ';
+    const icon=(ban||kick)?'<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>':pend?'<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+      :'<svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12"/><path d="M17 22v-3.2a2 2 0 0 0-.6-1.4L12 13l-4.4 4.4a2 2 0 0 0-.6 1.4V22"/><path d="M7 2v3.2a2 2 0 0 0 .6 1.4L12 11l4.4-4.4a2 2 0 0 0 .6-1.4V2"/></svg>';
+    el.innerHTML='<div class="auth blk" role="alert"><div class="blk-ic'+(pend?' pend':'')+'"><span class="blk-ring"></span><span class="blk-ring r2"></span>'+icon+'</div>'
+      +'<h2>'+title+'</h2>'+(s.name?'<div class="blk-shop">'+e2(s.name)+'</div>':'')+'<p class="blk-msg">'+msg+'</p>'
+      +((ban||kick)?'':'<div class="blk-card"><div class="blk-t">'+(pend?'ဆက်သွယ်ရန်':'သက်တမ်းတိုးရန် ဆက်သွယ်ပါ')+'</div><div class="blk-ph">'+ph+'</div>'
+      +'<div class="rowf"><a class="btn pri" href="tel:'+ph+'">ဖုန်းခေါ်မည်</a><a class="btn" href="'+tg+'" target="_blank" rel="noopener">Telegram</a></div></div>')
+      +'<button type="button" class="btn block" id="blkRe">'+(kick?'ပြန်ဝင်မည်':'ပြန်စစ်မည်')+'</button>'
+      +(o.back?'<button type="button" class="btn block out" id="blkBk" style="margin-top:10px">← ပြန်သွားမည်</button>':'')+'</div>';
+    el.querySelector('#blkRe').onclick=kick?async()=>{const b=el.querySelector('#blkRe');b.disabled=true;try{const db=await Store.client();const r=await db.rpc('reclaim_device',{p_device:Store.devId()});if(r&&r.data&&r.data.ok){location.reload();return}b.textContent='စက်အရေအတွက် ပြည့်နေသည်'}catch(x){b.textContent='ချိတ်ဆက်၍ မရပါ'}setTimeout(()=>{b.disabled=false;b.textContent='ပြန်ဝင်မည်'},2500)}:()=>location.reload();
+    if(o.back)el.querySelector('#blkBk').onclick=()=>{delete el.dataset.blk;o.back()};
+  },
   phoneNorm(p){let d=String(p||'').replace(/\D/g,'');if(/^959\d{7,9}$/.test(d))d='0'+d.slice(2);else if(/^9\d{7,9}$/.test(d))d='0'+d;return d},
   emailOf(v){v=String(v||'').trim();return v.indexOf('@')>0?v.toLowerCase():this.phoneNorm(v)+'@pos.shop'},
   phoneOf(e){const m=/^(\d+)@pos\.shop$/.exec(String(e||''));return m?m[1]:String(e||'')},
@@ -727,7 +800,15 @@ const Sb={
       }
     }
     const r=await cl.from('kv').select('id').limit(1);
-    if(r.error)throw r.error;
+    if(r.error){
+      /* blocked by RLS: find out why (suspended / expired / pending) so we can show a proper screen */
+      if(r.error.code==='42501'||/row-level security|permission denied/i.test(String(r.error.message||''))){
+        let row=null;try{const q=await cl.from('shops').select('name,status,expires_at').limit(1);row=q&&q.data&&q.data[0]}catch(x){}
+        if(row&&!Sb.live(row))throw Object.assign(new Error('BLOCKED'),{code:'BLOCKED',shop:row});
+        try{const h=await cl.rpc('heartbeat');if(h&&h.data&&h.data.banned)throw Object.assign(new Error('BLOCKED'),{code:'BLOCKED',shop:{name:h.data.name,status:'banned'}})}catch(x){if(x&&x.code==='BLOCKED')throw x}
+      }
+      throw r.error;
+    }
     return cl;
   },
   explain(e){
@@ -735,7 +816,7 @@ const Sb={
     if(m==='lib')return 'Supabase library ဖွင့်၍ မရပါ — အင်တာနက် ချိတ်ထားခြင်း ရှိမရှိ စစ်ပါ';
     if(c==='42P01'||c==='PGRST205'||/does not exist|schema cache/i.test(m))return 'Supabase setup မပြီးသေးပါ (table မရှိ) — Admin ကို ဆက်သွယ်ပါ';
     if(m==='NOAUTH')return 'ဆိုင်ပိုင်ရှင် ဖုန်းနံပါတ်/စကားဝှက် ဖြင့် ဝင်ရန် လိုပါသည်';
-    if(m==='BLOCKED')return 'ဆိုင်အကောင့် ပိတ်ထားပါသည် — Admin ကို ဆက်သွယ်ပါ';
+    if(m==='BLOCKED')return 'သက်တမ်းကုန်ဆုံးထားပါပြီ — သက်တမ်းတိုးရန် '+this.CONTACT+' (Telegram/phone) ကို ဆက်သွယ်ပါ';
     if(/invalid login credentials/i.test(m))return 'ဖုန်းနံပါတ် သို့မဟုတ် စကားဝှက် မှားနေပါသည်';
     if(c==='42501'||/row-level security|permission denied/i.test(m))return 'ခွင့်ပြုချက် မရှိပါ — ဆိုင်အကောင့် ပိတ်ထားခြင်း၊ သက်တမ်းကုန်ခြင်း သို့မဟုတ် Admin ဘက်မှ ဆိုင်နှင့် မချိတ်ရသေးခြင်း ဖြစ်နိုင်ပါသည်';
     if(/invalid api key|jwt|apikey/i.test(m)||c==='PGRST301')return 'Key မမှန်ပါ — Project Settings › API ထဲက anon public key ကို ထည့်ပါ';
@@ -745,7 +826,7 @@ const Sb={
   /* first-run / reconnect screen: role first (Owner / Cashier), then login or apply / pair. resolves with a cfg ({url,key,email}) */
   setup(err){
     return new Promise(resolve=>{
-      const el=document.getElementById('auth');
+      bootHide();const el=document.getElementById('auth');
       document.body.classList.add('noauth');el.hidden=false;
       const e2=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       let role=null,tab='in',msg=err||'';
@@ -797,11 +878,12 @@ const Sb={
           b.disabled=true;b.textContent='Server နှင့် ချိတ်ဆက်နေသည်...';E.textContent='';
           try{
             if(!up){await login(ph,pw);return}
-            if(own){await call('apply-shop',{name:v('sbS'),owner_name:v('sbN'),phone:ph,email:Sb.emailOf(ph),password:pw});tab='in';msg='လျှောက်လွှာ ပို့ပြီးပါပြီ — Super Admin ခွင့်ပြုပြီးမှ ဝင်နိုင်ပါမည်';draw();return}
+            if(own){await call('apply-shop',{name:v('sbS'),owner_name:v('sbN'),phone:ph,email:Sb.emailOf(ph),password:pw});tab='in';msg='လျှောက်လွှာ ပို့ပြီးပါပြီ — Admin ခွင့်ပြုပြီးလျှင် ဖုန်းနံပါတ် / စကားဝှက်ဖြင့် "ဝင်ရောက်မည်" မှ ဝင်နိုင်ပါမည်';draw();return}
             await call('pair-cashier',{code:v('sbC').toUpperCase(),name:v('sbN'),phone:ph,email:Sb.emailOf(ph),password:pw});
             await login(ph,pw);
           }catch(x){
             console.error(x);
+            if(x&&x.code==='BLOCKED'&&x.shop){Sb.blockScreen(x.shop,{back:()=>{msg='';draw()}});return}
             const c=String((x&&x.code)||'');
             E.textContent=(c==='42501'&&!up&&own)?'Admin ခွင့်ပြုချက် မရသေးပါ (သို့) ဆိုင်ပိတ်ထားပါသည်':(up?String((x&&x.message)||x):Sb.explain(x));
             b.disabled=false;b.textContent=up?(own?'လျှောက်လွှာ ပို့မည်':'အကောင့် ဖွင့်မည်'):'ဝင်မည်';
@@ -819,6 +901,20 @@ window.addEventListener('unhandledrejection',e=>{console.error(e.reason);try{e.p
 
 /* ================= Store (offline-first: phone database + automatic Supabase sync) ================= */
 const DEFAULT_METHOD='ငွေသား';
+/* ---- logo is kept on this device only (never uploaded to Supabase) ---- */
+const LL={K:'shoppos.logo',KS:'shoppos.logoSize',KL:'shoppos.lblLogo',
+  get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  put(k,v){try{localStorage.setItem(k,v==null?'':String(v))}catch(e){toast('ပုံ သိမ်း၍ မရပါ — ဖုန်းနေရာ မလုံလောက်ပါ')}},
+  inj(o){o=o||{};let lg=this.get(this.K),ls=this.get(this.KS);
+    if(lg===null&&o.logo){lg=o.logo;this.put(this.K,lg);if(o.logoSize){ls=o.logoSize;this.put(this.KS,ls)}}
+    return Object.assign({},o,{logo:lg||'',logoSize:ls||'m'})},
+  strip(o){const c=Object.assign({},o);delete c.logo;delete c.logoSize;return c},
+  KT:'shoppos.logoTf',
+  tfAll(){try{return JSON.parse(this.get(this.KT)||'{}')||{}}catch(e){return {}}},
+  tf(k){const t=this.tfAll()[k]||{};return {x:+t.x||0,y:+t.y||0,s:t.s>0?+t.s:100,r:+t.r||0}},
+  setTf(k,t){const a=this.tfAll();if(!t||(!t.x&&!t.y&&(t.s||100)===100&&!t.r))delete a[k];else a[k]={x:t.x,y:t.y,s:t.s,r:t.r};this.put(this.KT,JSON.stringify(a))},
+  tfCss(k,unit){const t=this.tf(k);if(!t.x&&!t.y&&t.s===100&&!t.r)return '';return 'transform-origin:center;transform:translate('+(t.x*unit).toFixed(2)+'mm,'+(t.y*unit).toFixed(2)+'mm) rotate('+t.r+'deg) scale('+(t.s/100)+');'}
+};
 const DEFAULTS={methods:['ငွေသား','KPay','Wave Pay'],shopName:'ကျွန်ုပ်၏ဆိုင်',phone:'',address:'',footer:'ဝယ်ယူအားပေးမှုအတွက် ကျေးဇူးတင်ပါသည်။',earnPer:1000,pointValue:10,logo:'',logoSize:'m',headerNote:'',vTitle:'ဘောက်ချာ',signBox:true,autoLabel:true,inviteCode:'',units:['ခု','ပြည်','ဗူး'],prodCats:[],expCats:['ကုန်ပစ္စည်း ဝယ်ယူမှု','ဝန်ထမ်းလစာ','ဆိုင်ခန်းလခ','မီး / ရေ / အင်တာနက်','ပို့ဆောင်ခ','အခြား']};
 const LS_KEY='shoppos.v1';
 /* ---- Local database (IndexedDB, falls back to localStorage) ---- */
@@ -846,7 +942,7 @@ const isNetErr=e=>{
   return /failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out|abort|internet|ERR_/i.test(m)||(!c&&/fetch|network/i.test(m))||m==='lib';
 };
 const Store={
-  mode:'local',db:null,dl:null,d:{products:{},customers:{},vouchers:{},expenses:{},accounts:{},closings:{},settings:Object.assign({},DEFAULTS)},
+  mode:'local',db:null,dl:null,d:{products:{},customers:{},vouchers:{},expenses:{},accounts:{},closings:{},settings:LL.inj(Object.assign({},DEFAULTS))},
   subs:[],ready:{},ch:null,failed:false,
   ob:{},obN:0,tomb:{},backMerged:false,          /* outbox: changes made on this phone that Supabase has not received yet */
   pk:'',cfg:null,synced:false,lastSync:0,pg:{up:0,upT:0,dn:0,dnT:0},manual:false,
@@ -874,17 +970,27 @@ const Store={
       }
       /* first run on this phone: needs internet once to download the shop data */
       try{
-        {const sp=document.getElementById('auth');document.body.classList.add('noauth');sp.hidden=false;sp.innerHTML='<div class="auth"><p class="mut" style="text-align:center;padding:40px 0">Server နှင့် ချိတ်ဆက်နေသည်...</p></div>'}
-        await Sb.connect(cfg);
+        {bootHide();const sp=document.getElementById('auth');document.body.classList.add('noauth');sp.hidden=false;sp.innerHTML='<div class="auth"><div style="display:grid;justify-items:center;gap:14px;padding:70px 0"><div class="spin-ring"></div><p class="mut" style="margin:0">Server နှင့် ချိတ်ဆက်နေသည်...</p></div></div>'}
+        await Promise.race([Sb.connect(cfg),new Promise((_,rj)=>setTimeout(()=>rj(new TypeError('Failed to fetch')),20000))]);
         const all=await this.loadAll();this.apply(all);
         await this.migrateLocal();
         this.synced=true;this.lastSync=Date.now();this.persist();
         this.start();return;
       }catch(e){
         console.error(e);this.db=null;this.mode='local';
+        if(isNetErr(e)){await this.retryScreen(Sb.explain(e));continue}
+        if(e&&e.code==='BLOCKED'&&e.shop){Sb.blockScreen(e.shop);await new Promise(()=>{})}
         err=isNetErr(e)?'ပထမဆုံးအကြိမ် အင်တာနက် လိုအပ်ပါသည် — အင်တာနက်ချိတ်ပြီး ထပ်ကြိုးစားပါ။ ('+Sb.explain(e)+')':Sb.explain(e);cfg=null;
       }
     }
+  },
+  /* first connection failed (no internet / server down): say so and let the user try again */
+  retryScreen(msg){
+    return new Promise(res=>{
+      bootHide();const el=document.getElementById('auth');document.body.classList.add('noauth');el.hidden=false;
+      el.innerHTML='<div class="auth"><h2>ချိတ်ဆက်၍ မရပါ</h2><p class="w" style="text-align:center;margin:14px 0">'+esc(msg)+'</p><p class="mut" style="text-align:center">ပထမဆုံးအကြိမ် ဖွင့်ရန် အင်တာနက် လိုအပ်ပါသည်</p><button type="button" class="btn pri block" id="rtBtn" style="margin-top:16px">'+ico('refresh')+'ပြန်ချိတ်မည်</button></div>';
+      el.querySelector('#rtBtn').onclick=()=>{el.innerHTML='<div style="display:grid;justify-items:center;gap:14px;padding:70px 0"><div class="spin-ring"></div><p class="mut" style="margin:0">Server နှင့် ချိတ်ဆက်နေသည်...</p></div>';res()};
+    });
   },
   /* data made in 'this device only' mode -> queue it for upload once, when Supabase is connected for the first time */
   async migrateLocal(){
@@ -915,7 +1021,7 @@ const Store={
     }
     if(!s||!s.d)return false;
     COLLS.forEach(c=>{this.d[c]=s.d[c]||{}});
-    this.d.settings=Object.assign({},DEFAULTS,s.d.settings||{});
+    this.d.settings=LL.inj(Object.assign({},DEFAULTS,s.d.settings||{}));
     this.tomb=s.tomb||{};this.ob=s.ob||{};this.obN=Object.values(this.ob).reduce((a,o)=>Math.max(a,o.n||0),0);
     this.lastSync=s.lastSync||0;this.synced=!!s.synced;
     return this.synced;
@@ -957,14 +1063,38 @@ const Store={
   async gate(db){
     let r;try{r=await db.from('shops').select('name,status,expires_at').limit(1)}catch(e){return}
     const s=r&&r.data&&r.data[0];if(!s)return;
-    const live=(s.status==='active'||s.status==='trial')&&!(s.expires_at&&new Date(s.expires_at)<new Date());
-    if(live){if(this.blocked)location.reload();return}
-    const msg={pending:'Admin ခွင့်ပြုချက် စောင့်နေပါသည်',suspended:'ဆိုင်အကောင့်ကို ပိတ်သိမ်းထားပါသည်',rejected:'လျှောက်လွှာကို ပယ်ချထားပါသည်'}[s.status]||'ဆိုင်အကောင့် သက်တမ်း ကုန်ဆုံးနေပါသည်';
-    this.blocked=1;
-    const el=document.getElementById('auth');document.body.classList.add('noauth');el.hidden=false;
-    el.innerHTML='<div class="auth"><h2>'+esc(s.name||'')+'</h2><p class="w" style="text-align:center;margin:14px 0">'+esc(msg)+'</p><p class="mut" style="text-align:center">Admin ကို ဆက်သွယ်ပါ</p><button type="button" class="btn pri block" id="blkRe" style="margin-top:16px">ပြန်စစ်မည်</button></div>';
-    el.querySelector('#blkRe').onclick=()=>location.reload();
+    this.setSub(s);
+    if(Sb.live(s)){if(this.blocked===1)location.reload();return}
+    this.blocked=1;bootHide();Sb.blockScreen(s);
     throw Object.assign(new Error('BLOCKED'),{code:'BLOCKED'});
+  },
+  subKey(){return 'shoppos.sub:'+String((this.cfg&&this.cfg.email)||'').toLowerCase()},
+  setSub(s){this.sub={name:s.name,status:s.status,expires_at:s.expires_at,at:Date.now()};try{localStorage.setItem(this.subKey(),JSON.stringify(this.sub))}catch(e){}},
+  getSub(){if(!this.sub){try{this.sub=JSON.parse(localStorage.getItem(this.subKey())||'null')}catch(e){}}return this.sub},
+  async refreshSub(){try{const db=await this.client();const r=await db.from('shops').select('name,status,expires_at').limit(1);const s=r&&r.data&&r.data[0];if(s)this.setSub(s)}catch(e){}return this.getSub()},
+  /* every ~10 s: tell the server "this account is online" and learn at once if the account was banned / the shop was paused */
+  async beat(){
+    if(this.mode!=='cloud'||this._beat||(this._bt&&Date.now()-this._bt<2000))return;
+    this._beat=1;this._bt=Date.now();
+    try{
+      const db=await this.client();
+      const r=await db.rpc('heartbeat',{p_device:this.devId(),p_label:this.devLabel()});
+      const h=r&&!r.error&&r.data;if(!h||!h.ok)return;
+      this.setSub({name:h.name,status:h.status,expires_at:h.expires_at});
+      if(h.banned){this.blocked='ban';Sb.blockScreen({name:h.name,status:'banned'});return}
+      if(!Sb.live(h)){this.blocked=1;Sb.blockScreen(h);return}
+      if(h.kicked){this.blocked='dev';Sb.blockScreen({name:h.name,status:'kicked'});return}
+      if(h.over){this.blocked='dev';Sb.blockScreen({name:h.name,status:'over',max:h.max_devices});return}
+      if(this.blocked)location.reload();
+    }catch(e){}finally{this._beat=0}
+  },
+  devId(){let d='';try{d=localStorage.getItem('shoppos.devid')||''}catch(e){}if(!d){d='d'+Math.random().toString(36).slice(2,12);try{localStorage.setItem('shoppos.devid',d)}catch(e){}}return d},
+  devLabel(){const u=navigator.userAgent||'';const k=/iPhone|iPad/.test(u)?'iPhone/iPad':/Android/.test(u)?(/Mobile/.test(u)?'Android Phone':'Android Tablet'):/Windows/.test(u)?'Windows PC':/Mac/.test(u)?'Mac':'Browser';return k},
+  listenCtl(){
+    try{
+      if(this.ch2){try{this.db.removeChannel(this.ch2)}catch(e){}this.ch2=null}
+      this.ch2=this.db.channel('pos-ctl-'+Math.random().toString(36).slice(2,7)).on('postgres_changes',{event:'*',schema:'public',table:'shops'},()=>this.beat()).subscribe();
+    }catch(e){}
   },
   async loadAll(){
     const db=await this.client();
@@ -985,7 +1115,7 @@ const Store={
   /* put what is waiting in the outbox on top of freshly downloaded data, so unsent work is never overwritten */
   overlay(){
     Object.values(this.ob).forEach(o=>{
-      if(o.c==='meta'){if(o.id==='settings'&&o.op==='put')this.d.settings=Object.assign({},DEFAULTS,o.data);return}
+      if(o.c==='meta'){if(o.id==='settings'&&o.op==='put')this.d.settings=LL.inj(Object.assign({},DEFAULTS,o.data));return}
       if(!this.d[o.c])return;
       if(o.op==='del')delete this.d[o.c][o.id];else this.d[o.c][o.id]=Object.assign({},o.data,{id:o.id});
     });
@@ -1006,7 +1136,7 @@ const Store={
         if(n){this.again=true;this.healN=(this.healN||0)+n}
       }
       this.d[c]=srv;this.ready[c]=1});
-    if(all.settings)this.d.settings=Object.assign({},DEFAULTS,all.settings);
+    if(all.settings)this.d.settings=LL.inj(Object.assign({},DEFAULTS,all.settings));
     this.overlay();
   },
   async flush(db){
@@ -1072,13 +1202,14 @@ const Store={
     this.watchPage();
     window.addEventListener('online',()=>{this.online=true;paintChrome();this.sync()});
     window.addEventListener('offline',()=>{this.online=false;paintChrome()});
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)this.sync()});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden){this.sync();this.beat()}});
     setInterval(()=>{
       if(this.run)return;
       if(this.pendingCount()>0||!this.online||this.syncErr){this.sync();return}
       if(!document.hidden&&Date.now()-this.lastSync>(this.rt==='live'?60000:15000))this.sync();
     },10000);
     paintChrome();
+    setInterval(()=>this.beat(),10000);this.beat();
     this.sync();
   },
   watchPage(){
@@ -1088,6 +1219,7 @@ const Store={
   },
   listen(){
     try{
+      this.listenCtl();
       if(this.ch){const o=this.ch;this.ch=null;try{this.db.removeChannel(o)}catch(e){}}
       clearTimeout(this.rtT);
       const ch=this.db.channel('pos-kv-'+Math.random().toString(36).slice(2,7)).on('postgres_changes',{event:'*',schema:'public',table:'kv'},p=>this.onChange(p));
@@ -1110,7 +1242,7 @@ const Store={
     const c=row.collection,id=row.id;
     if(this.ob[c+'/'+id])return;
     if(c==='meta'&&String(id).indexOf('del:')===0){if(t!=='DELETE'){this.tomb[String(id).slice(4)]=1;const p2=String(id).slice(4).split('/');if(this.d[p2[0]]&&this.d[p2[0]][p2[1]]&&!this.ob[p2[0]+'/'+p2[1]]){delete this.d[p2[0]][p2[1]];this.persist();this.emit()}}return}
-    if(c==='meta'){if(id==='settings'&&t!=='DELETE'&&row.data){this.d.settings=Object.assign({},DEFAULTS,row.data);this.persist();this.emit()}return}
+    if(c==='meta'){if(id==='settings'&&t!=='DELETE'&&row.data){this.d.settings=LL.inj(Object.assign({},DEFAULTS,row.data));this.persist();this.emit()}return}
     if(!this.d[c])return;
     if(t==='DELETE')delete this.d[c][id];else if(row.data)this.d[c][id]=Object.assign({},row.data,{id:id});else return;
     this.persist();this.emit();
@@ -1135,9 +1267,16 @@ const Store={
     this.track('meta','del:'+c+'/'+id,'put',{c:c,id:id,at:Date.now()});
     return Promise.resolve();
   },
+  setLocalLogo(lg,sz){
+    if(lg!=null)LL.put(LL.K,lg);if(sz)LL.put(LL.KS,sz);
+    this.d.settings=Object.assign({},this.d.settings,{logo:lg!=null?lg:this.d.settings.logo,logoSize:sz||this.d.settings.logoSize});
+    this.persist();this.emit();
+  },
   putSettings(s){
-    this.d.settings=JSON.parse(JSON.stringify(s));this.emit();
-    this.track('meta','settings','put',this.d.settings);
+    s=JSON.parse(JSON.stringify(s));
+    if('logo' in s)LL.put(LL.K,s.logo||'');if('logoSize' in s)LL.put(LL.KS,s.logoSize||'m');
+    this.d.settings=s;this.emit();
+    this.track('meta','settings','put',LL.strip(this.d.settings));
     return Promise.resolve();
   }
 };
@@ -1293,6 +1432,40 @@ const TG={
 window.addEventListener('online',()=>setTimeout(()=>TG.retry(),1500));
 setTimeout(()=>TG.retry(),8000);
 
+
+/* ================= Terms & Conditions (shown once at first open; readable in Settings › About) ================= */
+const TERMS_V=3,TERMS_KEY='shoppos.terms';
+const TERMS=[
+  'Application အတွက် ၆လ အာမခံပါပါတယ်',
+  'Android သီးသန့်သာ အသုံးပြုရပါမည်',
+  'bug နှင့် error များကို ၄၈ နာရီအတွင်း ဖြေရှင်းပေးပါတယ်',
+  '၆လကျော်ပါက software update အတွက် ဖြည့်ချင်သည့် အချက်အလက်အလိုက် ကျသင့်ငွေ ရှိပါမည် — ဆိုင်သို့ လာရောက် (သို့) online update ပို့ပေးပါတယ်',
+  '၁ နှစ် Free အသုံးပြုခွင့် ရပါမယ် (အာမခံပါပါတယ်)',
+  '၁ နှစ်ကျော်လွန်ပါက လစဉ်ကြေး တစ်လ နှစ်သောင်းခွဲ ကျသင့်ပါမယ်',
+  'မိမိဆိုင်၏ data အချက်အလက်များ မပေါက်ကြားစေရန် အခြားသူအား app ကို တိုက်ရိုက် ကူးယူပေးခြင်းကို ရှောင်ရှားပါ',
+  'ကူးယူပေး၍ ဖြစ်ပေါ်လာသော ပြဿနာများအတွက် တာဝန်မယူပါ',
+  'မူပိုင်ခွင့် (Copyright) တင်ထားပါသည်',
+  'တစ်ပုံစံတည်းဖြစ်စေ၊ ဆင်တူယိုးမှားစွာဖြစ်စေ ကူးယူခွင့် မရှိပါ',
+  'တည်ဆဲ ဥပဒေအရ အရေးယူခြင်း ခံရမည် ဖြစ်သည်'
+];
+const termsList=()=>'<ol style="margin:8px 0 0;padding-left:22px;line-height:1.9">'+TERMS.map(t=>'<li style="margin-bottom:6px">'+esc(t)+'</li>').join('')+'</ol>';
+function termsAccepted(){try{const o=JSON.parse(localStorage.getItem(TERMS_KEY)||'null');return o&&o.v>=TERMS_V?o:null}catch(e){return null}}
+function termsGate(){
+  return new Promise(res=>{
+    if(termsAccepted()){res();return}
+    const el=document.createElement('div');el.id='termsGate';
+    el.style.cssText='position:fixed;inset:0;z-index:500;background:var(--bg);overflow:auto';
+    el.innerHTML='<div class="auth"><h2>စည်းမျဉ်းစည်းကမ်းများ</h2><p class="sub" style="text-align:center">Terms and Conditions</p>'
+      +'<div class="card" style="margin-top:14px">'+termsList()+'</div>'
+      +'<label class="swrow" style="border-top:0;padding:14px 0;gap:12px;align-items:flex-start;justify-content:flex-start"><input type="checkbox" id="tgAgree" style="width:24px;height:24px;flex:none;margin-top:2px"><span style="line-height:1.7">အထက်ပါ အချက်အလက်များကို လက်ခံပါသည်</span></label>'
+      +'<button class="btn pri block" id="tgOk" disabled style="opacity:.45">လက်ခံပြီး ဆက်သွားမည်</button></div>';
+    document.body.appendChild(el);
+    const cb=el.querySelector('#tgAgree'),ok=el.querySelector('#tgOk');
+    cb.onchange=()=>{ok.disabled=!cb.checked;ok.style.opacity=cb.checked?'1':'.45'};
+    ok.onclick=()=>{if(!cb.checked)return;try{localStorage.setItem(TERMS_KEY,JSON.stringify({v:TERMS_V,at:Date.now()}))}catch(e){}el.remove();res()};
+  });
+}
+
 /* ================= Selectors ================= */
 const Sel={
   closing(d){return Store.get('closings',d)},
@@ -1363,7 +1536,7 @@ function createVoucher(o){
   const earned=(cust&&S.earnPer>0)?Math.floor(received/S.earnPer):0;
   const v={id:uid('v'),no:nextNo(date),date:date,createdAt:now,customerId:cust?cust.id:null,customerName:cust?cust.name:'',
     items:items,subtotal:subtotal,discount:discount,pointsUsed:pts,pointsValue:pointsValue,total:total,paid:received,
-    payments:pays||(received>0?[{at:now,amount:received,method:o.method||DEFAULT_METHOD,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''}]:[]),pointsEarned:earned,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''};
+    payments:pays||(received>0?[{at:now,amount:received,method:o.method||DEFAULT_METHOD,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:''}]:[]),pointsEarned:earned,by:Auth.me?Auth.me.id:'',byName:Auth.me?Auth.me.name:'',cod:!!o.cod&&(total-received)>0,deliName:String(o.deliName||'').trim(),deliPhone:String(o.deliPhone||'').trim()};
   items.forEach(i=>{const p=Store.get('products',i.pid);if(p)Store.put('products',Object.assign({},p,{stock:Math.max(0,(p.stock||0)-i.qty)}))});
   if(cust)Store.put('customers',Object.assign({},cust,{points:Math.max(0,(cust.points||0)-pts+earned)}));
   Store.put('vouchers',v);
@@ -1415,7 +1588,7 @@ function confirmBox(title,msg,okLabel){
   });
 }
 const seg=(key,opts,val)=>'<div class="seg" role="group">'+opts.map(o=>'<button type="button" data-act="seg" data-key="'+key+'" data-val="'+o[0]+'" aria-pressed="'+(String(val)===String(o[0]))+'">'+o[1]+'</button>').join('')+'</div>';
-const pill=v=>Sel.rem(v)<=0?'<span class="pill paid">'+ico('check','s')+'ငွေပေးပြီး</span>':'<span class="pill unpaid"><i class="dot"></i>ငွေမလွှဲရသေး</span>';
+const pill=v=>Sel.rem(v)<=0?'<span class="pill paid">'+ico('check','s')+'ငွေပေးပြီး</span>':'<span class="pill unpaid"><i class="dot"></i>'+(v.cod?'Cash on delivery':'ငွေမလွှဲရသေး')+'</span>';
 const carriedTag=v=>(Sel.rem(v)>0&&v.date<today())?'<div class="tag">ယခင်ရက်မှ လွှဲပြောင်း · '+daysBetween(v.date,today())+' ရက်</div>':'';
 
 const OS_DEF=[['designing','ဒီဇိုင်းဆွဲနေဆဲ',25,0,'ပစ္စည်း မယူရသေး — ဒီဇိုင်းဆွဲနေဆဲ'],['printing','စက်တင်နေဆဲ',50,1,'ပစ္စည်း မယူရသေး — စက်တင်နေဆဲ'],['ready','ပြီးစီးပြီ',75,2,'ပစ္စည်း မယူရသေး — ယူရန် အဆင်သင့်'],['done','ထုတ်ယူပြီး',100,3,'ပစ္စည်း ထုတ်ယူပြီး / ပို့ပြီး']];
@@ -1576,13 +1749,13 @@ const logoImg=(S,th)=>{
   const f=(S.fmt||{}).logo||{};
   if(!(S.logo&&S.logo.indexOf('data:image/')===0))return phEl(S,'logo','လိုဂို ထည့်ရန်',th?'ctr':'');
   const h=f.h||((LOGO_H[S.logoSize]||22)*(th?.9:1));
-  const img='<img class="lg" alt="" data-ed="logo" src="'+S.logo+'" style="max-height:'+h+'mm;max-width:'+(th?'100%':'80mm')+'">';
+  const img='<img class="lg" alt="" data-ed="logo" src="'+S.logo+'" style="max-height:'+h+'mm;max-width:'+(th?'100%':'80mm')+';'+LL.tfCss(th?'th':'a4',1)+'">';
   return (th&&f.a)?'<div style="text-align:'+f.a+'">'+img+'</div>':img;
 };
 const paidLbl=v=>Sel.rem(v)>0?'စရံငွေ':'ပေးငွေ';
 function receiptHTML(v,mode,S0){
   const S=S0||Store.d.settings,cust=v.customerId?Store.get('customers',v.customerId):null;
-  const cname=Sel.cname(v),phone=cust?cust.phone:'',addr=cust?cust.address:'',rem=Sel.rem(v),paid=rem<=0,status=paid?'ငွေပေးပြီး':'ငွေမလွှဲရသေး';
+  const cname=Sel.cname(v),phone=cust?cust.phone:'',addr=cust?cust.address:'',rem=Sel.rem(v),paid=rem<=0,status=paid?'ငွေပေးပြီး':(v.cod?'Cash on delivery':'ငွေမလွှဲရသေး'),deli=((v.deliName||'')+(v.deliPhone?' '+v.deliPhone:'')).trim();
   const dt=fmtD(v.date)+' '+fmtT(v.createdAt),meth=methodsUsed(v);
   const extra=[];
   if(v.discount>0)extra.push(['လျှော့စျေး','- '+ks(v.discount)]);
@@ -1591,7 +1764,7 @@ function receiptHTML(v,mode,S0){
     const rows=v.items.map((i,k)=>'<tr><td class="c">'+(k+1)+'</td><td>'+esc(i.name)+'</td><td class="r">'+ks(i.price)+'</td><td class="r">'+ks(i.qty)+(i.unit?' '+esc(i.unit):'')+'</td><td class="r">'+ks(i.price*i.qty)+'</td></tr>').join('');
     return '<div class="rc rc-a4"><div class="rc-top"><div class="rc-hd">'+logoImg(S)+'<div><div class="rc-shop"'+edA(S,'shop')+'>'+esc(S.shopName)+'</div>'+(S.address?'<div'+edA(S,'addr')+'>'+esc(S.address)+'</div>':phEl(S,'addr','လိပ်စာ ထည့်ရန်'))+(S.phone?'<div'+edA(S,'phone')+'>ဖုန်း - '+esc(S.phone)+'</div>':phEl(S,'phone','ဖုန်း ထည့်ရန်'))+(S.headerNote?'<div'+edA(S,'note')+'>'+nl(S.headerNote)+'</div>':phEl(S,'note','ထပ်ဆောင်းစာသား ထည့်ရန်'))+'</div></div>'
      +'<div class="rc-meta"><div class="rc-title"'+edA(S,'title')+'>'+esc(S.vTitle||'ဘောက်ချာ')+'</div><div>အမှတ်စဉ် - '+esc(v.no)+'</div><div>ရက်စွဲ - '+esc(dt)+'</div>'+(v.byName?'<div>ဖြတ်သူ - '+esc(v.byName)+'</div>':'')+'<div class="rc-stamp '+(paid?'ok':'due')+'">'+status+'</div></div></div>'
-     +'<div>ဖောက်သည် - <b>'+esc(cname)+'</b>'+(phone?' ('+esc(phone)+')':'')+'</div>'+(addr?'<div>လိပ်စာ - '+esc(addr)+'</div>':'')
+     +'<div>ဖောက်သည် - <b>'+esc(cname)+'</b>'+(phone?' ('+esc(phone)+')':'')+'</div>'+(addr?'<div>လိပ်စာ - '+esc(addr)+'</div>':'')+(deli?'<div>Deli - '+esc(deli)+'</div>':'')
      +'<table class="rc-tbl"><thead><tr><th class="c">စဉ်</th><th>ပစ္စည်း</th><th class="r">ဈေးနှုန်း</th><th class="r">အရေအတွက်</th><th class="r">ကျသင့်ငွေ</th></tr></thead><tbody>'+rows+'</tbody></table>'
      +'<div class="rc-tot"><div><span>ကုန်ပစ္စည်း စုစုပေါင်း</span><span>'+ks(v.subtotal)+'</span></div>'+extra.map(e=>'<div><span>'+esc(e[0])+'</span><span>'+esc(e[1])+'</span></div>').join('')
      +'<div class="g"><span>ပေးရန် စုစုပေါင်း</span><span>'+ks(v.total)+' ကျပ်</span></div><div><span>'+paidLbl(v)+'</span><span>'+ks(v.paid||0)+'</span></div><div'+(rem>0?' class="red"':'')+'><span>ကျန်ငွေ</span><span>'+ks(rem)+'</span></div>'+(meth?'<div><span>ငွေပေးချေမှု</span><span>'+esc(meth)+'</span></div>':'')+'</div>'
@@ -1599,7 +1772,7 @@ function receiptHTML(v,mode,S0){
   }
   const rows=v.items.map(i=>'<div class="it"><div class="nm">'+esc(i.name)+'</div><div class="ln"><span>'+ks(i.qty)+' × '+ks(i.price)+'</span><span>'+ks(i.price*i.qty)+'</span></div></div>').join('');
   return '<div class="rc rc-th">'+logoImg(S,1)+'<div class="ctr shop"'+edA(S,'shop')+'>'+esc(S.shopName)+'</div>'+(S.address?'<div class="ctr"'+edA(S,'addr')+'>'+esc(S.address)+'</div>':phEl(S,'addr','လိပ်စာ ထည့်ရန်','ctr'))+(S.phone?'<div class="ctr"'+edA(S,'phone')+'>ဖုန်း - '+esc(S.phone)+'</div>':phEl(S,'phone','ဖုန်း ထည့်ရန်','ctr'))+(S.headerNote?'<div class="ctr"'+edA(S,'note')+'>'+nl(S.headerNote)+'</div>':phEl(S,'note','ထပ်ဆောင်းစာသား ထည့်ရန်','ctr'))
-   +'<hr><div class="ln"><span>အမှတ်စဉ်</span><span>'+esc(v.no)+'</span></div><div class="ln"><span>ရက်စွဲ</span><span>'+esc(dt)+'</span></div><div class="ln"><span>ဖောက်သည်</span><span>'+esc(cname)+'</span></div>'+(v.byName?'<div class="ln"><span>ဖြတ်သူ</span><span>'+esc(v.byName)+'</span></div>':'')+(phone?'<div class="ln"><span>ဖုန်း</span><span>'+esc(phone)+'</span></div>':'')+(addr?'<div>'+esc(addr)+'</div>':'')+'<hr>'
+   +'<hr><div class="ln"><span>အမှတ်စဉ်</span><span>'+esc(v.no)+'</span></div><div class="ln"><span>ရက်စွဲ</span><span>'+esc(dt)+'</span></div><div class="ln"><span>ဖောက်သည်</span><span>'+esc(cname)+'</span></div>'+(v.byName?'<div class="ln"><span>ဖြတ်သူ</span><span>'+esc(v.byName)+'</span></div>':'')+(phone?'<div class="ln"><span>ဖုန်း</span><span>'+esc(phone)+'</span></div>':'')+(addr?'<div>'+esc(addr)+'</div>':'')+(deli?'<div class="ln"><span>Deli</span><span>'+esc(deli)+'</span></div>':'')+'<hr>'
    +rows+'<hr><div class="ln"><span>စုစုပေါင်း</span><span>'+ks(v.subtotal)+'</span></div>'+extra.map(e=>'<div class="ln"><span>'+esc(e[0])+'</span><span>'+esc(e[1])+'</span></div>').join('')
    +'<div class="ln big"><span>ပေးရန်</span><span>'+ks(v.total)+' ကျပ်</span></div><div class="ln"><span>'+paidLbl(v)+'</span><span>'+ks(v.paid||0)+'</span></div><div class="ln'+(rem>0?' red':'')+'"><span>ကျန်ငွေ</span><span>'+ks(rem)+'</span></div>'+(meth?'<div class="ln"><span>ငွေပေးချေမှု</span><span>'+esc(meth)+'</span></div>':'')
    +'<div class="st">'+status+'</div><hr>'+(S.footer?'<div class="ctr"'+edA(S,'foot')+'>'+nl(S.footer)+'</div>':phEl(S,'foot','အောက်ခြေစာသား ထည့်ရန်','ctr'))+'</div>';
@@ -1849,7 +2022,7 @@ async function autoReceipt(v){
   if(!rp.length){doPrint(v,'th');return}
   await directPrint(v,rp);
 }
-const swrow=(id,t,on)=>'<label class="swrow"><span>'+t+'</span><input type="checkbox" class="sw" id="'+id+'"'+(on?' checked':'')+'></label>';
+const swrow=(id,t,on,ic)=>'<label class="swrow"><span class="swl">'+(ic?ico(ic):'')+'<span>'+t+'</span></span><input type="checkbox" class="sw" id="'+id+'"'+(on?' checked':'')+'></label>';
 function fitPreview(box){
   const inner=box.firstElementChild;if(!inner)return;
   inner.style.transform='none';
@@ -1886,7 +2059,7 @@ function productSheet(id){
      +'<div class="two"><div class="field"><label class="lbl" for="pUnit">ယူနစ်</label><input class="inp" id="pUnit" value="'+esc(p?p.unit:'')+'" placeholder="ခု၊ ပြည်၊ ဗူး"></div>'
      +'<div class="field"><label class="lbl" for="pLow">လက်ကျန်နည်း သတိပေးရန်</label><input class="inp" id="pLow" inputmode="numeric" value="'+(p&&p.low!=null?p.low:5)+'"></div></div>'
      +'<div class="field" style="margin-top:-4px"><div class="sub" style="margin-bottom:4px">သိမ်းထားသော ယူနစ်များ — နှိပ်၍ ရွေးပါ</div><div class="rowf" id="pUnits">'+unitList().map(u=>'<button type="button" class="chip" data-u="'+esc(u)+'">'+esc(u)+'</button>').join('')+'</div></div>'
-     +'<div class="two"><div class="field"><label class="lbl" for="pSku">ကုဒ် (ရှိလျှင်)</label><input class="inp" id="pSku" value="'+esc(p?p.sku:'')+'"></div><div class="field"><label class="lbl" for="pCost">ဝယ်ဈေး (မထည့်လည်းရ)</label><input class="inp" id="pCost" inputmode="numeric" placeholder="မဖြည့်လည်း ရသည်" value="'+(p&&p.cost!=null?p.cost:'')+'"></div></div>'
+     +'<div class="two"><div class="field"><label class="lbl" for="pSku">ကုဒ် (ရှိလျှင်)</label><input class="inp" id="pSku" value="'+esc(p?p.sku:'')+'"></div>'+(canCost()?'<div class="field"><label class="lbl" for="pCost">ဝယ်ဈေး (မထည့်လည်းရ)</label><input class="inp" id="pCost" inputmode="numeric" placeholder="မဖြည့်လည်း ရသည်" value="'+(p&&p.cost!=null?p.cost:'')+'"></div>':'')+'</div>'
      +'<div class="field"><label class="lbl">လက်ကားဈေး (အရေအတွက်အလိုက်)</label><p class="sub" style="margin-bottom:6px">ဥပမာ - ၁၀ ခုနှင့်အထက် ဝယ်လျှင် တစ်ခုလျှင် ဈေးသက်သာမည်</p><div id="pTiers"></div><button type="button" class="btn s" id="pTierAdd">'+ico('plus')+'ဈေးအဆင့် ထည့်မည်</button></div>',
     footer:'<div class="'+(p?'row2':'')+'">'+(p?'<button class="btn out" id="pDel">'+ico('trash')+'ဖျက်မည်</button>':'')+'<button class="btn pri'+(p?'':' block')+'" id="pSave">သိမ်းမည်</button></div>',
     onMount(el){
@@ -1905,7 +2078,7 @@ function productSheet(id){
         const tiers=Object.keys(tm).map(Number).sort((a,b)=>a-b).map(k=>({min:k,price:tm[k]}));
         const np=Object.assign({},p||{},{id:p?p.id:uid('p'),name:name,price:Math.max(0,Math.round(num(el.querySelector('#pPrice').value))),
           stock:Math.max(0,Math.floor(num(el.querySelector('#pStock').value))),unit:el.querySelector('#pUnit').value.trim(),
-          low:Math.max(0,Math.floor(num(el.querySelector('#pLow').value))),tiers:tiers,cost:(()=>{const cv=el.querySelector('#pCost').value.trim();return cv===''?null:Math.max(0,Math.round(num(cv)))})(),sku:el.querySelector('#pSku').value.trim(),cat:cat,createdAt:p?p.createdAt:Date.now()});
+          low:Math.max(0,Math.floor(num(el.querySelector('#pLow').value))),tiers:tiers,cost:(()=>{const ce=el.querySelector('#pCost');if(!ce)return p&&p.cost!=null?p.cost:null;const cv=ce.value.trim();return cv===''?null:Math.max(0,Math.round(num(cv)))})(),sku:el.querySelector('#pSku').value.trim(),cat:cat,createdAt:p?p.createdAt:Date.now()});
         Store.put('products',np);
         if(cat)addProdCat(cat);
         if(np.unit){const cu=Store.d.settings.units||[];if(cu.indexOf(np.unit)<0)Store.putSettings(Object.assign({},Store.d.settings,{units:cu.concat([np.unit])}))}
@@ -1963,14 +2136,14 @@ function customerSheet(id,after){
     body:'<div class="field"><label class="lbl" for="cName">အမည်</label><input class="inp" id="cName" value="'+esc(c?c.name:'')+'"></div>'
      +'<div class="field"><label class="lbl" for="cPhone">ဖုန်းနံပါတ်</label><input class="inp" id="cPhone" inputmode="tel" value="'+esc(c?c.phone:'')+'" placeholder="09 xxx xxx xxx"></div>'
      +'<div class="field"><label class="lbl" for="cAddr">လိပ်စာ</label><textarea class="inp" id="cAddr" rows="2">'+esc(c?c.address:'')+'</textarea></div>'
-     +(c?'<div class="field"><label class="lbl" for="cPts">လက်ရှိ အမှတ်</label><input class="inp" id="cPts" inputmode="numeric" value="'+(c.points||0)+'"></div>':''),
-    footer:'<div class="'+(c?'row2':'')+'">'+(c?'<button class="btn out" id="cDel">'+ico('trash')+'ဖျက်မည်</button>':'')+'<button class="btn pri'+(c?'':' block')+'" id="cSave">သိမ်းမည်</button></div>',
+     +(c&&Auth.owner()?'<div class="field"><label class="lbl" for="cPts">လက်ရှိ အမှတ်</label><input class="inp" id="cPts" inputmode="numeric" value="'+(c.points||0)+'"></div>':c?'<div class="field"><label class="lbl">လက်ရှိ အမှတ်</label><div class="sub">'+(c.points||0)+' မှတ် · Owner သာ ပြင်နိုင်ပါသည်</div></div>':''),
+    footer:'<div class="'+(c&&Auth.owner()?'row2':'')+'">'+(c&&Auth.owner()?'<button class="btn out" id="cDel">'+ico('trash')+'ဖျက်မည်</button>':'')+'<button class="btn pri'+(c&&Auth.owner()?'':' block')+'" id="cSave">သိမ်းမည်</button></div>',
     onMount(el){
       el.querySelector('#cSave').onclick=()=>{
         const name=el.querySelector('#cName').value.trim();
         if(!name){toast('ဖောက်သည်အမည် ထည့်ပါ');return}
         const nc=Object.assign({},c||{},{id:c?c.id:uid('c'),name:name,phone:el.querySelector('#cPhone').value.trim(),address:el.querySelector('#cAddr').value.trim(),
-          points:c?Math.max(0,Math.floor(num(el.querySelector('#cPts').value))):0,createdAt:c?c.createdAt:Date.now()});
+          points:c?(Auth.owner()&&el.querySelector('#cPts')?Math.max(0,Math.floor(num(el.querySelector('#cPts').value))):(c.points||0)):0,createdAt:c?c.createdAt:Date.now()});
         Store.put('customers',nc);ctl.close();toast('ဖောက်သည် သိမ်းပြီးပါပြီ');if(after)after(nc);
       };
       const d=el.querySelector('#cDel');
@@ -2089,7 +2262,7 @@ function voucherSheet(id){
   };
   const detail=v=>{const rem=Sel.rem(v),cust=v.customerId?Store.get('customers',v.customerId):null;return '<div class="rowf" style="justify-content:space-between;margin-bottom:6px"><div><div class="nm" style="font-size:17px">#'+esc(v.no)+'</div><div class="sub">'+fmtD(v.date)+' · '+fmtT(v.createdAt)+(v.byName?' · ဖြတ်သူ '+esc(v.byName):'')+'</div></div>'+'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+pill(v)+osPill(v)+'</div></div>'
      +carriedTag(v)+osBox(v)
-     +'<dl class="kv"><dt>ဖောက်သည်</dt><dd>'+esc(Sel.cname(v))+(cust&&cust.phone?' · '+esc(cust.phone):'')+(cust&&cust.address?'<br><span class="sub">'+esc(cust.address)+'</span>':'')+'</dd></dl>'
+     +'<dl class="kv"><dt>ဖောက်သည်</dt><dd>'+esc(Sel.cname(v))+(cust&&cust.phone?' · '+esc(cust.phone):'')+(cust&&cust.address?'<br><span class="sub">'+esc(cust.address)+'</span>':'')+'</dd>'+((v.deliName||v.deliPhone)?'<dt>Deli</dt><dd>'+esc(v.deliName||'')+(v.deliPhone?' · '+esc(v.deliPhone):'')+'</dd>':'')+'</dl>'
      +'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ပစ္စည်း</th><th class="r">ဈေးနှုန်း</th><th class="c">အရေအတွက်</th><th class="r">ကျသင့်ငွေ</th></tr></thead><tbody>'
      +v.items.map(i=>'<tr><td class="nm">'+esc(i.name)+'</td><td class="r">'+ks(i.price)+'</td><td class="c">'+ks(i.qty)+(i.unit?' '+esc(i.unit):'')+'</td><td class="r">'+ks(i.price*i.qty)+'</td></tr>').join('')
      +'</tbody></table></div>'
@@ -2100,6 +2273,7 @@ function voucherSheet(id){
      +'<div class="ln"><span>'+paidLbl(v)+'</span><span>'+ks(v.paid||0)+'</span></div><div class="ln"><span>ကျန်ငွေ</span><span><b'+(rem>0?' class="w"':'')+'>'+ks(rem)+'</b></span></div>'
      +(v.pointsEarned>0?'<div class="ln"><span>ရရှိသော အမှတ်</span><span>+'+ks(v.pointsEarned)+' မှတ်</span></div>':'')+'</div>'
      +((v.payments||[]).length?'<div class="sec-t">ငွေပေးချေမှု မှတ်တမ်း</div>'+v.payments.map(p=>'<div class="ln rowf" style="justify-content:space-between;font-size:14px"><span class="mut">'+fmtD(dstr(new Date(p.at)))+' '+fmtT(p.at)+' · '+esc(p.method||DEFAULT_METHOD)+(p.refund?' · ပြန်ပေးငွေ':'')+(p.byName?' · '+esc(p.byName):'')+'</span><b class="num">'+ks(p.amount)+' ကျပ်</b></div>').join(''):'')
+     +((v.history||[]).length?'<div class="sec-t">ပြင်ဆင်မှု မှတ်တမ်း (History)</div>'+v.history.slice().reverse().map(h=>'<div class="ln" style="font-size:14px;border-top:1px solid var(--line);padding:6px 0"><div class="mut">'+fmtD(dstr(new Date(h.at)))+' '+fmtT(h.at)+(h.byName?' · '+esc(h.byName):'')+'</div><div>'+(h.changes||[]).map(esc).join('<br>')+'</div></div>').join(''):'')
      +((v.returns||[]).length?'<div class="sec-t">ပြန်အမ်းမှတ်တမ်း</div>'+v.returns.map(r=>'<div class="ln" style="font-size:14px"><div class="mut">'+fmtD(dstr(new Date(r.at)))+' '+fmtT(r.at)+(r.byName?' · '+esc(r.byName):'')+'</div><div>'+r.items.map(i=>esc(i.name)+' ×'+i.qty).join('၊ ')+' — <b class="num">'+ks(r.value)+' ကျပ်</b>'+(r.cash>0?' (ပြန်ပေးငွေ '+ks(r.cash)+')':'')+'</div></div>').join(''):'')
      +(rem>0?'<div class="sec-t">စရံ / ငွေပေးချေမှု မှတ်မည်</div><div class="rowf" style="flex-wrap:nowrap"><input class="inp" id="vPay" inputmode="numeric" value="'+rem+'" style="flex:1;min-width:0" aria-label="ပေးချေငွေ"><button class="btn pri" id="vPayGo">မှတ်မည်</button></div><div style="margin-top:8px">'+methodPickerShell('vM')+'</div>':'')
    +(vCan(v)?'<div class="rowf" style="margin-top:12px">'+((v.returns||[]).length?'':'<button class="btn s" id="vEdit">'+ico('edit')+'ဘောက်ချာ ပြင်မည်</button>')+((v.items||[]).length?'<button class="btn s" id="vRet">'+ico('refresh')+'ပစ္စည်း ပြန်အမ်းမည်</button>':'')+'</div>':'')
@@ -2233,7 +2407,7 @@ function voucherSheet(id){
 }
 /* ================= Create Label (parcel / delivery label) ================= */
 const LBL_KEY='shoppos.label';
-function labelPrefs(){let o={};try{o=JSON.parse(localStorage.getItem(LBL_KEY)||'{}')}catch(e){}return {w:o.w>=20?o.w:70,h:o.h>=15?o.h:80}}
+function labelPrefs(){let o={};try{o=JSON.parse(localStorage.getItem(LBL_KEY)||'{}')}catch(e){}const S0=(Store&&Store.d&&Store.d.settings)||{};const w=S0.labelW>=20?S0.labelW:o.w,h=S0.labelH>=15?S0.labelH:o.h;return {w:w>=20?w:70,h:h>=15?h:80}}
 function saveLabelPrefs(w,h){try{localStorage.setItem(LBL_KEY,JSON.stringify({w:w,h:h}))}catch(e){}}
 function labelSummary(d,mm){
   const head=(d.itemsHead||'').trim(),lines=String(d.itemsText||'').split('\n').map(x=>x.trim()).filter(Boolean),tot=(d.totalText||'').trim(),st=(d.statusText||'').trim();
@@ -2250,14 +2424,15 @@ function labelSummary(d,mm){
   return h;
 }
 function labelFromVoucher(v){
-  const d={name:'',addr:'',phone:'',code:(v&&v.no)||'',date:(v&&v.date)||today(),itemsHead:'',itemsText:'',totalText:'',statusText:''};
+  const d={name:'',addr:'',phone:'',code:(v&&v.no)||'',date:(v&&v.date)||today(),itemsHead:'',itemsText:'',totalText:'',statusText:'',deli:'',header:Store.d.settings.labelHeader||'',footer:Store.d.settings.labelFooter||''};
   if(!v)return d;
   const c=v.customerId?Store.get('customers',v.customerId):null;
   if(c){d.name=c.name||'';d.addr=c.address||'';d.phone=c.phone||''}else if(v.customerName)d.name=v.customerName;
   const rem=Sel.rem(v),its=v.items||[],qn=its.reduce((a,i)=>a+(Number(i.qty)||0),0);
   if(its.length){d.itemsHead='ပစ္စည်း '+its.length+' မျိုး · '+qn+' ခု';d.itemsText=its.map(i=>(i.name||'')+' ×'+(Number(i.qty)||0)+(i.unit?' '+i.unit:'')).join('\n')}
   d.totalText=ks(v.total||0)+' ကျပ်';
-  d.statusText=rem>0?'UNPAID · ကျန် '+ks(rem):'PAID';
+  d.statusText=rem>0?(v.cod?'COD · ကောက်ရန် '+ks(rem):'UNPAID · ကျန် '+ks(rem)):'PAID';
+  d.deli=((v.deliName||'')+(v.deliPhone?' '+v.deliPhone:'')).trim();
   return d;
 }
 async function autoLabel(v){
@@ -2270,7 +2445,7 @@ function labelHTML(d,W,H){
   const u=Math.max(.45,Math.min(W/70,H/80)),mm=x=>(x*u).toFixed(2)+'mm',S=Store.d.settings;
   const nl=t=>esc(t||'').replace(/\n/g,'<br>');
   return '<div style="width:'+W+'mm;height:'+H+'mm;margin:0 auto;box-sizing:border-box;padding:'+mm(3)+';background:#fff;color:#000;border:'+mm(.5)+' solid #000;border-radius:'+mm(3)+';display:flex;flex-direction:column;overflow:hidden;line-height:1.4;font-family:\'Noto Sans Myanmar\',\'Myanmar Text\',Padauk,\'Plus Jakarta Sans\',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact">'
-   +'<div style="display:flex;justify-content:space-between;gap:'+mm(2)+';align-items:center;font-size:'+mm(3.3)+';font-weight:700;padding-bottom:'+mm(1.6)+';border-bottom:'+mm(.35)+' dashed #000"><span>'+esc(S.shopName||'')+'</span><span>'+esc(d.date?fmtD(d.date):'')+'</span></div>'
+   +'<div style="display:flex;justify-content:space-between;gap:'+mm(2)+';align-items:center;font-size:'+mm(3.3)+';font-weight:700;padding-bottom:'+mm(1.6)+';border-bottom:'+mm(.35)+' dashed #000"><span style="display:flex;align-items:center;gap:'+mm(1.5)+';min-width:0">'+((S.logo&&S.logo.indexOf('data:image/')===0&&LL.get(LL.KL)!=='0')?'<img alt="" src="'+S.logo+'" style="height:'+mm({s:5,m:7.5,l:11}[S.logoSize]||7.5)+';max-width:'+mm(24)+';object-fit:contain;flex:none;'+LL.tfCss('lbl',u)+'" data-lg="1">':'')+'<span>'+esc(d.header||S.shopName||'')+'</span></span><span>'+esc(d.date?fmtD(d.date):'')+'</span></div>'
    +'<div style="font-size:'+mm(2.9)+';margin-top:'+mm(2.4)+';letter-spacing:.06em;font-weight:600">လက်ခံသူ / TO</div>'
    +'<div style="font-size:'+mm(7)+';font-weight:800;line-height:1.3;overflow-wrap:anywhere">'+(nl(d.name)||'—')+'</div>'
    +'<div style="margin-top:'+mm(1.6)+';flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden">'
@@ -2278,7 +2453,9 @@ function labelHTML(d,W,H){
    +labelSummary(d,mm)
    +'</div>'
    +(d.phone?'<div style="font-size:'+mm(6)+';font-weight:800;margin-top:'+mm(1.6)+'"><span style="font-size:'+mm(3.2)+';font-weight:600">ဖုန်း </span>'+esc(d.phone)+'</div>':'')
-   +'<div style="margin-top:'+mm(2.2)+';background:#000;color:#fff;border-radius:'+mm(1.6)+';padding:'+mm(1.3)+' '+mm(2.6)+';font-size:'+mm(5)+';font-weight:800;display:flex;justify-content:space-between;gap:'+mm(2)+'"><span>Code</span><span>'+esc(d.code||'—')+'</span></div></div>';
+   +(d.deli?'<div style="margin-top:'+mm(1.6)+';font-size:'+mm(3.6)+';font-weight:700;overflow-wrap:anywhere"><span style="font-size:'+mm(2.8)+';font-weight:600">Deli </span>'+esc(d.deli)+'</div>':'')
+   +(d.footer?'<div style="margin-top:'+mm(1.6)+';padding-top:'+mm(1.2)+';border-top:'+mm(.3)+' dashed #000;font-size:'+mm(3)+';text-align:center;overflow-wrap:anywhere">'+nl(d.footer)+'</div>':'')
+   +'<div style="margin-top:'+mm(1)+';font-size:'+mm(2.4)+';text-align:right;color:#000;opacity:.75">Code '+esc(d.code||'—')+'</div></div>';
 }
 function labelDoc(html,W,H){
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>@page{size:'+W+'mm '+H+'mm;margin:0}html,body{margin:0;padding:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>'+html+'';
@@ -2329,9 +2506,13 @@ function labelSheet(v){
     body:'<div id="lbPrev" style="background:var(--tint);border-radius:16px;padding:10px;margin-bottom:12px"><div id="lbPrevIn"></div></div>'
      +'<div class="field"><label class="lbl">စက္ကူအရွယ်အစား (mm) — ကြိုက်သလို သတ်မှတ်နိုင်သည်</label><div class="two"><input class="inp" id="lbW" inputmode="decimal" aria-label="အကျယ် mm" placeholder="အကျယ်"><input class="inp" id="lbH" inputmode="decimal" aria-label="အမြင့် mm" placeholder="အမြင့်"></div><div class="rowf" style="gap:6px;margin-top:2px">'+sizes.map(z=>'<button type="button" class="chip" data-sz="'+z[0]+'x'+z[1]+'" style="cursor:pointer">'+z[0]+'×'+z[1]+'</button>').join('')+'</div></div>'
      +'<div class="field"><button type="button" class="btn block" id="lbCust">'+ico('users')+'<span id="lbCustT"></span></button></div>'
+     +'<div class="field"><label class="lbl" for="lbHdr">Header (အပေါ်ဆုံး စာသား — မထည့်ပါက ဆိုင်အမည်)</label><input class="inp" id="lbHdr" placeholder="'+esc(Store.d.settings.shopName||'')+'"></div>'
      +'<div class="field"><label class="lbl" for="lbName">နာမည်</label><input class="inp" id="lbName"></div>'
      +'<div class="field"><label class="lbl" for="lbAddr">နေရပ် လိပ်စာ</label><textarea class="inp" id="lbAddr" rows="2"></textarea></div>'
      +'<div class="two"><div class="field"><label class="lbl" for="lbPhone">ဖုန်းနံပါတ်</label><input class="inp" id="lbPhone" inputmode="tel"></div><div class="field"><label class="lbl" for="lbCode">Code</label><input class="inp" id="lbCode"></div></div>'
+     +'<div class="field"><label class="lbl" for="lbDeli">Deli (နာမည် ဖုန်းနံပါတ်)</label><input class="inp" id="lbDeli" placeholder="ဥပမာ - ကိုမောင် 09xxxxxxxxx"></div>'
+     +'<div class="field"><label class="lbl" for="lbFoot">Footer (အောက်ခြေစာသား)</label><input class="inp" id="lbFoot" placeholder="ဥပမာ - ကျေးဇူးတင်ပါသည်"><div class="sub" style="margin-top:4px">ဤ Label တစ်ခုအတွက်သာ ပြောင်းမည် — အမြဲသုံးမည့် စာသားကို Owner က Settings › Print ထဲတွင် သတ်မှတ်ပါ။</div></div>'
+     +'<div class="rowf" style="gap:8px;margin:-4px 0 12px"><button type="button" class="btn s" id="lbSaveDef">'+ico('check')+'Header / Footer ပုံသေ သိမ်းမည်</button><button type="button" class="btn s" id="lbLogoPos">'+ico('image')+'Logo နေရာ ရွှေ့မည်</button></div>'
      +'<div class="field"><label class="lbl" for="lbHead">ပစ္စည်း အကျဉ်း (ခေါင်းစီး)</label><input class="inp" id="lbHead" placeholder="ဥပမာ - ပစ္စည်း 3 မျိုး · 6 ခု"></div>'
      +'<div class="field"><label class="lbl" for="lbItems">ပစ္စည်း စာရင်း (တစ်ကြောင်းလျှင် တစ်မျိုး)</label><textarea class="inp" id="lbItems" rows="3"></textarea></div>'
      +'<div class="two"><div class="field"><label class="lbl" for="lbTotal">Total</label><input class="inp" id="lbTotal" placeholder="12,500 ကျပ်"></div><div class="field"><label class="lbl" for="lbStat">Paid / Unpaid</label><input class="inp" id="lbStat" placeholder="PAID"></div></div>'
@@ -2347,12 +2528,14 @@ function labelSheet(v){
         inn.style.cssText='position:relative;margin:0 auto;width:'+(W*px*s).toFixed(1)+'px;height:'+(H*px*s).toFixed(1)+'px';
         inn.innerHTML='<div style="position:absolute;left:0;top:0;width:'+W+'mm;height:'+H+'mm;transform:scale('+s.toFixed(4)+');transform-origin:0 0">'+labelHTML(d,W,H)+'</div>';
       };
-      const setF=()=>{q('#lbName').value=d.name;q('#lbAddr').value=d.addr;q('#lbPhone').value=d.phone;q('#lbCode').value=d.code;q('#lbHead').value=d.itemsHead;q('#lbItems').value=d.itemsText;q('#lbTotal').value=d.totalText;q('#lbStat').value=d.statusText;q('#lbCustT').textContent=picked?(' ဖောက်သည်: '+picked+' (ပြောင်းမည်)'):' ဖောက်သည် ရွေးမည် (အကုန်ဖြည့်ပေးမည်)'};
+      const setF=()=>{q('#lbName').value=d.name;q('#lbAddr').value=d.addr;q('#lbPhone').value=d.phone;q('#lbCode').value=d.code;q('#lbDeli').value=d.deli;q('#lbFoot').value=d.footer;q('#lbHdr').value=d.header;q('#lbHead').value=d.itemsHead;q('#lbItems').value=d.itemsText;q('#lbTotal').value=d.totalText;q('#lbStat').value=d.statusText;q('#lbCustT').textContent=picked?(' ဖောက်သည်: '+picked+' (ပြောင်းမည်)'):' ဖောက်သည် ရွေးမည် (အကုန်ဖြည့်ပေးမည်)'};
       q('#lbW').value=W;q('#lbH').value=H;setF();paint();
-      [['#lbName','name'],['#lbAddr','addr'],['#lbPhone','phone'],['#lbCode','code'],['#lbHead','itemsHead'],['#lbItems','itemsText'],['#lbTotal','totalText'],['#lbStat','statusText']].forEach(f=>q(f[0]).addEventListener('input',()=>{d[f[1]]=q(f[0]).value;paint()}));
+      [['#lbName','name'],['#lbAddr','addr'],['#lbPhone','phone'],['#lbCode','code'],['#lbDeli','deli'],['#lbFoot','footer'],['#lbHdr','header'],['#lbHead','itemsHead'],['#lbItems','itemsText'],['#lbTotal','totalText'],['#lbStat','statusText']].forEach(f=>q(f[0]).addEventListener('input',()=>{d[f[1]]=q(f[0]).value;paint()}));
       ['#lbW','#lbH'].forEach(s=>q(s).addEventListener('input',paint));
       $$('[data-sz]',el).forEach(b=>b.onclick=()=>{const z=b.dataset.sz.split('x');q('#lbW').value=z[0];q('#lbH').value=z[1];paint()});
       $$('[data-st]',el).forEach(b=>b.onclick=()=>{q('#lbStat').value=b.dataset.st;d.statusText=b.dataset.st;paint()});
+      q('#lbSaveDef').onclick=()=>{Store.putSettings(Object.assign({},Store.d.settings,{labelHeader:(d.header||'').trim(),labelFooter:(d.footer||'').trim()}));toast('Header / Footer ကို ပုံသေအဖြစ် သိမ်းပြီးပါပြီ')};
+      q('#lbLogoPos').onclick=()=>{if(!Store.d.settings.logo){toast('Logo အရင်ရွေးပါ (Settings › ဆိုင်အချက်အလက်)');return}logoTfSheet('lbl',paint)};
       q('#lbCust').onclick=()=>custPickSheet(c=>{fillC(c);setF();paint()});
       const go=f=>{const dm=dims();saveLabelPrefs(dm[0],dm[1]);f(Object.assign({},d),dm[0],dm[1])};
       q('#lbDirect').onclick=()=>go(labelDirect);
@@ -2408,14 +2591,17 @@ function deleteVoucher(v){unapplyVoucher(v);Store.del('vouchers',v.id)}
 function voucherEditSheet(id,after){
   const v0=Store.get('vouchers',id);if(!v0){toast('ဘောက်ချာ မတွေ့ပါ');return}
   const S=Store.d.settings,ms=(S.methods||[DEFAULT_METHOD]).slice(),custs=Store.list('customers').sort((a,b)=>COLL.compare(String(a.name),String(b.name)));
-  const st={items:v0.items.map(i=>Object.assign({},i)),pays:(v0.payments||[]).map(p=>Object.assign({},p)),date:v0.date,cust:v0.customerId||'',disc:v0.discount||0};
+  const st={items:v0.items.map(i=>Object.assign({},i)),pays:(v0.payments||[]).map(p=>Object.assign({},p)),date:v0.date,cust:v0.customerId||'',disc:v0.discount||0,cod:!!v0.cod,dn:v0.deliName||'',dp:v0.deliPhone||''};
   const sameC=()=>st.cust===(v0.customerId||'');
   const calc=()=>{const sub=st.items.reduce((a,i)=>a+Math.round(num(i.price))*Math.floor(num(i.qty)),0),disc=Math.min(Math.max(0,Math.round(num(st.disc))),sub),pv=sameC()?Math.min(v0.pointsValue||0,sub-disc):0,total=sub-disc-pv,paid=st.pays.reduce((a,p)=>a+Math.max(0,Math.round(num(p.amount))),0);return {sub:sub,disc:disc,pv:pv,total:total,paid:paid}};
   const sumHTML=()=>{const c=calc(),rem=c.total-c.paid;return '<div class="ln"><span>ကုန်ပစ္စည်း စုစုပေါင်း</span><span>'+ks(c.sub)+'</span></div>'+(c.disc>0?'<div class="ln"><span>လျှော့စျေး</span><span>- '+ks(c.disc)+'</span></div>':'')+(c.pv>0?'<div class="ln"><span>အမှတ်ဖြင့် နှုတ်ငွေ</span><span>- '+ks(c.pv)+'</span></div>':'')+'<div class="ln g"><span>ပေးရန် စုစုပေါင်း</span><span>'+ks(c.total)+'</span></div><div class="ln"><span>ပေးငွေ</span><span>'+ks(c.paid)+'</span></div><div class="ln"><span>ကျန်ငွေ</span><span><b'+(rem<0?' class="w"':'')+'>'+ks(rem)+'</b></span></div>'};
   const draw=()=>'<div class="two"><div class="field"><label class="lbl" for="veDate">ရက်စွဲ</label><input class="inp" id="veDate" type="date" max="'+today()+'" value="'+st.date+'"'+(Auth.owner()?'':' disabled')+'></div><div class="field"><label class="lbl" for="veCust">ဖောက်သည်</label><select class="inp" id="veCust"><option value="">ဧည့်သည်</option>'+custs.map(c=>'<option value="'+c.id+'"'+(c.id===st.cust?' selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></div></div>'
     +'<div class="sec-t">ပစ္စည်းများ</div>'+st.items.map((i,k)=>'<div class="ve-it"><div class="rowf" style="flex-wrap:nowrap"><input class="inp" data-i="'+k+'" data-f="name" value="'+esc(i.name)+'" aria-label="ပစ္စည်းအမည်" style="flex:1;min-width:0"><button type="button" class="icon-btn" data-irm="'+k+'" aria-label="ဖျက်မည်">'+ico('trash')+'</button></div><div class="two" style="margin-top:6px"><input class="inp" inputmode="numeric" data-i="'+k+'" data-f="price" value="'+i.price+'" aria-label="ဈေးနှုန်း" placeholder="ဈေးနှုန်း"><input class="inp" inputmode="numeric" data-i="'+k+'" data-f="qty" value="'+i.qty+'" aria-label="အရေအတွက်" placeholder="အရေအတွက်"></div>'+sellerSel('data-i="'+k+'" data-f="seller"',i.seller||'')+'</div>').join('')
+    +'<div class="rowf" style="margin-top:8px"><button type="button" class="btn s" id="veAdd">'+ico('plus')+'ပစ္စည်း ထပ်ထည့်မည်</button></div>'
     +'<div class="field" style="margin-top:10px"><label class="lbl" for="veDisc">လျှော့စျေး (ကျပ်)</label><input class="inp" id="veDisc" inputmode="numeric" value="'+(st.disc||'')+'" placeholder="0"></div>'
-    +(st.pays.length?'<div class="sec-t">ငွေပေးချေမှု မှတ်တမ်း</div>'+st.pays.map((p,k)=>{const opts=ms.indexOf(p.method)<0&&p.method?ms.concat([p.method]):ms;return '<div class="rowf" style="flex-wrap:nowrap;margin-bottom:6px"><input class="inp" inputmode="numeric" data-p="'+k+'" data-f="amount" value="'+p.amount+'" aria-label="ပမာဏ" style="flex:1;min-width:0"><select class="inp" data-p="'+k+'" data-f="method" aria-label="နည်းလမ်း" style="flex:1;min-width:0">'+opts.map(m=>'<option'+(m===(p.method||DEFAULT_METHOD)?' selected':'')+'>'+esc(m)+'</option>').join('')+'</select><button type="button" class="icon-btn" data-prm="'+k+'" aria-label="ဖျက်မည်">'+ico('trash')+'</button></div>'}).join(''):'')
+    +'<div class="field"><label class="lbl">Deli (ပို့ဆောင်သူ)</label><div class="two"><input class="inp" id="veDN" placeholder="နာမည်" value="'+esc(st.dn)+'" aria-label="Deli နာမည်"><input class="inp" id="veDP" inputmode="tel" placeholder="ဖုန်းနံပါတ်" value="'+esc(st.dp)+'" aria-label="Deli ဖုန်း"></div></div>'
+    +'<label class="swrow" style="border-top:0;padding:6px 0"><span class="swl">'+ico('wallet')+'<span>Cash on delivery (ပို့ပြီးမှ ငွေကောက်မည်)</span></span><input type="checkbox" class="sw" id="veCod"'+(st.cod?' checked':'')+'></label>'
+    +(st.pays.length?'<div class="sec-t">ငွေပေးချေမှု မှတ်တမ်း</div>'+st.pays.map((p,k)=>{const opts=ms.indexOf(p.method)<0&&p.method?ms.concat([p.method]):ms;return '<div class="rowf" style="flex-wrap:nowrap;margin-bottom:6px"><input class="inp" inputmode="numeric" data-p="'+k+'" data-f="amount" value="'+p.amount+'" aria-label="ပမာဏ" style="flex:1;min-width:0"><select class="inp" data-p="'+k+'" data-f="method" aria-label="နည်းလမ်း" style="flex:1;min-width:0">'+opts.map(m=>'<option'+(m===(p.method||DEFAULT_METHOD)?' selected':'')+'>'+esc(m)+'</option>').join('')+'</select>'+(Auth.owner()?'<button type="button" class="icon-btn" data-prm="'+k+'" aria-label="ဖျက်မည်">'+ico('trash')+'</button>':'')+'</div>'}).join(''):'')
     +'<div class="sumbox" id="veSum" style="margin-top:12px">'+sumHTML()+'</div>';
   Sheet.open({title:'ဘောက်ချာ ပြင်မည် #'+v0.no,body:draw(),footer:'<button class="btn pri block" id="veSave">သိမ်းမည်</button>',
     onMount(el,ctl){
@@ -2424,21 +2610,27 @@ function voucherEditSheet(id,after){
         if(t.dataset.i!=null){const i=st.items[Number(t.dataset.i)],f=t.dataset.f;i[f]=(f==='name'||f==='seller')?t.value:f==='qty'?Math.max(0,Math.floor(num(t.value))):Math.max(0,Math.round(num(t.value)));paintSum()}
         else if(t.dataset.p!=null){const p=st.pays[Number(t.dataset.p)],f=t.dataset.f;p[f]=f==='amount'?Math.max(0,Math.round(num(t.value))):t.value;paintSum()}
         else if(t.id==='veDisc'){st.disc=t.value;paintSum()}
+        else if(t.id==='veDN'){st.dn=t.value}
+        else if(t.id==='veDP'){st.dp=t.value}
+        else if(t.id==='veCod'){st.cod=t.checked}
         else if(t.id==='veDate'){if(t.value)st.date=t.value}
         else if(t.id==='veCust'){st.cust=t.value;paintSum()}
       };
       el.addEventListener('input',onIn);el.addEventListener('change',onIn);
       el.addEventListener('click',e=>{
         const r=e.target.closest('[data-irm]'),pr=e.target.closest('[data-prm]');
+        if(e.target.closest('#veAdd')){veAddItemSheet(it=>{const ex=st.items.find(x=>x.pid===it.pid);if(ex)ex.qty=(Math.floor(num(ex.qty))||0)+it.qty;else st.items.push(it);ctl.setBody(draw());toast('ပစ္စည်း ထည့်ပြီးပါပြီ')});return}
         if(r){if(st.items.length<2){toast('ပစ္စည်း အနည်းဆုံး ၁ ခု ရှိရပါမည် — ဘောက်ချာအားလုံးကို ဖျက်လိုလျှင် ဖျက်မည်ကို နှိပ်ပါ',true);return}st.items.splice(Number(r.dataset.irm),1);ctl.setBody(draw())}
-        if(pr){st.pays.splice(Number(pr.dataset.prm),1);ctl.setBody(draw())}
+        if(pr&&Auth.owner()){st.pays.splice(Number(pr.dataset.prm),1);ctl.setBody(draw())}
       });
       el.querySelector('#veSave').onclick=()=>{
         const c=calc();
         if(st.items.some(i=>!String(i.name||'').trim())){toast('ပစ္စည်းအမည် ထည့်ပါ');return}
         if(st.items.some(i=>Math.floor(num(i.qty))<=0)){toast('အရေအတွက် ထည့်ပါ');return}
         if(c.paid>c.total){toast('ပေးငွေသည် စုစုပေါင်းထက် များနေသည်',true);return}
-        if(c.total-c.paid>0&&!st.cust){toast('ကြွေးကျန်သည့် ဘောက်ချာအတွက် ဖောက်သည် ရွေးပါ');return}
+        if(c.total-c.paid>0&&!st.cust&&!st.cod){toast('ကြွေးကျန်သည့် ဘောက်ချာအတွက် ဖောက်သည် ရွေးပါ');return}
+        {const oq={},nq={};(v0.items||[]).forEach(i=>{oq[i.pid]=(oq[i.pid]||0)+(Number(i.qty)||0)});st.items.forEach(i=>{if(i.pid)nq[i.pid]=(nq[i.pid]||0)+Math.floor(num(i.qty))});
+          for(const pid in nq){const p=Store.get('products',pid);if(p&&nq[pid]-(oq[pid]||0)>(p.stock||0)){toast('လက်ကျန် မလုံလောက်ပါ ('+p.name+' — '+(p.stock||0)+' ခုသာ ကျန်သည်)');return}}}
         unapplyVoucher(v0);
         const cust=st.cust?Store.get('customers',st.cust):null;
         const items=st.items.map(i=>Object.assign({},i,{name:String(i.name).trim(),price:Math.round(num(i.price)),qty:Math.floor(num(i.qty))}));
@@ -2446,9 +2638,90 @@ function voucherEditSheet(id,after){
         const pts=c.pv>0&&S.pointValue>0?Math.ceil(c.pv/S.pointValue):0,earned=cust&&S.earnPer>0?Math.floor(c.paid/S.earnPer):0;
         if(cust){const cf=Store.get('customers',cust.id);Store.put('customers',Object.assign({},cf,{points:Math.max(0,(cf.points||0)-pts+earned)}))}
         const pays=st.pays.filter(p=>Math.round(num(p.amount))>0).map(p=>Object.assign({},p,{amount:Math.round(num(p.amount))}));
-        Store.put('vouchers',Object.assign({},v0,{date:Auth.owner()?(st.date||v0.date):v0.date,customerId:cust?cust.id:null,customerName:cust?cust.name:'',items:items,subtotal:c.sub,discount:c.disc,pointsUsed:pts,pointsValue:c.pv,total:c.total,paid:c.paid,payments:pays,pointsEarned:earned}));
+        const me=Auth.me||{},newDate=Auth.owner()?(st.date||v0.date):v0.date,chg=[];
+        const ln=i=>(i.name||'')+' ×'+(Number(i.qty)||0)+' @'+ks(i.price);
+        const bL=(v0.items||[]).map(ln),aL=items.map(ln);
+        bL.forEach(x=>{if(aL.indexOf(x)<0)chg.push('− '+x)});aL.forEach(x=>{if(bL.indexOf(x)<0)chg.push('+ '+x)});
+        if((v0.discount||0)!==c.disc)chg.push('လျှော့စျေး '+ks(v0.discount||0)+' → '+ks(c.disc));
+        if(newDate!==v0.date)chg.push('ရက်စွဲ '+fmtD(v0.date)+' → '+fmtD(newDate));
+        const oc=v0.customerName||'ဧည့်သည်',nc2=cust?cust.name:'ဧည့်သည်';if((v0.customerId||'')!==(cust?cust.id:''))chg.push('ဖောက်သည် '+oc+' → '+nc2);
+        if((v0.paid||0)!==c.paid)chg.push('ပေးငွေ '+ks(v0.paid||0)+' → '+ks(c.paid));
+        const od=((v0.deliName||'')+' '+(v0.deliPhone||'')).trim(),nd=((st.dn||'').trim()+' '+(st.dp||'').trim()).trim();if(od!==nd)chg.push('Deli '+(od||'—')+' → '+(nd||'—'));
+        const ncod=!!st.cod&&(c.total-c.paid>0);if(!!v0.cod!==ncod)chg.push('Cash on delivery '+(v0.cod?'ဖယ်':'ထည့်'));
+        if((v0.total||0)!==c.total)chg.push('စုစုပေါင်း '+ks(v0.total||0)+' → '+ks(c.total));
+        const hist=(v0.history||[]).concat(chg.length?[{at:Date.now(),by:me.id||'',byName:me.name||'',changes:chg}]:[]);
+        Store.put('vouchers',Object.assign({},v0,{date:newDate,customerId:cust?cust.id:null,customerName:cust?cust.name:'',items:items,subtotal:c.sub,discount:c.disc,pointsUsed:pts,pointsValue:c.pv,total:c.total,paid:c.paid,payments:pays,pointsEarned:earned,cod:ncod,deliName:(st.dn||'').trim(),deliPhone:(st.dp||'').trim(),history:hist}));
         ctl.close();toast('ဘောက်ချာ ပြင်ပြီးပါပြီ');if(after)after();
       };
+    }});
+}
+function veAddItemSheet(onAdd){
+  const all=Store.list('products').sort((a,b)=>COLL.compare(String(a.name),String(b.name)));
+  Sheet.open({title:'ပစ္စည်း ထပ်ထည့်မည်',
+    body:'<div class="search" style="margin-bottom:10px"><span aria-hidden="true">'+ico('search')+'</span><input class="inp" id="vaQ" placeholder="ပစ္စည်းအမည် / ကုဒ်ဖြင့် ရှာမည်" aria-label="ရှာမည်"></div><div id="vaL"></div>'
+     +'<div class="sec-t">'+ico('edit')+'စာရင်းထဲမပါသော ပစ္စည်း</div>'
+     +'<div class="field"><input class="inp" id="vaN" placeholder="ပစ္စည်းအမည် / အလုပ်အမျိုးအစား" aria-label="ပစ္စည်းအမည်"></div>'
+     +'<div class="two"><input class="inp" id="vaP" inputmode="numeric" placeholder="ဈေးနှုန်း" aria-label="ဈေးနှုန်း"><input class="inp" id="vaQt" inputmode="numeric" value="1" aria-label="အရေအတွက်"></div>'
+     +'<div class="rowf" style="margin-top:10px"><button type="button" class="btn pri block" id="vaGo">'+ico('plus')+'ထည့်မည်</button></div>',
+    onMount(el,ctl){
+      const q=s=>el.querySelector(s);
+      const paint=()=>{const t=q('#vaQ').value.trim().toLowerCase();const list=all.filter(p=>!t||String(p.name).toLowerCase().indexOf(t)>=0||String(p.sku||'').toLowerCase().indexOf(t)>=0).slice(0,60);
+        q('#vaL').innerHTML=list.length?list.map(p=>'<button type="button" class="li" data-pick="'+p.id+'"><div class="mid"><div class="nm">'+esc(p.name)+'</div><div class="sub">'+ks(tierPrice(p,1,false))+' ကျပ် · လက်ကျန် '+(p.stock||0)+(p.unit?' '+esc(p.unit):'')+'</div></div><div class="end" aria-hidden="true">'+ico('plus')+'</div></button>').join(''):'<p class="sub">ပစ္စည်း မတွေ့ပါ</p>'};
+      q('#vaQ').oninput=paint;paint();
+      el.addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;const p=Store.get('products',b.dataset.pick);if(!p)return;ctl.close();onAdd({pid:p.id,name:p.name,unit:p.unit||'',price:tierPrice(p,1,false),cost:p.cost==null?null:p.cost,qty:1,seller:''})});
+      q('#vaGo').onclick=()=>{const n=q('#vaN').value.trim(),pr=Math.max(0,Math.round(num(q('#vaP').value))),qt=Math.max(1,Math.floor(num(q('#vaQt').value)||1));
+        if(!n){toast('ပစ္စည်းအမည် ထည့်ပါ');return}
+        ctl.close();onAdd({pid:uid('cu'),name:n,unit:'',price:pr,cost:null,qty:qt,seller:''})};
+    }});
+}
+function logoTfSheet(t0,onDone){
+  const TG=[['th','ဘောက်ချာ (Thermal)'],['a4','ဘောက်ချာ (A4)'],['lbl','Label']];
+  let tg=t0||'th';
+  const sv={no:'000000-001',date:today(),createdAt:Date.now(),customerName:'နမူနာ ဖောက်သည်',items:[{name:'နမူနာ ပစ္စည်း',price:2500,qty:2,unit:'ခု'}],subtotal:5000,discount:0,pointsValue:0,total:5000,paid:3000,payments:[{at:Date.now(),amount:3000,method:DEFAULT_METHOD}]};
+  const lblDims=()=>{const pf=labelPrefs();return [pf.w,pf.h]};
+  const unitOf=()=>{if(tg!=='lbl')return 1;const d=lblDims();return Math.max(.45,Math.min(d[0]/70,d[1]/80))};
+  const rng=(id,lbl,min,max,step,val,suf)=>'<div class="rw"><span>'+lbl+'</span><b id="'+id+'V">'+val+suf+'</b></div><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" style="margin-bottom:10px">';
+  Sheet.open({title:'Logo နေရာ / အရွယ် ချိန်ညှိမည်',onClose(){if(onDone)onDone()},
+    body:'<div class="seg" id="tfTg" style="margin-bottom:8px">'+TG.map(x=>'<button type="button" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'
+     +'<p class="sub" style="margin:0 0 4px">Logo ကို ဆွဲရွှေ့နိုင်သည်။ အောက်က slider များဖြင့် အရွယ်၊ လှည့်ခြင်း၊ နေရာ ညှိနိုင်သည်။ ဤစက်ထဲတွင်သာ သိမ်းသည်။</p>'
+     +'<div class="prev" id="tfPrev"><div class="prev-in"></div></div><div id="tfCtl"></div>'
+     +'<div class="rowf" style="justify-content:space-between;margin-top:8px"><button type="button" class="btn s out" id="tfReset">'+ico('refresh')+'မူလအတိုင်း</button><button type="button" class="btn s pri" id="tfDone">'+ico('check')+'ပြီးပြီ</button></div>',
+    onMount(el,ctl){
+      const q=s=>el.querySelector(s);
+      const cur=()=>LL.tf(tg);
+      const save=t=>LL.setTf(tg,t);
+      const paintPrev=()=>{
+        const pv=q('#tfPrev'),S=Store.d.settings;
+        if(tg==='lbl'){const d=lblDims();pv.firstElementChild.innerHTML=labelHTML(labelFromVoucher(sv),d[0],d[1])}
+        else pv.firstElementChild.innerHTML=receiptHTML(sv,tg,S);
+        requestAnimationFrame(()=>{fitPreview(pv);const im=tg==='lbl'?pv.querySelector('img[data-lg]'):pv.querySelector('img.lg');if(im){im.style.touchAction='none';im.style.cursor='grab';im.style.outline='1px dashed #2563eb';im.style.outlineOffset='2px'}else if(tg==='lbl')pv.insertAdjacentHTML('beforeend','<div class="sub" style="padding:6px 10px">Label တွင် Logo ပိတ်ထားသည် — "Label မှာလည်း Logo ပြမည်" ကို ဖွင့်ပါ</div>')});
+      };
+      const paintCtl=()=>{const t=cur(),mx=tg==='lbl'?30:60;
+        q('#tfCtl').innerHTML=rng('tfS','ကြီးငယ်',20,300,5,t.s,'%')+rng('tfR','လှည့်ခြင်း',-180,180,1,t.r,'°')+rng('tfX','ဘယ် ◂ ▸ ညာ',-mx,mx,.5,t.x,'')+rng('tfY','အပေါ် ◂ ▸ အောက်',-mx,mx,.5,t.y,'')};
+      const drawTg=()=>$$('#tfTg button',el).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===tg)));
+      const all=()=>{drawTg();paintCtl();paintPrev()};
+      q('#tfTg').onclick=e=>{const b=e.target.closest('button');if(b){tg=b.dataset.v;all()}};
+      q('#tfCtl').oninput=e=>{const t=cur(),i=e.target;const n=Number(i.value);
+        if(i.id==='tfS')t.s=n;else if(i.id==='tfR')t.r=n;else if(i.id==='tfX')t.x=n;else if(i.id==='tfY')t.y=n;else return;
+        const o=q('#'+i.id+'V');if(o)o.textContent=n+(i.id==='tfS'?'%':i.id==='tfR'?'°':'');
+        save(t);paintPrev()};
+      q('#tfReset').onclick=()=>{save(null);all()};
+      q('#tfDone').onclick=()=>ctl.close();
+      /* drag the logo with finger / mouse */
+      let drag=null;
+      const pv=q('#tfPrev');
+      pv.addEventListener('pointerdown',e=>{const im=e.target.closest('img');if(!im||!(im.classList.contains('lg')||im.dataset.lg))return;
+        const inner=pv.firstElementChild,m=/scale\(([\d.]+)\)/.exec(inner.style.transform||''),fit=m?Number(m[1]):1;
+        drag={x0:e.clientX,y0:e.clientY,t:cur(),im:im,k:3.7795*fit*unitOf()};try{im.setPointerCapture(e.pointerId)}catch(x){}
+        im.style.cursor='grabbing';e.preventDefault()});
+      pv.addEventListener('pointermove',e=>{if(!drag)return;
+        const mx=tg==='lbl'?30:60,t=Object.assign({},drag.t);
+        t.x=Math.max(-mx,Math.min(mx,Math.round((drag.t.x+(e.clientX-drag.x0)/drag.k)*2)/2));
+        t.y=Math.max(-mx,Math.min(mx,Math.round((drag.t.y+(e.clientY-drag.y0)/drag.k)*2)/2));
+        drag.cur=t;drag.im.style.transform='translate('+(t.x*unitOf()).toFixed(2)+'mm,'+(t.y*unitOf()).toFixed(2)+'mm) rotate('+t.r+'deg) scale('+(t.s/100)+')';drag.im.style.transformOrigin='center'});
+      const end=()=>{if(!drag)return;const t=drag.cur;drag=null;if(t){save(t);paintCtl();paintPrev()}};
+      pv.addEventListener('pointerup',end);pv.addEventListener('pointercancel',end);
+      all();
     }});
 }
 function customItemSheet(){
@@ -2484,6 +2757,8 @@ function checkoutSheet(){
      +'<div class="field" id="ckSplit" hidden><label class="lbl">ငွေပေးချေမှု ခွဲပေးခြင်း (နည်းလမ်းတစ်ခုချင်း ပမာဏထည့်ပါ)</label><div id="ckRows"></div><button type="button" class="btn s" id="ckAddRow">'+ico('plus')+'နည်းလမ်း ထပ်ထည့်မည်</button></div>'
      +'<div class="field"><button type="button" class="btn s" id="ckSplitBtn">ငွေပေးနည်း ခွဲမည်</button></div>'
      +'<div class="field" id="ckMF"><label class="lbl">ငွေပေးချေမှု နည်းလမ်း</label>'+methodPickerShell('ckM')+'</div>'
+     +'<div class="field" id="ckCodF" hidden><label class="swrow" style="border-top:0;padding:6px 0"><span class="swl">'+ico('wallet')+'<span>Cash on delivery (ပို့ပြီးမှ ငွေကောက်မည်)</span></span><input type="checkbox" class="sw" id="ckCod"></label></div>'
+     +'<div class="field"><label class="lbl">Deli (ပို့ဆောင်သူ — ရှိလျှင်)</label><div class="two"><input class="inp" id="ckDN" placeholder="နာမည်" aria-label="Deli နာမည်"><input class="inp" id="ckDP" inputmode="tel" placeholder="ဖုန်းနံပါတ်" aria-label="Deli ဖုန်း"></div></div>'
      +'<div class="field" id="ckOS"><label class="lbl">အော်ဒါ အခြေအနေ (ထုတ်လုပ်ရမည့် ပစ္စည်းဆိုလျှင် ရွေးပါ)</label><div class="seg" role="group"><button type="button" data-ckos="" aria-pressed="true">ရောင်းချမှုသာ</button>'+osSync().map(o=>'<button type="button" data-ckos="'+esc(o[0])+'" aria-pressed="false">'+esc(o[1])+'</button>').join('')+'</div></div>'
     +'<div class="sumbox" id="ckSum"></div>',
     footer:'<button class="btn pri block" id="ckGo">'+ico('check')+'ဘောက်ချာ ထုတ်မည်</button>',
@@ -2509,9 +2784,10 @@ function checkoutSheet(){
         const c=calc();
         q('#ckRec').disabled=false;
         q('#ckMF').hidden=st.split||!(c.rec>0);
+        q('#ckCodF').hidden=!(c.rem>0);if(!(c.rem>0))q('#ckCod').checked=false;
         if(st.mode==='paid'&&document.activeElement!==q('#ckRec'))q('#ckRec').value=c.total;
         q('#ckRecL').textContent=st.mode==='paid'?'ပေးငွေ (လျော့ရိုက်လျှင် စရံငွေ ဖြစ်မည်)':'စရံငွေ (ရှိလျှင်)';
-        q('#ckSum').innerHTML='<div class="ln"><span>ကုန်ပစ္စည်း စုစုပေါင်း</span><span>'+ks(sub)+'</span></div>'
+        q('#ckSum').innerHTML=(q('#ckCod').checked&&c.rem>0?'<div class="ln"><span><b>Cash on delivery</b></span><span><b>'+ks(c.rem)+' ကောက်ရန်</b></span></div>':'')+'<div class="ln"><span>ကုန်ပစ္စည်း စုစုပေါင်း</span><span>'+ks(sub)+'</span></div>'
           +(c.disc>0?'<div class="ln"><span>လျှော့စျေး</span><span>- '+ks(c.disc)+'</span></div>':'')
           +(c.pv>0?'<div class="ln"><span>အမှတ် '+ks(c.pts)+' မှတ်ဖြင့် နှုတ်ငွေ</span><span>- '+ks(c.pv)+'</span></div>':'')
           +'<div class="ln g"><span>ပေးရန် စုစုပေါင်း</span><span>'+ks(c.total)+' ကျပ်</span></div>'
@@ -2522,7 +2798,8 @@ function checkoutSheet(){
       };
       const paintCust=()=>{
         const cust=st.custId?Store.get('customers',st.custId):null;
-        q('#ckSel').innerHTML=cust?'<div class="selchip"><div class="av" style="width:34px;height:34px">'+esc(initial(cust.name))+'</div><div class="mid"><div class="nm">'+esc(cust.name)+'</div><div class="sub">'+esc(cust.phone||'')+' · '+ks(cust.points||0)+' မှတ်'+(Sel.custDue(cust.id)>0?' · ကြွေး '+ks(Sel.custDue(cust.id)):'')+'</div></div><button type="button" class="icon-btn" id="ckClr" aria-label="ဖယ်ရှားမည်" style="width:34px;height:34px">'+ico('x')+'</button></div>':'<div class="selchip"><div class="mid">ဧည့်သည် (ဖောက်သည်မဟုတ်)</div></div>';
+        q('#ckSel').innerHTML=cust?'<div class="selchip"><div class="av" style="width:34px;height:34px">'+esc(initial(cust.name))+'</div><div class="mid"><div class="nm">'+esc(cust.name)+'</div><div class="sub">'+esc(cust.phone||'')+' · '+ks(cust.points||0)+' မှတ်'+(Sel.custDue(cust.id)>0?' · ကြွေး '+ks(Sel.custDue(cust.id)):'')+'</div></div><button type="button" class="icon-btn" id="ckEdit" aria-label="ပြင်ဆင်မည်" style="width:34px;height:34px">'+ico('edit')+'</button><button type="button" class="icon-btn" id="ckClr" aria-label="ဖယ်ရှားမည်" style="width:34px;height:34px">'+ico('x')+'</button></div>':'<div class="selchip"><div class="mid">ဧည့်သည် (ဖောက်သည်မဟုတ်)</div></div>';
+        const ce=q('#ckEdit');if(ce)ce.onclick=()=>customerSheet(st.custId,()=>{paintCust();paintRes();paintSum()});
         const cl=q('#ckClr');if(cl)cl.onclick=()=>{st.custId=null;Cart.customerId=null;q('#ckPts').value='';paintCust();paintRes();paintSum()};
         q('#ckPtsBox').hidden=!(cust&&(cust.points||0)>0&&S.pointValue>0);
         if(q('#ckPtsBox').hidden)q('#ckPts').value='';
@@ -2569,14 +2846,16 @@ function checkoutSheet(){
       q('#ckSplit').addEventListener('click',e=>{const b=e.target.closest('[data-srm]');if(b){st.rows.splice(Number(b.dataset.srm),1);paintRows();paintSum()}});
       q('#ckPtsAll').onclick=()=>{const c=calc();q('#ckPts').value=c.maxPts;paintSum()};
       const setMode=(m,keep)=>{st.mode=m;q('#mPaid').setAttribute('aria-pressed',String(m==='paid'));q('#mUnpaid').setAttribute('aria-pressed',String(m==='unpaid'));if(m==='unpaid'&&!keep)q('#ckRec').value='';paintSum()};
+      q('#ckCod').addEventListener('change',paintSum);
       q('#mPaid').onclick=()=>setMode('paid');q('#mUnpaid').onclick=()=>setMode('unpaid');
       q('#ckGo').onclick=()=>{
         if(Sel.isClosed(today())){toast('ယနေ့ စာရင်းပိတ်ပြီးပါပြီ — ဘောက်ချာ ထပ်ဖြတ်၍ မရပါ');return}
         const c=calc();
-        if(c.rem>0&&!st.custId){toast('ကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ');return}
+        const cod=q('#ckCod').checked&&c.rem>0;
+        if(c.rem>0&&!st.custId&&!cod){toast('ကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ (ဒါမှမဟုတ် Cash on delivery ရွေးပါ)');return}
         const fresh=Cart.lines();
         for(const l of fresh){if(l.qty>l.p.stock){toast(l.p.name+' လက်ကျန် မလုံလောက်ပါ');return}}
-        const v=createVoucher({lines:fresh,customerId:st.custId,discount:c.disc,pointsUsed:c.pts,received:c.rec,method:mp.get(),payments:c.pays?c.pays.map(x=>({amount:x.amount,method:x.method})):undefined});
+        const v=createVoucher({lines:fresh,customerId:st.custId,discount:c.disc,pointsUsed:c.pts,received:c.rec,method:mp.get(),payments:c.pays?c.pays.map(x=>({amount:x.amount,method:x.method})):undefined,cod:cod,deliName:q('#ckDN').value,deliPhone:q('#ckDP').value});
         if(st.os){osSet(v.id,st.os)}
         Cart.clear();ctl.close();if(window._cartCtl)window._cartCtl.close();App.render();updateCobar();
         toast('ဘောက်ချာ ထုတ်ပြီးပါပြီ');autoLabel(v);autoReceipt(v);setTimeout(()=>voucherSheet(v.id),250);
@@ -2592,10 +2871,10 @@ function csvRows(kind){
     Store.list('vouchers').sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).forEach(v=>{
       const c=v.customerId?Store.get('customers',v.customerId):null,its=(v.items||[]).length?v.items:[null];
       its.forEach((i,k)=>r.push([v.no,v.date,fmtT(v.createdAt||0),Sel.cname(v),c?c.phone:'',v.byName||'',i?i.name:'',i?i.unit:'',i?i.qty:'',i?i.price:'',i?i.price*i.qty:'',
-        k?'':v.subtotal,k?'':v.discount||0,k?'':v.total,k?'':v.paid||0,k?'':Sel.rem(v),k?'':(Sel.rem(v)>0?'ငွေမလွှဲရသေး':'ငွေပေးပြီး')]));
+        k?'':v.subtotal,k?'':v.discount||0,k?'':v.total,k?'':v.paid||0,k?'':Sel.rem(v),k?'':(Sel.rem(v)>0?(v.cod?'Cash on delivery':'ငွေမလွှဲရသေး'):'ငွေပေးပြီး')]));
     });return r;
   }
-  if(kind==='products')return [['ပစ္စည်းအမည်','ယူနစ်','ရောင်းဈေး','ဝယ်ဈေး','လက်ကျန်','ကုဒ်','အမျိုးအစား']].concat(Store.list('products').sort((a,b)=>COLL.compare(String(a.name),String(b.name))).map(p=>[p.name,p.unit||'',p.price,p.cost==null?'':p.cost,p.stock,p.sku||'',p.cat||'']));
+  if(kind==='products')return [['ပစ္စည်းအမည်','ယူနစ်','ရောင်းဈေး','ဝယ်ဈေး','လက်ကျန်','ကုဒ်','အမျိုးအစား']].concat(Store.list('products').sort((a,b)=>COLL.compare(String(a.name),String(b.name))).map(p=>[p.name,p.unit||'',p.price,(p.cost==null||!canCost())?'':p.cost,p.stock,p.sku||'',p.cat||'']));
   if(kind==='customers')return [['အမည်','ဖုန်း','လိပ်စာ','အမှတ်','ကြွေးကျန်','စုစုပေါင်းဝယ်ယူငွေ']].concat(Store.list('customers').sort((a,b)=>COLL.compare(String(a.name),String(b.name))).map(c=>[c.name,c.phone||'',c.address||'',c.points||0,Sel.custDue(c.id),Sel.custSpent(c.id)]));
   return [['ရက်စွဲ','အမျိုးအစား','ပမာဏ','နည်းလမ်း','မှတ်ချက်','မှတ်သူ']].concat(Store.list('expenses').sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(x=>[x.date,x.category||'',x.amount,x.method||'',x.note||'',x.byName||'']));
 }
@@ -2619,51 +2898,117 @@ async function restoreBackup(file){
 function restoreData(j){
   const n=['products','customers','vouchers','expenses','closings'].reduce((a,c)=>a+(j.data[c]||[]).length,0);
   ['products','customers','vouchers','expenses','closings'].forEach(c=>(j.data[c]||[]).forEach(o=>{if(o&&o.id)Store.put(c,o)}));
-  if(j.settings)Store.putSettings(Object.assign({},Store.d.settings,j.settings));
+  if(j.settings)Store.putSettings(Object.assign({},Store.d.settings,j.settings,{logo:j.settings.logo||Store.d.settings.logo,logoSize:j.settings.logoSize||Store.d.settings.logoSize}));
   toast('ပြန်သွင်းပြီးပါပြီ — ဒေတာ '+n+' ခု');
 }
+const TabTheme={K:'shoppos.tabTheme',DEF:{bg:'#0A192F',fg:'#939AA3',act:'#FFFFFF'},
+  get(){try{const t=JSON.parse(LL.get(this.K)||'{}');return t&&typeof t==='object'?t:{}}catch(e){return {}}},
+  set(t){LL.put(this.K,JSON.stringify(t));this.apply()},
+  rgba(h,a){const m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return '';const n=parseInt(m[1],16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')'},
+  apply(){const t=this.get(),r=document.documentElement.style,sp=(k,v)=>{if(v)r.setProperty(k,v);else r.removeProperty(k)};
+    sp('--tab-bg',t.bg);sp('--tab-fg',t.fg);sp('--tab-act',t.act);sp('--tab-pill',t.act?this.rgba(t.act,.15):'');
+    const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t.bg||this.DEF.bg)}};
+TabTheme.apply();
+function colorSheet(){
+  const T=TabTheme,row=(id,lb)=>'<div class="rowf" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:12px"><label class="lbl" for="'+id+'" style="margin:0">'+lb+'</label><input type="color" id="'+id+'" style="width:60px;height:40px;border:0;padding:0;background:none;flex:none"></div>';
+  const presets=[['#0A192F','ပင်လယ်ရောင်'],['#111111','အနက်'],['#14532D','စိမ်း'],['#7F1D1D','အနီရင့်'],['#4C1D95','ခရမ်း'],['#0F766E','စိမ်းပြာ'],['#9A3412','လိမ္မော်ရင့်']];
+  Sheet.open({title:'Tab အရောင် ချိန်းမည်',small:true,
+    body:'<div style="background:var(--tab-bg);border-radius:16px;padding:12px 8px;display:flex;justify-content:space-around;margin-bottom:14px"><span style="color:var(--tab-act);font-weight:700">ရွေးထားသည့် Tab</span><span style="color:var(--tab-fg)">အခြား Tab</span></div>'
+     +row('tcBg','Tab နောက်ခံအရောင်')+row('tcFg','Tab စာသား (မရွေးထားသည့်)')+row('tcAct','Tab စာသား (ရွေးထားသည့်)')
+     +'<div class="lbl">အမြန်ရွေးရန် (နောက်ခံ)</div><div class="rowf" style="gap:8px;margin:6px 0 10px">'+presets.map(x=>'<button type="button" data-bg="'+x[0]+'" aria-label="'+x[1]+'" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:'+x[0]+'"></button>').join('')+'</div>'
+     +'<p class="sub">ဤဖုန်း/စက်ထဲတွင်သာ သိမ်းပါမည် — စက်တစ်လုံးချင်းစီ ကိုယ်ကြိုက်သလို ရွေးနိုင်ပါသည်။</p>',
+    footer:'<button class="btn block" id="tcReset">ပုံမှန်အရောင် ပြန်ထားမည်</button>',
+    onMount(el){
+      const g=id=>el.querySelector('#'+id),load=()=>{const t=T.get();g('tcBg').value=t.bg||T.DEF.bg;g('tcFg').value=t.fg||T.DEF.fg;g('tcAct').value=t.act||T.DEF.act};
+      load();
+      [['tcBg','bg'],['tcFg','fg'],['tcAct','act']].forEach(x=>g(x[0]).addEventListener('input',()=>{const t=T.get();t[x[1]]=g(x[0]).value;T.set(t)}));
+      el.querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>{const t=T.get();t.bg=b.dataset.bg;T.set(t);load()});
+      g('tcReset').onclick=()=>{LL.put(T.K,'');T.apply();load();toast('ပုံမှန်အရောင် ပြန်ထားပြီးပါပြီ')};
+    }});
+}
+function subHtml(s){
+  if(!s)return '<p class="sub">သက်တမ်း အချက်အလက် ရယူနေသည်... (အင်တာနက် လိုပါသည်)</p>';
+  const exp=s.expires_at?new Date(s.expires_at):null,d=exp?Math.ceil((exp-Date.now())/86400000):null;
+  const lab={trial:'Trial',active:'Active',pending:'စောင့်ဆိုင်း',suspended:'ပိတ်သိမ်း',rejected:'ပယ်ချ'}[s.status]||s.status;
+  const dead=s.status==='suspended'||(d!==null&&d<0),soon=!dead&&d!==null&&d<=5;
+  const col=dead?'var(--red)':soon?'#B45309':'var(--grn)';
+  const pct=d===null?100:Math.max(4,Math.min(100,d/30*100));
+  const ds=exp?exp.getDate()+'/'+(exp.getMonth()+1)+'/'+exp.getFullYear():'';
+  const big=dead?(s.status==='suspended'?'ပိတ်သိမ်းထားသည်':'သက်တမ်းကုန်ပြီ'):d===null?'မသတ်မှတ်':d+' ရက်';
+  return '<div class="tile" style="padding:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="eb">သက်တမ်း လက်ကျန်</div><span style="font-size:12px;font-weight:700;color:'+col+'">'+esc(lab)+'</span></div>'
+   +'<div style="font-size:28px;font-weight:800;color:'+col+';margin-top:2px">'+big+'</div>'
+   +(exp?'<div class="subbar"><i style="width:'+(dead?0:pct)+'%;background:'+col+'"></i></div><div class="sub">ကုန်ဆုံးမည့်ရက် - <b>'+ds+'</b></div>':'')
+   +((dead||soon)?'<div class="sub" style="margin-top:8px;color:'+col+'">သက်တမ်းတိုးရန် <a href="tel:'+Sb.CONTACT+'" style="font-weight:800;color:inherit">'+Sb.CONTACT+'</a> (Telegram/phone) ကို ဆက်သွယ်ပါ</div>':'')+'</div>';
+}
 function settingsSheet(){
-  const S=Store.d.settings;
-  const hasDemo=['products','customers','vouchers'].some(c=>Store.list(c).some(x=>x.demo));
+  const S=Store.d.settings,LP=labelPrefs();
   const ctl=Sheet.open({title:'ဆက်တင်များ',
-    body:'<div class="field"><label class="lbl" for="sName">ဆိုင်အမည်</label><input class="inp" id="sName" value="'+esc(S.shopName)+'"></div>'
+    body:'<div id="sMenu"></div><div class="spage" data-pg="shop" hidden><div class="field"><label class="lbl" for="sName">ဆိုင်အမည်</label><input class="inp" id="sName" value="'+esc(S.shopName)+'"></div>'
      +'<div class="two"><div class="field"><label class="lbl" for="sPhone">ဆိုင်ဖုန်း</label><input class="inp" id="sPhone" inputmode="tel" value="'+esc(S.phone)+'"></div><div class="field"><label class="lbl" for="sAddr">လိပ်စာ</label><input class="inp" id="sAddr" value="'+esc(S.address)+'"></div></div>'
      +'<div class="sec-t">ဘောက်ချာ ဒီဇိုင်း</div>'
-     +'<div class="field"><label class="lbl">ဆိုင် လိုဂို</label><div class="rowf"><img id="sLogoImg" alt="" style="max-height:56px;max-width:120px;border-radius:8px;display:none"><label class="btn s" for="sLogoF">ပုံရွေးမည်</label><input type="file" id="sLogoF" accept="image/*" hidden><button type="button" class="btn s out" id="sLogoX">ဖယ်မည်</button></div></div>'
+     +'<div class="field"><label class="lbl">Logo (ဘောက်ချာ + Label နှစ်ခုလုံးတွင် ပါမည်)</label><p class="sub" style="margin:0 0 6px">ဤဖုန်း/စက်ထဲတွင်သာ သိမ်းသည် — Supabase သို့ မတင်ပါ။ Owner / Cashier နှစ်ဦးလုံး ရွေး၍ရသည်။ စက်တစ်လုံးချင်းစီတွင် ရွေးထားရပါမည်။</p><div class="rowf"><img id="sLogoImg" alt="" style="max-height:56px;max-width:120px;border-radius:8px;display:none"><label class="btn s" for="sLogoF">'+ico('image')+'ပုံရွေးမည်</label><input type="file" id="sLogoF" accept="image/*" hidden><button type="button" class="btn s out" id="sLogoX">'+ico('trash')+'ဖယ်မည်</button></div></div>'
      +'<div class="field"><label class="lbl">လိုဂို အရွယ်အစား</label><div class="seg" id="sLsz"><button type="button" data-v="s">သေး</button><button type="button" data-v="m">အလယ်</button><button type="button" data-v="l">ကြီး</button></div></div>'
+     +swrow('sLblLogo','Label မှာလည်း Logo ပြမည်',LL.get(LL.KL)!=='0','tag')
+     +'<div class="rowf" style="margin:6px 0 10px"><button type="button" class="btn s" id="sLogoTf">'+ico('sliders')+'Logo နေရာ / အရွယ် ချိန်ညှိမည်</button></div>'
      +'<div class="field"><label class="lbl" for="sVt">ဘောက်ချာ ခေါင်းစဉ်</label><input class="inp" id="sVt" value="'+esc(S.vTitle||'ဘောက်ချာ')+'"></div>'
      +'<div class="field"><label class="lbl" for="sHn">ခေါင်းစီး ထပ်ဆောင်းစာသား (စာကြောင်းခွဲ၍ ရေးနိုင်သည်)</label><textarea class="inp" id="sHn" rows="2">'+esc(S.headerNote||'')+'</textarea></div>'
      +'<div class="field"><label class="lbl" for="sFoot">ဘောက်ချာ အောက်ခြေ စာသား (စာကြောင်းခွဲ၍ ရေးနိုင်သည်)</label><textarea class="inp" id="sFoot" rows="3">'+esc(S.footer)+'</textarea></div>'
      +'<div class="field"><label class="lbl"><input type="checkbox" id="sSign"'+(S.signBox!==false?' checked':'')+'> A4 တွင် လက်မှတ်နေရာ ပြမည်</label></div>'
-     +'<div class="rowf"><button type="button" class="btn s" id="sPrev">နမူနာ ကြည့်မည်</button></div>'
-     +'<div class="sec-t">အကောင့်</div><div class="rowf"><button type="button" class="btn s" id="sAcc">အကောင့်များ စီမံမည်'+(pendingList().length?' ('+pendingList().length+' ခွင့်ပြုရန်)':'')+'</button><button type="button" class="btn s out" id="sOut">ထွက်မည်</button></div>'
-     +'<div class="sec-t">ငွေပေးချေမှု နည်းလမ်းများ</div><div class="mpick" id="sMs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sMNew" placeholder="နည်းလမ်းအသစ် ထည့်ရန် (ဥပမာ - AYA Pay)" aria-label="နည်းလမ်းအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sMAdd">ထည့်မည်</button></div>'
-     +'<div class="sec-t">ကုန်ကျစရိတ် အမျိုးအစားများ</div><div class="mpick" id="sCs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sCNew" placeholder="အမျိုးအစားအသစ် ထည့်ရန်" aria-label="အမျိုးအစားအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sCAdd">ထည့်မည်</button></div>'
-     +'<div class="sec-t">ကုန်ပစ္စည်း အမျိုးအစားများ (category)</div><div class="mpick" id="sPc"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sPcNew" placeholder="အမျိုးအစားအသစ် ထည့်ရန် (ဥပမာ - ဂျာစီ)" aria-label="ကုန်ပစ္စည်း အမျိုးအစားအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sPcAdd">ထည့်မည်</button></div><p class="sub" style="margin:0 0 8px">အမည်ပြင်လျှင် ပစ္စည်းများတွင် လိုက်ပြောင်းမည်။ ဖယ်ရှားလျှင် ပစ္စည်းများ \"အမျိုးအစားမရှိ\" ဖြစ်သွားမည် (ပစ္စည်း မဖျက်ပါ)။</p>'
+     +'<div class="rowf"><button type="button" class="btn s" id="sPrev">'+ico('eye')+'နမူနာ ကြည့်မည်</button></div>'
+     +'</div><div class="spage" data-pg="account" hidden>'
+     +'<div class="sec-t">အရောင်</div><div class="rowf" style="margin-bottom:6px"><button type="button" class="btn s" id="sColor">'+ico('sliders')+'Tab / စာသား အရောင် ချိန်းမည်</button></div>'
+      +'<div class="sec-t">အကောင့်</div><div class="rowf"><button type="button" class="btn s" id="sAcc">'+ico('users')+'အကောင့်များ စီမံမည်'+(pendingList().length?' ('+pendingList().length+' ခွင့်ပြုရန်)':'')+'</button><button type="button" class="btn s out" id="sOut">'+ico('logout')+'ထွက်မည်</button></div>'
+     +(Store.mode==='cloud'?'<div class="sec-t">အကောင့် သက်တမ်း</div><div id="subBox">'+subHtml(Store.getSub())+'</div>':'')
+     +(Auth.owner()?'<div class="sec-t">ခွင့်ပြုချက်</div><label class="swrow" style="border-top:0;padding:6px 0"><span class="swl">'+ico('eye')+'<span>Cashier ကို ဝယ်ဈေး ကြည့်ခွင့်ပေးမည်</span></span><input type="checkbox" class="sw" id="sCashCost"'+(S.cashierCost===false?'':' checked')+'></label><p class="sub" style="margin:0 0 8px">ပိတ်ထားလျှင် Cashier ဘက်တွင် ဝယ်ဈေး မပေါ်ပါ၊ ပစ္စည်းအဝင်လည်း မှတ်၍ မရပါ။</p>':'')
+     +'</div><div class="spage" data-pg="money" hidden>'
+     +'<div class="sec-t">ငွေပေးချေမှု နည်းလမ်းများ</div><div class="mpick" id="sMs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sMNew" placeholder="နည်းလမ်းအသစ် ထည့်ရန် (ဥပမာ - AYA Pay)" aria-label="နည်းလမ်းအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sMAdd">'+ico('plus')+'ထည့်မည်</button></div>'
+     +'<div class="sec-t">ကုန်ကျစရိတ် အမျိုးအစားများ</div><div class="mpick" id="sCs"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sCNew" placeholder="အမျိုးအစားအသစ် ထည့်ရန်" aria-label="အမျိုးအစားအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sCAdd">'+ico('plus')+'ထည့်မည်</button></div>'
      +'<div class="sec-t">နေ့စဉ် ရောင်းချမှု ပစ်မှတ်</div><div class="field"><label class="lbl" for="sTgt">တစ်ရက်စာ ပစ်မှတ် (ကျပ်)</label><input class="inp" id="sTgt" inputmode="numeric" value="'+(S.dailyTarget||'')+'" placeholder="ဥပမာ 500000"></div><p class="sub" style="margin:-4px 0 8px">Dashboard ရေပုလင်း ပြည့်မည့် ပမာဏ — ဆိုင်ပိုင်ရှင်သာ သတ်မှတ်နိုင်သည်။</p>'
-     +'<div class="sec-t">ရောင်းသူများ</div><div class="mpick" id="sSl"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sSNew" placeholder="ရောင်းသူ အမည် ထည့်ရန်" aria-label="ရောင်းသူအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sSAdd">ထည့်မည်</button></div>'
+     +'</div><div class="spage" data-pg="sales" hidden>'
+     +'<div class="sec-t">ရောင်းသူများ</div><div class="mpick" id="sSl"></div><div class="rowf" style="margin:8px 0 4px;flex-wrap:nowrap"><input class="inp" id="sSNew" placeholder="ရောင်းသူ အမည် ထည့်ရန်" aria-label="ရောင်းသူအသစ်" style="flex:1;min-width:0"><button type="button" class="btn s" id="sSAdd">'+ico('plus')+'ထည့်မည်</button></div>'
      +'<div class="sec-t">အော်ဒါ အခြေအနေ</div><p class="sub" style="margin-bottom:8px">ဘောက်ချာအောက်တွင် ပြမည့် အော်ဒါ အခြေအနေ စာသား၊ ရာခိုင်နှုန်း ပြင်ရန် / အသစ်ထည့်ရန် — Admin သာ။</p><div class="rowf" style="margin-bottom:8px"><button type="button" class="btn s" id="sOsEd">'+ico('edit','s')+'အခြေအနေ စာသား ပြင်/ထည့်မည်</button></div>'
      +'<div class="sec-t">လော်ရယ်တီ အမှတ်</div><div class="two"><div class="field"><label class="lbl" for="sEarn">ဝယ်ယူငွေ ကျပ် မည်မျှလျှင် ၁ မှတ်</label><input class="inp" id="sEarn" inputmode="numeric" value="'+S.earnPer+'"></div><div class="field"><label class="lbl" for="sPv">၁ မှတ်၏ တန်ဖိုး (ကျပ်)</label><input class="inp" id="sPv" inputmode="numeric" value="'+S.pointValue+'"></div></div>'
      +'<p class="sub">အမှတ်များကို ငွေရရှိသည့်အခါ တွက်ချက်၍ ထည့်ပေးပါသည်။ ကြွေးဖြင့်ရောင်းသော ပမာဏအတွက် ကြွေးရှင်းသည့်အခါမှ အမှတ်ရပါမည်။</p>'
+     +'</div><div class="spage" data-pg="about" hidden>'
+     +'<div class="sec-t">About · စည်းမျဉ်းစည်းကမ်းများ</div><div class="sub" style="margin-bottom:4px">'+(termsAccepted()?'လက်ခံထားသည် · '+fmtD(dstr(new Date(termsAccepted().at||Date.now())))+' ':'')+'</div><div class="card" style="margin-bottom:12px">'+termsList()+'</div>'
+     +'</div><div class="spage" data-pg="data" hidden>'
      +'<div class="sec-t">ဒေတာ</div><p class="sub" style="margin-bottom:8px">'+(Store.mode==='cloud'?'ဒေတာများကို ဤဖုန်းထဲတွင်ပါ သိမ်းထားသဖြင့် အင်တာနက် မရှိလည်း သုံးနိုင်ပါသည်။ အင်တာနက် ပြန်ရသည်နှင့် Supabase သို့ အလိုအလျောက် တင်ပြီး အသစ်များကို ဒေါင်းလုပ် လုပ်ပါမည်။'+(Store.pendingCount()?' (မတင်ရသေးသော '+Store.pendingCount()+' ခု ရှိသည်)':'')+(Store.syncErr?' — '+Store.syncErr:''):'ဒေတာများကို ဤစက်၏ ဘရောက်ဇာထဲတွင်သာ သိမ်းဆည်းထားပါသည်။ အခြားစက်တွင် မမြင်ရပါ။')+'</p>'
-     +'<div class="rowf" style="margin-bottom:12px">'+(Store.mode==='cloud'?'<button class="btn s" id="sbSync">ယခု ချိန်ညှိမည်</button><button class="btn s" id="sbLink">ငွေကိုင်ဖုန်းအတွက် လင့်ခ် ကူးမည်</button>':'')+'<button class="btn s" id="sbChg">ဆိုင်အကောင့် '+(Store.mode==='cloud'?'ပြောင်းမည်':'ချိတ်မည်')+'</button></div>'
+     +'<div class="rowf" style="margin-bottom:12px">'+(Store.mode==='cloud'?'<button class="btn s" id="sbSync">'+ico('refresh')+'ယခု ချိန်ညှိမည်</button><button class="btn s" id="sbLink">'+ico('link')+'ငွေကိုင်ဖုန်းအတွက် လင့်ခ် ကူးမည်</button>':'')+'<button class="btn s" id="sbChg">'+ico('cloud')+'Supabase '+(Store.mode==='cloud'?'ပြောင်းမည်':'ချိတ်မည်')+'</button></div>'
      +'<div class="sec-t">Backup / Excel ထုတ်ရန်</div><p class="sub" style="margin-bottom:8px">Backup ဖိုင်ကို ဖုန်းပျောက်လျှင် ပြန်သွင်းရန် သိမ်းထားပါ။ CSV ဖိုင်ကို Excel / Google Sheets တွင် ဖွင့်နိုင်သည်။</p>'
-     +'<div class="rowf" style="margin-bottom:8px"><button class="btn s pri" data-ex="backup">Backup ဖိုင် (JSON)</button><label class="btn s" for="sRestF">Backup ပြန်သွင်းမည်</label><input type="file" id="sRestF" accept=".json,application/json" hidden></div>'
-     +(Auth.owner()?'<div class="sec-t">စာရင်းပိတ်ပြီး Telegram သို့ ပို့ရန်</div><label class="swrow" style="border-top:0;padding:6px 0"><span>စာရင်းပိတ်တိုင်း Share ဖွင့်မည် (Bot မလို)</span><input type="checkbox" class="sw" id="tgShare"'+(S.tgShare===false?'':' checked')+'></label><p class="sub" style="margin:0 0 8px">စာရင်းပိတ်လိုက်တာနဲ့ Share ပြတင်းပေါက် ပေါ်မည် — Telegram ကိုရွေးပြီး ကိုယ့် Chat ကို နှိပ်ရုံပါ (တစ်ခါ ရွေးပြီးရင် နောက်တစ်ခါ Chat က အပေါ်ဆုံးမှာ ပေါ်တတ်သည်)။</p><details style="margin-bottom:10px"><summary class="sub">အလိုအလျောက် ပို့ရန် (Bot သုံးမည်ဆိုလျှင်)</summary><p class="sub" style="margin:6px 0">Bot ချိတ်ထားလျှင် Share မဖွင့်တော့ဘဲ Telegram သို့ တန်းပို့မည်။ (1) @BotFather ဖြင့် Bot ဆောက်ပြီး Token ထည့်ပါ (2) Bot ကို "hi" ပို့ပါ (3) "Chat ID ရှာမည်" နှိပ်ပါ။</p><div class="field"><label class="lbl" for="tgTok">Bot Token</label><input class="inp" id="tgTok" autocomplete="off" value="'+esc(S.tgToken||'')+'"></div><div class="field"><label class="lbl" for="tgChat">Chat ID</label><input class="inp" id="tgChat" inputmode="numeric" autocomplete="off" value="'+esc(S.tgChat||'')+'"></div><div class="rowf"><button class="btn s" id="tgFind" type="button">Chat ID ရှာမည်</button><button class="btn s" id="tgTest" type="button">စမ်းပို့မည်</button></div></details>':'')
-     +'<div class="rowf" style="margin-bottom:4px"><button class="btn s" id="sAutoRest">Auto backup မှ ပြန်ယူမည်</button></div><p class="sub" style="margin:0 0 10px">ဒေတာ ပြောင်းတိုင်း ဤစက်ထဲ (Documents/ShopPOS) တွင် အလိုအလျောက် သိမ်းထားသည်။</p>'
-     +'<div class="rowf" style="margin-bottom:12px"><button class="btn s" data-ex="vouchers">ဘောက်ချာ CSV</button><button class="btn s" data-ex="products">ပစ္စည်း CSV</button><button class="btn s" data-ex="customers">ဖောက်သည် CSV</button><button class="btn s" data-ex="expenses">ကုန်ကျစရိတ် CSV</button></div>'
+     +'<div class="rowf" style="margin-bottom:8px"><button class="btn s pri" data-ex="backup">'+ico('download')+'Backup ဖိုင် (JSON)</button><label class="btn s" for="sRestF">'+ico('upload')+'Backup ပြန်သွင်းမည်</label><input type="file" id="sRestF" accept=".json,application/json" hidden></div>'
+     +(Auth.owner()?'<div class="sec-t">စာရင်းပိတ်ပြီး Telegram သို့ ပို့ရန်</div><label class="swrow" style="border-top:0;padding:6px 0"><span class="swl">'+ico('send')+'<span>စာရင်းပိတ်တိုင်း Share ဖွင့်မည် (Bot မလို)</span></span><input type="checkbox" class="sw" id="tgShare"'+(S.tgShare===false?'':' checked')+'></label><p class="sub" style="margin:0 0 8px">စာရင်းပိတ်လိုက်တာနဲ့ Share ပြတင်းပေါက် ပေါ်မည် — Telegram ကိုရွေးပြီး ကိုယ့် Chat ကို နှိပ်ရုံပါ (တစ်ခါ ရွေးပြီးရင် နောက်တစ်ခါ Chat က အပေါ်ဆုံးမှာ ပေါ်တတ်သည်)။</p><details style="margin-bottom:10px"><summary class="sub">အလိုအလျောက် ပို့ရန် (Bot သုံးမည်ဆိုလျှင်)</summary><p class="sub" style="margin:6px 0">Bot ချိတ်ထားလျှင် Share မဖွင့်တော့ဘဲ Telegram သို့ တန်းပို့မည်။ (1) @BotFather ဖြင့် Bot ဆောက်ပြီး Token ထည့်ပါ (2) Bot ကို "hi" ပို့ပါ (3) "Chat ID ရှာမည်" နှိပ်ပါ။</p><div class="field"><label class="lbl" for="tgTok">Bot Token</label><input class="inp" id="tgTok" autocomplete="off" value="'+esc(S.tgToken||'')+'"></div><div class="field"><label class="lbl" for="tgChat">Chat ID</label><input class="inp" id="tgChat" inputmode="numeric" autocomplete="off" value="'+esc(S.tgChat||'')+'"></div><div class="rowf"><button class="btn s" id="tgFind" type="button">'+ico('search')+'Chat ID ရှာမည်</button><button class="btn s" id="tgTest" type="button">'+ico('send')+'စမ်းပို့မည်</button></div></details>':'')
+     +'<div class="rowf" style="margin-bottom:4px"><button class="btn s" id="sAutoRest">'+ico('refresh')+'Auto backup မှ ပြန်ယူမည်</button></div><p class="sub" style="margin:0 0 10px">ဒေတာ ပြောင်းတိုင်း ဤစက်ထဲ (Documents/ShopPOS) တွင် အလိုအလျောက် သိမ်းထားသည်။</p>'
+     +'<div class="rowf" style="margin-bottom:12px"><button class="btn s" data-ex="vouchers">'+ico('file')+'ဘောက်ချာ CSV</button><button class="btn s" data-ex="products">'+ico('file')+'ပစ္စည်း CSV</button><button class="btn s" data-ex="customers">'+ico('file')+'ဖောက်သည် CSV</button><button class="btn s" data-ex="expenses">'+ico('file')+'ကုန်ကျစရိတ် CSV</button></div>'
+     +'</div><div class="spage" data-pg="print" hidden>'
      +'<div class="sec-t">Print / Printer</div>'
      +'<div class="field"><label class="lbl">ပုံမှန် ပရင့်ထုတ်မည့် စက်</label><div class="seg" id="sPm"><button type="button" data-v="a4">A4 စာရွက်</button><button type="button" data-v="th">Thermal စက်</button></div></div>'
      +'<div class="stat" style="margin-top:0"><span>Thermal Printer</span><span><b class="'+(PL.connected().length?'':'w')+'">'+(PL.list.length?PL.connected().length+' / '+PL.list.length+' စက် ချိတ်ထားသည်':'မချိတ်ရသေးပါ')+'</b></span></div>'
      +'<div class="rowf" style="margin:8px 0"><button class="btn s" id="sPrn">'+ico('print')+'Printer များ ချိတ်ဆက် / စီမံရန်</button></div>'
      +'<div class="sec-t">Auto ပရင့်ထုတ်ခြင်း</div>'
-     +swrow('sAutoRcp','ဘောက်ချာ ထုတ်တိုင်း ဘောက်ချာ အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoReceipt===true)
-     +swrow('sAutoLbl','ဘောက်ချာ ထုတ်တိုင်း Label အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoLabel!==false)
+     +swrow('sAutoRcp','ဘောက်ချာ ထုတ်တိုင်း ဘောက်ချာ အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoReceipt===true,'receipt')
+     +swrow('sAutoLbl','ဘောက်ချာ ထုတ်တိုင်း Label အလိုအလျောက် ပရင့်ထုတ်မည်',S.autoLabel!==false,'tag')
      +'<p class="sub" style="margin-bottom:8px">ဘောက်ချာ စာသား / လိုဂို အရွယ်အစားကို ဘောက်ချာဖွင့်ပြီး Print tab ထဲက ဘောက်ချာပေါ်တွင် တိုက်ရိုက်နှိပ်၍ ပြင်နိုင်ပါသည်။</p>'
-     +'<div class="rowf"><button class="btn s" id="sDemo">နမူနာဒေတာ ထည့်မည်</button>'+(hasDemo?'<button class="btn s out" id="sDemoClr">နမူနာဒေတာ ဖျက်မည်</button>':'')+'</div>',
-    footer:'<button class="btn pri block" id="sSave">သိမ်းမည်</button>',
+     +(Auth.owner()?'<div class="sec-t">Label ဆက်တင်</div><div class="field"><label class="lbl">Label စက္ကူအရွယ်အစား (mm)</label><div class="two"><input class="inp" id="sLbW" inputmode="decimal" placeholder="အကျယ်" aria-label="အကျယ် mm" value="'+LP.w+'"><input class="inp" id="sLbH" inputmode="decimal" placeholder="အမြင့်" aria-label="အမြင့် mm" value="'+LP.h+'"></div><div class="rowf" style="gap:6px;margin-top:2px">'+[[50,30],[58,40],[70,80],[80,100],[100,150]].map(z=>'<button type="button" class="chip" data-lsz="'+z[0]+'x'+z[1]+'" style="cursor:pointer">'+z[0]+'×'+z[1]+'</button>').join('')+'</div></div><div class="field"><label class="lbl" for="sLbHd">Label ခေါင်းစီး (Header) — မထည့်ပါက ဆိုင်အမည် ပြမည်</label><textarea class="inp" id="sLbHd" rows="1" placeholder="ဥပမာ - ကျွန်ုပ်၏ဆိုင်">'+esc(S.labelHeader||'')+'</textarea></div><div class="field"><button type="button" class="btn block" id="sLbLogoTf">'+ico('image')+'Label Logo နေရာ ရွှေ့မည်</button></div><div class="field"><label class="lbl" for="sLbF">Label အောက်ခြေစာသား (Footer)</label><textarea class="inp" id="sLbF" rows="2" placeholder="ဥပမာ - ကျေးဇူးတင်ပါသည်">'+esc(S.labelFooter||'')+'</textarea></div><p class="sub">အောက်က \"သိမ်းမည်\" ကို နှိပ်လျှင် Label အားလုံးတွင် ဤအတိုင်း အမြဲသုံးမည်။</p>':'')
+     +'</div>',
+    footer:'<button class="btn pri block" id="sSave">'+ico('check')+'သိမ်းမည်</button>',
     onMount(el){
       const q=s=>el.querySelector(s);
+      /* ---- mobile-style settings menu: tap a row -> its related settings open ---- */
+      const PG=[
+        ['shop','shop','ဆိုင်အချက်အလက် · ဘောက်ချာ','ဆိုင်အမည်၊ လိုဂို၊ ခေါင်းစီး၊ အောက်ခြေစာသား'],
+        ['account','users','အကောင့် · ခွင့်ပြုချက်','အကောင့်များ စီမံမည်၊ Cashier ဝယ်ဈေး ကြည့်ခွင့်'],
+        ['money','wallet','ငွေစာရင်း','ငွေပေးချေနည်းလမ်း၊ ကုန်ကျစရိတ် အမျိုးအစား၊ နေ့စဉ်ပစ်မှတ်'],
+        ['sales','cart','ရောင်းချမှု','ရောင်းသူများ၊ အော်ဒါ အခြေအနေ၊ လော်ရယ်တီအမှတ်'],
+        ['print','print','Print / Printer / Label','Printer၊ Auto ပရင့်၊ Label အရွယ်/Footer'],
+        ['data','cloud','ဒေတာ · Backup · Telegram','Backup၊ Excel/CSV၊ Telegram'],
+        ['about','star','About','စည်းမျဉ်းစည်းကမ်းများ']
+      ];
+      const pages=$$('.spage',el),menu=q('#sMenu'),saveB=q('#sSave'),scr=el.querySelector('.sheet-b')||el;
+      menu.innerHTML=PG.map(p=>'<button type="button" class="li" data-go="'+p[0]+'"><div class="av">'+ico(p[1])+'</div><div class="mid"><div class="nm">'+p[2]+'</div><div class="sub">'+p[3]+'</div></div><div class="end" aria-hidden="true">›</div></button>').join('');
+      pages.forEach(pg=>{const m=PG.filter(p=>p[0]===pg.dataset.pg)[0];pg.insertAdjacentHTML('afterbegin','<div class="rowf" style="align-items:center;gap:8px;margin-bottom:10px"><button type="button" class="btn s" data-back="1">‹ ဆက်တင်များ</button><b style="font-size:16px">'+(m?m[2]:'')+'</b></div>')});
+      const showPg=id=>{menu.hidden=!!id;pages.forEach(p=>{p.hidden=p.dataset.pg!==id});saveB.style.display=id?'':'none';scr.scrollTop=0};
+      el.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){showPg(g.dataset.go);return}if(e.target.closest('[data-back]'))showPg(null)});
+      showPg(null);
       let pm=Store.d.settings.printMode||'th';
       const drawPm=()=>$$('#sPm button',el).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===pm)));
       q('#sPm').onclick=e=>{const b=e.target.closest('button');if(b){pm=b.dataset.v;drawPm()}};drawPm();
@@ -2675,47 +3020,47 @@ function settingsSheet(){
       const cEd=chipEd(q('#sCs'),cs,1);
       q('#sCAdd').onclick=()=>{const n=q('#sCNew').value.trim();if(n&&cs.indexOf(n)<0){cs.push(n);q('#sCNew').value='';cEd.draw()}};
       cEd.draw();
-      let pc=prodCatList();const pcInit=pc.slice();
-      const pcEd=chipEd(q('#sPc'),pc,0);
-      q('#sPcAdd').onclick=()=>{const n=q('#sPcNew').value.trim();if(n&&pc.indexOf(n)<0){pc.push(n);q('#sPcNew').value='';pcEd.draw()}};
-      pcEd.draw();
       let sl=(Store.d.settings.sellers||[]).slice();
       const sEd=chipEd(q('#sSl'),sl,0);
       q('#sSAdd').onclick=()=>{const n=q('#sSNew').value.trim();if(n&&sl.indexOf(n)<0){sl.push(n);q('#sSNew').value='';sEd.draw()}};
       sEd.draw();
       let logo=S.logo||'',lsz=S.logoSize||'m';
       const drawL=()=>{const im=q('#sLogoImg');if(logo)im.src=logo;im.style.display=logo?'':'none';q('#sLogoX').hidden=!logo;$$('#sLsz button',el).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===lsz)))};
-      q('#sLogoF').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{logo=await readLogo(f);drawL()}catch(x){toast('ပုံဖတ်၍ မရပါ')}};
-      q('#sLogoX').onclick=()=>{logo='';drawL()};
-      q('#sLsz').onclick=e=>{const b=e.target.closest('button');if(b){lsz=b.dataset.v;drawL()}};
+      q('#sLogoF').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{logo=await readLogo(f);drawL();Store.setLocalLogo(logo,lsz);toast('Logo သိမ်းပြီးပါပြီ (ဤစက်ထဲတွင်သာ)')}catch(x){toast('ပုံဖတ်၍ မရပါ')}};
+      q('#sLogoX').onclick=()=>{logo='';drawL();Store.setLocalLogo('',lsz);toast('Logo ဖယ်ပြီးပါပြီ')};
+      if(q('#sLbLogoTf'))q('#sLbLogoTf').onclick=()=>{if(!Store.d.settings.logo){toast('Logo အရင်ရွေးပါ');return}logoTfSheet('lbl')};
+      q('#sLogoTf').onclick=()=>{if(!Store.d.settings.logo){toast('Logo အရင်ရွေးပါ');return}logoTfSheet()};
+      q('#sLblLogo').onchange=e=>LL.put(LL.KL,e.target.checked?'1':'0');
+      q('#sLsz').onclick=e=>{const b=e.target.closest('button');if(b){lsz=b.dataset.v;drawL();Store.setLocalLogo(null,lsz)}};
       drawL();
+      if(q('#subBox'))Store.refreshSub().then(()=>{const b=q('#subBox');if(b)b.innerHTML=subHtml(Store.getSub())});
       q('#sPrev').onclick=()=>previewSheet(Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,logo:logo,logoSize:lsz}));
       if(q('#sbSync'))q('#sbSync').onclick=async()=>{toast('ချိန်ညှိနေသည်...');await Store.sync();toast(Store.syncErr||(Store.online?'ချိန်ညှိပြီးပါပြီ':'အင်တာနက် မရှိသေးပါ — ရသည်နှင့် အလိုအလျောက် ချိန်ညှိပါမည်'))};
-      if(q('#sbLink'))q('#sbLink').onclick=async()=>{const c=Sb.cfg();if(!c||!c.url)return;const l=(NATIVE()?'https://localhost/':location.href.split('#')[0])+'#sb='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({url:c.url,key:c.key,email:c.email||''})))));try{await navigator.clipboard.writeText(l);toast('လင့်ခ် ကူးပြီးပါပြီ — ငွေကိုင်ဖုန်းများတွင် ဖွင့်ပါ')}catch(x){prompt('ဤလင့်ခ်ကို ကူးပါ',l)}};
-      q('#sbChg').onclick=async()=>{if(await confirmBox('Supabase ပြောင်းမည်','ပြန်ချိတ်ရန် စာမျက်နှာ ပြန်စပါမည်။ Owner ဖြင့် ပြန်ဝင်ရပါမည်။','ဆက်မည်')){try{if(Store.db)await Store.db.auth.signOut()}catch(x){}Sb.save({});try{localStorage.removeItem(SK)}catch(x){}location.reload()}};
-      q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
+      if(q('#sbLink'))q('#sbLink').onclick=async()=>{const c=Sb.cfg();if(!c||!c.url)return;const l=(NATIVE()?'https://localhost/':location.href.split('#')[0])+'#sb='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({url:c.url,key:c.key})))));try{await navigator.clipboard.writeText(l);toast('လင့်ခ် ကူးပြီးပါပြီ — ငွေကိုင်ဖုန်းများတွင် ဖွင့်ပါ')}catch(x){prompt('ဤလင့်ခ်ကို ကူးပါ',l)}};
+      q('#sbChg').onclick=async()=>{if(await confirmBox('Supabase ပြောင်းမည်','ပြန်ချိတ်ရန် စာမျက်နှာ ပြန်စပါမည်။ Owner ဖြင့် ပြန်ဝင်ရပါမည်။','ဆက်မည်')){Sb.save({});try{localStorage.removeItem(SK)}catch(x){}location.reload()}};
+      q('#sColor').onclick=()=>colorSheet();q('#sAcc').onclick=()=>{ctl.close();accountsSheet()};q('#sOut').onclick=()=>Auth.out();
       q('#sSave').onclick=()=>{
-        const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,prodCats:pc,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
+        const ns=Object.assign({},Store.d.settings,{shopName:q('#sName').value.trim()||DEFAULTS.shopName,methods:ms,expCats:cs,sellers:sl,phone:q('#sPhone').value.trim(),address:q('#sAddr').value.trim(),footer:q('#sFoot').value.trim(),headerNote:q('#sHn').value.trim(),vTitle:q('#sVt').value.trim()||'ဘောက်ချာ',signBox:q('#sSign').checked,autoLabel:q('#sAutoLbl').checked,dailyTarget:Math.max(0,Math.round(num(q('#sTgt').value))),autoReceipt:q('#sAutoRcp').checked,logo:logo,logoSize:lsz,printMode:pm,earnPer:Math.max(0,Math.round(num(q('#sEarn').value))),pointValue:Math.max(0,Math.round(num(q('#sPv').value)))});
+        if(q('#sCashCost'))ns.cashierCost=q('#sCashCost').checked;
+        if(q('#sLbF')){ns.labelFooter=q('#sLbF').value.trim();ns.labelHeader=q('#sLbHd').value.trim();const lw=num(q('#sLbW').value),lh=num(q('#sLbH').value);if(lw>=20&&lh>=15){ns.labelW=lw;ns.labelH=lh}}
         if(q('#tgTok')){ns.tgToken=q('#tgTok').value.trim();ns.tgChat=q('#tgChat').value.trim();ns.tgShare=q('#tgShare').checked}
         Object.keys(mEd.orig).forEach(n=>{const o=mEd.orig[n];if(o===n)return;
           Store.list('vouchers').forEach(v=>{if((v.payments||[]).some(p=>p.method===o))Store.put('vouchers',Object.assign({},v,{payments:v.payments.map(p=>p.method===o?Object.assign({},p,{method:n}):p)}))});
           Store.list('expenses').forEach(x=>{if(x.method===o)Store.put('expenses',Object.assign({},x,{method:n}))})});
         Object.keys(sEd.orig).forEach(n=>{const o=sEd.orig[n];if(o===n)return;Store.list('vouchers').forEach(v=>{if((v.items||[]).some(i=>i.seller===o))Store.put('vouchers',Object.assign({},v,{items:v.items.map(i=>i.seller===o?Object.assign({},i,{seller:n}):i)}))})});
         Object.keys(cEd.orig).forEach(n=>{const o=cEd.orig[n];if(o===n)return;Store.list('expenses').forEach(x=>{if(x.category===o)Store.put('expenses',Object.assign({},x,{category:n}))})});
-        {const ren={},oldNames=new Set();Object.keys(pcEd.orig).forEach(n=>{const o=pcEd.orig[n];if(o!==n){ren[o]=n;oldNames.add(o)}});
-         const gone=new Set(pcInit.filter(c=>pc.indexOf(c)<0&&!oldNames.has(c)));
-         Store.list('products').forEach(pr=>{const c=(pr.cat||'').trim();if(!c)return;if(ren[c]&&pc.indexOf(ren[c])>=0)Store.put('products',Object.assign({},pr,{cat:ren[c]}));else if(gone.has(c))Store.put('products',Object.assign({},pr,{cat:''}))})}
         Store.putSettings(ns);ctl.close();toast('ဆက်တင် သိမ်းပြီးပါပြီ');paintChrome();
       };
       q('#sPrn').onclick=()=>printerSheet();
+      $$('[data-lsz]',el).forEach(b=>b.onclick=()=>{const z=b.dataset.lsz.split('x');q('#sLbW').value=z[0];q('#sLbH').value=z[1]});
+      {const SI=[['ဘောက်ချာ ဒီဇိုင်း','receipt'],['အကောင့်','users'],['ခွင့်ပြုချက်','shield'],['ငွေပေးချေမှု','wallet'],['ကုန်ကျစရိတ်','list'],['နေ့စဉ် ရောင်းချမှု','target'],['ရောင်းသူ','users'],['အော်ဒါ အခြေအနေ','list'],['လော်ရယ်တီ','gift'],['About','star'],['ဒေတာ','cloud'],['Backup','download'],['စာရင်းပိတ်','send'],['Print','print'],['Auto','refresh'],['Label','tag']];
+       $$('.sec-t',el).forEach(h=>{const t=h.textContent.trim();const m=SI.find(x=>t.indexOf(x[0])===0);if(m&&!h.querySelector('.ic'))h.insertAdjacentHTML('afterbegin',ico(m[1]))})}
       q('#sOsEd').onclick=()=>osEditSheet();
       $$('[data-ex]',el).forEach(b=>b.onclick=()=>exportData(b.dataset.ex));
       if(q('#tgFind'))q('#tgFind').onclick=async()=>{const t=q('#tgTok').value.trim();if(!t){toast('Bot Token ထည့်ပါ');return}try{toast('ရှာနေသည်...');const r=await TG.findChat(t);q('#tgChat').value=r.id;toast('တွေ့ပြီ: '+(r.name||r.id)+' — "သိမ်းမည်" နှိပ်ပါ')}catch(e){toast('မတွေ့ပါ — '+(e.message||e))}};
       if(q('#tgTest'))q('#tgTest').onclick=async()=>{const t=q('#tgTok').value.trim(),c=q('#tgChat').value.trim();if(!t||!c){toast('Token နှင့် Chat ID ထည့်ပါ');return}try{const f=new FormData();f.append('chat_id',c);f.append('text','✅ POS မှ စမ်းသပ်ပို့ခြင်း အောင်မြင်ပါသည်');await TG.call(t,'sendMessage',f);toast('Telegram သို့ ပို့ပြီးပါပြီ')}catch(e){toast('ပို့၍ မရပါ — '+(e.message||e))}};
       q('#sAutoRest').onclick=()=>{ctl.close();AB.restoreAuto()};
       q('#sRestF').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)restoreBackup(f)};
-      q('#sDemo').onclick=()=>{loadDemo();ctl.close()};
-      const dc=q('#sDemoClr');if(dc)dc.onclick=async()=>{if(await confirmBox('နမူနာဒေတာ ဖျက်မည်','နမူနာအဖြစ် ထည့်ထားသော ကုန်ပစ္စည်း၊ ဖောက်သည်၊ ဘောက်ချာများကို ဖျက်မည်။ သင်ကိုယ်တိုင် ထည့်ထားသော ဒေတာကို မထိခိုက်ပါ။','ဖျက်မည်')){clearDemo();ctl.close()}};
     }});
 }
 
@@ -2858,13 +3203,13 @@ async function voucherBlob(v){
     const lgS=lg?Math.min(140,Math.max(24,Math.round(((FM.logo&&FM.logo.h)||LOGO_H[S.logoSize]||22)*2.9))):0;
     const ctY=20+Math.round(shS*1.3)+4,nY=ctY+Math.round(ctS*1.5)+4,nSt=Math.round(nS*1.5);
     const HH=Math.max(96+hn.length*20,nY+hn.length*nSt+16,lgS+32),lx=lg?P+lgS+12:P;
-    if(!dry){ctx.fillStyle='#0A192F';ctx.fillRect(0,0,W,HH);if(lg){ctx.fillStyle='#fff';ctx.fillRect(P,16,lgS,lgS);const k=Math.min((lgS-4)/lg.width,(lgS-4)/lg.height);ctx.drawImage(lg,P+lgS/2-lg.width*k/2,16+lgS/2-lg.height*k/2,lg.width*k,lg.height*k)}}
+    if(!dry){ctx.fillStyle='#0A192F';ctx.fillRect(0,0,W,HH);if(lg){ctx.fillStyle='#fff';ctx.fillRect(P,16,lgS,lgS);const k=Math.min((lgS-4)/lg.width,(lgS-4)/lg.height);const tf=LL.tf('th'),u=W/80;ctx.save();ctx.translate(P+lgS/2+tf.x*u,16+lgS/2+tf.y*u);ctx.rotate(tf.r*Math.PI/180);ctx.scale(tf.s/100,tf.s/100);ctx.drawImage(lg,-lg.width*k/2,-lg.height*k/2,lg.width*k,lg.height*k);ctx.restore()}}
     T(S.shopName,lx,20,'left','#FFFFFF',fw('shop',1),shS);
     T([S.phone,S.address].filter(Boolean).join(' · '),lx,ctY,'left','rgba(255,255,255,.78)',fw('addr',0),ctS);
     hn.forEach((l,k)=>T(l,lx,nY+k*nSt,'left','rgba(255,255,255,.78)',fw('note',0),nS));
     y=HH+26;
     T((S.vTitle||'ဘောက်ချာ')+' #'+v.no,P,y,'left','#0A192F',fw('title',1),ttS);
-    const st=rem>0?'ငွေမလွှဲရသေး':'ငွေပေးပြီး';
+    const st=rem>0?(v.cod?'Cash on delivery':'ငွေမလွှဲရသေး'):'ငွေပေးပြီး';
     font('700',13);const sw=ctx.measureText(st).width+24;
     if(!dry){ctx.beginPath();ctx.roundRect?ctx.roundRect(W-P-sw,y-1,sw,28,14):ctx.rect(W-P-sw,y-1,sw,28);if(rem>0){ctx.fillStyle='#B91C1C';ctx.fill()}else{ctx.lineWidth=1.5;ctx.strokeStyle='#0A192F';ctx.stroke()}}
     T(st,W-P-sw/2,y+3,'center',rem>0?'#FFFFFF':'#0A192F','700',13);
@@ -2913,34 +3258,6 @@ async function saveVoucherImage(v){
   }catch(e){if(e&&e.code==='declined')return;toast('ပုံသိမ်း၍ မရပါ')}
 }
 
-/* ================= Demo data ================= */
-function loadDemo(){
-  const t=today(),S=Store.d.settings;
-  const P=[['ဆန်ကောင်း (၁ ပြည်)',2800,120,'ပြည'],['ဆီစားသုံး (၁ လီတာ)',4200,40,'ပုလင်း'],['ကော်ဖီမစ် 3-in-1',1500,60,'ထုပ်'],['ရေသန့်ဘူး (၁ လီတာ)',600,150,'ဘူး'],['ဆပ်ပြာခဲ',1200,8,'ခဲ'],['ငါးငံပြာရည်',1800,35,'ပုလင်း'],['ဆား (၁ ထုပ်)',500,3,'ထုပ်'],['နို့ဆီဗူး',2300,48,'ဗူး']];
-  const prods=P.map((p,i)=>({id:'demo-p'+(i+1),name:p[0],price:p[1],cost:i===P.length-1?null:Math.round(p[1]*0.75/50)*50,stock:p[2],unit:p[3],low:5,sku:'P'+pad(i+1,3),createdAt:Date.now()-i,demo:true}));
-  const C=[['ဦးအောင်ကို','09 400 000 101',40],['ဒေါ်မြင့်မြင့်','09 400 000 102',10],['ကိုဇော်ဝင်း','09 400 000 103',0],['မခင်ခင်လွင်','09 400 000 104',25]];
-  const custs=C.map((c,i)=>({id:'demo-c'+(i+1),name:c[0],phone:c[1],points:c[2],createdAt:Date.now()-i,demo:true}));
-  const spec=[[0,-1,[[0,2],[3,6]],'full'],[0,0,[[1,1],[7,4],[2,3]],'full'],[0,2,[[5,2],[4,3]],0],[1,1,[[0,5],[1,2]],'full'],[1,3,[[2,6],[6,4],[3,12]],5000],[2,0,[[7,10],[5,3]],0],[3,2,[[0,10]],'full'],[4,1,[[1,3],[3,6]],'full'],[6,3,[[4,5],[2,2]],'full'],[9,0,[[0,8],[1,2]],'full']];
-  const vs=[];
-  spec.slice().reverse().forEach((s,k)=>{
-    const date=addDays(t,-s[0]),at=parseD(date).getTime()+(9+k%8)*3600000;
-    const items=s[2].map(x=>{const p=prods[x[0]];return {pid:p.id,name:p.name,unit:p.unit,price:p.price,qty:x[1]}});
-    const total=items.reduce((a,i)=>a+i.price*i.qty,0),paid=s[3]==='full'?total:s[3],cust=s[1]>=0?custs[s[1]]:null;
-    const earned=cust&&S.earnPer>0?Math.floor(paid/S.earnPer):0;
-    if(cust)cust.points+=earned;
-    vs.push({id:'demo-v'+(k+1),no:date.replace(/-/g,'').slice(2)+'-'+pad(vs.filter(v=>v.date===date).length+1,3),date:date,createdAt:at,customerId:cust?cust.id:null,customerName:cust?cust.name:'',items:items,subtotal:total,discount:0,pointsUsed:0,pointsValue:0,total:total,paid:paid,payments:paid>0?[{at:at,amount:paid,method:['ငွေသား','KPay','Wave Pay'][k%3]}]:[],pointsEarned:earned,demo:true});
-  });
-  const SL=(S.sellers&&S.sellers.length)?S.sellers:['မောင်မောင်','မမ'];
-  if(!(S.sellers&&S.sellers.length))Store.putSettings(Object.assign({},S,{sellers:SL}));
-  vs.forEach((v,k)=>v.items.forEach((i,j)=>{i.seller=SL[(k+j)%SL.length]}));
-  prods.forEach(p=>Store.put('products',p));custs.forEach(c=>Store.put('customers',c));vs.forEach(v=>Store.put('vouchers',v));
-  toast('နမူနာဒေတာ ထည့်ပြီးပါပြီ');
-}
-function clearDemo(){
-  ['products','customers','vouchers'].forEach(c=>Store.list(c).filter(x=>x.demo).forEach(x=>Store.del(c,x.id)));
-  Cart.items=Cart.items.filter(i=>Store.get('products',i.pid));if(Cart.customerId&&!Store.get('customers',Cart.customerId))Cart.customerId=null;
-  toast('နမူနာဒေတာ ဖျက်ပြီးပါပြီ');
-}
 
 /* ================= Views ================= */
 const TABS=[
@@ -2960,7 +3277,7 @@ function viewHome(part){
   const empty=!Store.list('products').length&&!Store.list('vouchers').length&&!Store.list('customers').length;
   const dd=parseD(t),unpaid=Sel.unpaid().slice(0,5),low=Sel.lowStock().slice(0,5);
   let h='',h2='';
-  if(empty)h+='<section class="card"><div class="card-h"><h3>စတင်အသုံးပြုရန်</h3></div><p class="mut" style="margin-bottom:12px">ကုန်ပစ္စည်းနှင့် ဖောက်သည်များ ထည့်သွင်းပြီး ရောင်းချမှုကို စတင်နိုင်ပါပြီ။ အရင်စမ်းကြည့်လိုလျှင် နမူနာဒေတာ ထည့်နိုင်ပါသည်။</p><div class="rowf"><button class="btn pri" data-act="demo-load">နမူနာဒေတာဖြင့် စမ်းကြည့်မည်</button><button class="btn" data-act="new-product">'+ico('plus')+'ကုန်ပစ္စည်း ထည့်မည်</button></div></section>';
+  if(empty)h+='<section class="card"><div class="card-h"><h3>စတင်အသုံးပြုရန်</h3></div><p class="mut" style="margin-bottom:12px">ကုန်ပစ္စည်းနှင့် ဖောက်သည်များ ထည့်သွင်းပြီး ရောင်းချမှုကို စတင်နိုင်ပါပြီ။</p><div class="rowf"><button class="btn pri" data-act="new-product">'+ico('plus')+'ကုန်ပစ္စည်း ထည့်မည်</button></div></section>';
   h2+='<section class="card"><div class="card-h"><h3>ငွေမလွှဲရသေးသော ဘောက်ချာများ</h3><button class="btn s" data-act="goto" data-tab="vouchers" data-vstatus="unpaid">အားလုံးကြည့်မည်</button></div>'
     +(unpaid.length?'<div class="list">'+unpaid.map(v=>'<button class="li" data-act="open-voucher" data-id="'+v.id+'"><div class="mid"><div class="nm">'+esc(Sel.cname(v))+'</div><div class="sub">#'+esc(v.no)+' · '+fmtD(v.date)+'</div>'+carriedTag(v)+'</div><div class="end"><b>'+ks(Sel.rem(v))+'</b><div class="sub">ကျပ်</div></div></button>').join('')+'</div>':emptyBox('check','ငွေမလွှဲရသေးသော ဘောက်ချာ မရှိပါ'))+'</section>';
   h2+='<section class="card"><div class="card-h"><h3>လက်ကျန်နည်းသော ပစ္စည်းများ</h3><button class="btn s" data-act="goto" data-tab="stock">ကုန်ပစ္စည်း</button></div>'
@@ -3114,6 +3431,7 @@ function viewExp(){
    +(Auth.owner()?'<div class="rowf" style="margin-bottom:4px"><button class="btn s" data-act="e-csv">CSV ထုတ်မည်</button></div>':'')+'<div id="eList">'+eListHTML()+'</div>';
 }
 function stockInSheet(){
+  if(!canCost()){toast('ဝယ်ဈေး ကြည့်ခွင့် မရှိပါ — ဆိုင်ပိုင်ရှင်သာ ပစ္စည်းအဝင် မှတ်နိုင်သည်');return}
   const ps=Store.list('products').sort((a,b)=>COLL.compare(String(a.name),String(b.name)));
   if(!ps.length){toast('ကုန်ပစ္စည်း အရင်ထည့်ပါ');return}
   const rows=[{pid:ps[0].id,qty:'',cost:ps[0].cost!=null?ps[0].cost:''}];
@@ -3208,7 +3526,7 @@ const Auth={me:null,plat:null,
   restore(){let id=null;try{id=localStorage.getItem(SK)}catch(e){}const a=id&&Store.get('accounts',id);if(a&&a.active!==false){this.me=a;return true}return false},
   owner(){return !!this.me&&this.me.role==='owner'}};
 const rndCode=()=>Math.random().toString(36).slice(2,8).toUpperCase();
-const CASH_ORDER=['reports','sell','vouchers','exp','stock'];
+const CASH_ORDER=['reports','sell','vouchers','customers','exp','stock'];
 const tabOK=id=>Auth.owner()?id!=='sell'&&id!=='home':CASH_ORDER.indexOf(id)>=0;
 function buildTabs(){const T=TABS.filter(t=>tabOK(t.id)).sort((a,b)=>Auth.owner()?(a.id==='reports'?-1:b.id==='reports'?1:0):CASH_ORDER.indexOf(a.id)-CASH_ORDER.indexOf(b.id));$('#tabbarIn').innerHTML=T.map(t=>'<button class="tab" data-tab="'+t.id+'" aria-current="false"><span class="pl">'+ico(t.icon)+'</span><span>'+t.label+'</span></button>').join('');$('#tabbarIn').style.setProperty('--nt',T.length)}
 function enter(){if(Auth.me&&Auth.me.role!=='owner'&&Auth.me.pending===true){waitScreen(Auth.me);return}document.body.classList.remove('noauth');$('#auth').hidden=true;buildTabs();paintChrome();App.go('reports')}
@@ -3350,9 +3668,8 @@ function nameSheet(){
       paintChrome();c.close();toast('အမည် ပြောင်းပြီးပါပြီ');
     }}});
 }
-function mySheet(){Sheet.open({title:'ကျွန်ုပ်၏ အကောင့်',small:true,body:'<p class="msg"><b>'+esc(Auth.me.name)+'</b>'+(Auth.me.device?'':' · @'+esc(Auth.me.username))+'<br>'+(Auth.owner()?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</p>',footer:'<button class="btn block" id="myNm" style="margin-bottom:8px">အမည် ပြောင်းမည်</button>'+'<button class="btn block" id="myPrn" style="margin-bottom:8px">'+ico('print')+'Printer ချိတ်ဆက်ရန်</button><div class="row2">'+(Auth.me.device?'':'<button class="btn" id="myPw">စကားဝှက်ပြောင်းမည်</button>')+'<button class="btn out" id="myOut">ထွက်မည်</button></div>',
-  onMount(el){const on=(s,f)=>{const n=el.querySelector(s);if(n)n.onclick=f};on('#myNm',()=>nameSheet());on('#myPrn',()=>printerSheet());on('#myPw',()=>pwSheet(Auth.me));on('#myOut',()=>Auth.out())}})}
-const pcList=()=>((Store.d.settings.pairCodes)||[]).filter(x=>x.exp>Date.now());
+function mySheet(){Sheet.open({title:'ကျွန်ုပ်၏ အကောင့်',small:true,body:'<p class="msg"><b>'+esc(Auth.me.name)+'</b>'+(Auth.me.device?'':' · @'+esc(Auth.me.username))+'<br>'+(Auth.owner()?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</p>',footer:'<button class="btn block" id="myNm" style="margin-bottom:8px">အမည် ပြောင်းမည်</button>'+'<button class="btn block" id="myClr" style="margin-bottom:8px">'+ico('sliders')+'Tab / စာသား အရောင် ချိန်းမည်</button>'+'<button class="btn block" id="myPrn" style="margin-bottom:8px">'+ico('print')+'Printer ချိတ်ဆက်ရန်</button><div class="row2">'+(Auth.me.device?'':'<button class="btn" id="myPw">စကားဝှက်ပြောင်းမည်</button>')+'<button class="btn out" id="myOut">ထွက်မည်</button></div>',
+  onMount(el){const on=(s,f)=>{const n=el.querySelector(s);if(n)n.onclick=f};on('#myNm',()=>nameSheet());on('#myPrn',()=>printerSheet());on('#myClr',()=>colorSheet());on('#myPw',()=>pwSheet(Auth.me));on('#myOut',()=>Auth.out())}})}
 function accountsSheet(){
   const body=()=>(pendingList().length?'<div class="sec-t" style="margin-top:0">ခွင့်ပြုချက် စောင့်နေသူများ</div>'+pendingList().map(a=>'<div class="rowf" style="justify-content:space-between;padding:8px 0"><div style="min-width:0"><div class="nm">'+esc(a.name)+'</div><div class="sub">'+esc(a.phone||'')+'</div></div><div class="rowf"><button class="btn pri s" data-ap="'+a.id+'">'+ico('check','s')+'ခွင့်ပြုမည်</button><button class="btn s out" data-rj="'+a.id+'">ပယ်မည်</button></div></div>').join('')+'<div style="height:10px"></div>':'')+'<div class="sec-t" style="margin-top:0">Pair code</div><p class="sub">ငွေကိုင်အကောင့် ဖွင့်ရန် Pair code ထုတ်ပေးပါ — တစ်ခုလျှင် တစ်ကြိမ်သာ သုံးနိုင်ပြီး ၂၄ နာရီအတွင်း သက်တမ်းကုန်မည်</p>'+pcList().map(x=>'<div class="rowf" style="margin:6px 0;justify-content:space-between"><b style="font-size:24px;letter-spacing:.14em">'+esc(x.code)+'</b><span class="rowf"><button class="btn s" data-pcc="'+esc(x.code)+'">ကူးမည်</button><button class="btn s out" data-pcx="'+esc(x.code)+'">ဖျက်မည်</button></span></div>').join('')+'<div class="rowf" style="margin:6px 0 12px"><button class="btn pri s" id="acNew">'+ico('plus','s')+'Pair code အသစ်ထုတ်မည်</button></div>'
    +Store.list('accounts').sort((a,b)=>a.createdAt-b.createdAt).map(a=>'<div class="rowf" style="justify-content:space-between;border-top:1px solid var(--line);padding:8px 0"><div style="min-width:0"><div class="nm">'+esc(a.name)+(a.active===false?' <span class="w">(ပိတ်ထား)</span>':'')+(a.pending?' <span class="w">(စောင့်ဆိုင်းဆဲ)</span>':'')+'</div><div class="sub">'+(a.device?'ဖုန်း · '+esc(a.phone||a.username.replace('phone-','')):'ဖုန်း · '+esc(a.username))+' · '+(a.role==='owner'?'ဆိုင်ပိုင်ရှင်':'ငွေကိုင်')+'</div></div><div class="rowf"><button class="btn s" data-ae="'+a.id+'">ပြင်မည်</button>'+(a.device?'':'<button class="btn s" data-pw="'+a.id+'">စကားဝှက်</button>')+''+(a.role!=='owner'?'<button class="btn s out" data-ad="'+a.id+'">'+ico('trash','s')+'ဖျက်မည်</button>':'')+(a.role!=='owner'?'<button class="btn s out" data-tg="'+a.id+'">'+(a.active===false?'ပြန်ဖွင့်မည်':'ပိတ်မည်')+'</button>':'')+'</div></div>').join('');
@@ -3444,13 +3761,67 @@ function curveChart(days,series){
    +'<div class="rowf" style="gap:14px;margin-top:6px">'+series.map(s=>'<span class="sub" style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:'+s.c+'"></i>'+s.n+'</span>').join('')+'</div>';
 }
 function donut(items,centerTop,centerSub){
-  const tot=items.reduce((a,x)=>a+x.v,0),r=42,C=2*Math.PI*r;
-  let off=0,arcs='';
-  if(tot>0)items.forEach(x=>{if(x.v<=0)return;const len=x.v/tot*C;arcs+='<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="'+x.c+'" stroke-width="15" stroke-dasharray="'+Math.max(0,len-1.5).toFixed(2)+' '+(C-Math.max(0,len-1.5)).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 60 60)"/>';off+=len});
-  const svg='<svg viewBox="0 0 120 120" width="124" height="124" role="img" style="flex:none;color:var(--fg)"><circle cx="60" cy="60" r="'+r+'" fill="none" stroke="currentColor" stroke-opacity=".08" stroke-width="15"/>'+arcs
-   +'<text x="60" y="'+(centerSub?58:64)+'" text-anchor="middle" font-size="'+(String(centerTop).length>5?14:18)+'" font-weight="800" fill="currentColor">'+centerTop+'</text>'+(centerSub?'<text x="60" y="73" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity=".6">'+centerSub+'</text>':'')+'</svg>';
-  const leg='<div style="flex:1;min-width:0">'+(tot>0?items.map(x=>'<div class="rowf" style="justify-content:space-between;flex-wrap:nowrap;gap:8px;padding:3px 0"><span style="display:inline-flex;align-items:center;gap:7px;min-width:0"><i style="flex:none;width:10px;height:10px;border-radius:50%;background:'+x.c+'"></i><span class="nm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">'+esc(x.n)+'</span></span><span class="num" style="flex:none;font-size:13px"><b>'+Math.round(x.v/tot*100)+'%</b></span></div>').join(''):'<div class="sub">ဒေတာ မရှိသေးပါ</div>')+'</div>';
-  return '<div class="rowf" style="flex-wrap:nowrap;gap:14px;align-items:center">'+svg+leg+'</div>';
+  return pieChart(items,{pct:1,note:(centerTop!=null&&centerTop!==''?centerTop+(centerSub?' '+centerSub:''):'')});
+}
+function pieChart(items,opt){
+  opt=opt||{};
+  const PC=['#4F83E8','#55B687','#E8A33D','#E11D48','#7C3AED','#64748B'];
+  const its=items.filter(x=>x.v>0).map((x,i)=>Object.assign({},x,{col:PC[i%PC.length]})),tot=its.reduce((a,x)=>a+x.v,0);
+  if(!(tot>0))return '<div class="sub">ဒေတာ မရှိသေးပါ</div>';
+  const pt=(a,r)=>(100+r*Math.cos(a)).toFixed(2)+' '+(100+r*Math.sin(a)).toFixed(2);
+  let a0=-Math.PI/2,paths='',lbls='';
+  its.forEach(x=>{const a1=a0+x.v/tot*2*Math.PI,pc=Math.round(x.v/tot*100);
+    paths+=its.length===1?'<circle cx="100" cy="100" r="100" fill="'+x.col+'"/>':'<path d="M100 100L'+pt(a0,100)+'A100 100 0 '+((a1-a0)>Math.PI?1:0)+' 1 '+pt(a1,100)+'Z" fill="'+x.col+'"/>';
+    if(pc>=8){const m=(a0+a1)/2,q=its.length===1?[100,100]:pt(m,62).split(' ');lbls+='<text x="'+q[0]+'" y="'+q[1]+'" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="800" fill="#fff">'+pc+'%</text>'}
+    a0=a1});
+  const svg='<svg viewBox="0 0 200 200" role="img" aria-label="ငွေပေးချေမှု နည်းလမ်း" style="flex:1 1 170px;min-width:150px;max-width:280px;height:auto">'+paths+lbls+'</svg>';
+  const vals='<div style="flex:1 1 130px;min-width:0">'+its.map(x=>'<'+(opt.detail?'button type="button" data-act="recv-detail" data-m="'+esc(x.n)+'"':'div')+' class="pv"><div class="pn">'+esc(x.n)+'</div><div class="pa">'+ks(x.v)+' <small>Ks</small>'+(opt.pct?' <small>· '+Math.round(x.v/tot*100)+'%</small>':'')+'</div></'+(opt.detail?'button':'div')+'>').join('')+'</div>';
+  const leg='<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-top:14px">'+its.map(x=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:13px"><i style="width:14px;height:14px;border-radius:50%;background:'+x.col+'"></i>'+esc(x.n)+'</span>').join('')+'</div>';
+  return (opt.note?'<div style="text-align:center;font-weight:700;margin:0 0 10px">'+opt.note+'</div>':'')+'<div style="display:flex;flex-wrap:wrap;gap:16px 20px;align-items:center">'+svg+vals+'</div>'+leg;
+}
+function recvTotalCard(o){
+  const tot=o.recv+o.repaid,row=(l,v,k,sub)=>'<button type="button" class="row btnr" data-act="hero-detail" data-k="'+k+'"><span>'+l+(sub?' <span class="sub">'+sub+'</span>':'')+' ›</span><span class="num"><b>'+ks(v)+'</b> <span class="sub">ကျပ်</span></span></button>';
+  return '<section class="card rcv"><div class="card-h"><h3>'+(o.isDay?'ယနေ့ ':'')+'ရရှိငွေ စုစုပေါင်း</h3></div>'
+   +'<div class="sub" style="margin-bottom:2px">'+esc(o.label)+' · ရောင်းရငွေမှ ရရှိငွေ + ကြွေးကျန်လွှဲငွေ</div>'
+   +'<button type="button" data-act="recv-detail" data-m="" style="display:block;width:100%;text-align:left;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer"><div style="font-size:30px;font-weight:800;line-height:1.3">'+ks(tot)+' <small style="font-size:13px;font-weight:500;color:var(--mut)">ကျပ် ›</small></div><div class="sub">Payment တစ်ခုချင်း အသေးစိတ် ကြည့်ရန် နှိပ်ပါ</div></button>'
+   +'<div style="margin-top:8px"><div class="row" style="border-top:0"><span>ရောင်းရငွေ (ရောင်းထားငွေ)</span><span class="num"><b>'+ks(o.sold)+'</b> <span class="sub">ကျပ်</span></span></div>'
+   +row('ရောင်းရငွေထဲမှ ရရှိငွေ',o.recv,'recv','')+row('ကြွေးကျန်လွှဲငွေ (ကြွေးပြန်ရငွေ)',o.repaid,'repaid','')
+   +'<div class="row"><span>ကုန်ကျစရိတ် (နုတ်)</span><span class="num">− <b>'+ks(o.ex||0)+'</b> <span class="sub">ကျပ်</span></span></div>'
+   +'<div class="row" style="font-weight:700"><span>လက်ကျန်ငွေ (ရရှိ − ကုန်ကျ)</span><span class="num"><b'+(tot-(o.ex||0)<0?' class="w"':'')+'>'+ks(tot-(o.ex||0))+'</b> <span class="sub">ကျပ်</span></span></div></div>'
+   +'<div class="rowf" style="margin-top:10px"><button type="button" class="btn s pri" data-act="recv-detail" data-m="">'+ico('wallet')+'Payment အသေးစိတ် ကြည့်မည်</button></div></section>';
+}
+function receivableCard(periodDebt,label){
+  const t0=today(),out=Sel.outstanding(),car=Sel.carried(t0),carN=Sel.carriedCount(t0),unp=Sel.unpaid(),cs={};
+  unp.forEach(v=>{cs[v.customerId||('g'+v.id)]=1});
+  const row=(l,v,w)=>'<div class="row" style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><span>'+l+'</span><span class="num"><b'+(w?' class="w"':'')+'>'+ks(v)+'</b> <span class="sub">ကျပ်</span></span></div>';
+  return '<section class="card" style="border-left:4px solid #E11D48"><div class="card-h"><h3>ကြွေးကျန် ရရှိမည့်ငွေ</h3></div>'
+   +'<div class="sub">ဆိုင်တစ်ခုလုံး · လက်ရှိ ကောက်ခံရန် ကျန်သော ငွေ (ရရှိငွေနှင့် သီးခြား)</div>'
+   +'<div style="font-size:30px;font-weight:800;line-height:1.3'+(out>0?';color:#E11D48':'')+'">'+ks(out)+' <small style="font-size:13px;font-weight:500;color:var(--mut)">ကျပ်</small></div>'
+   +(out>0?'<div style="margin-top:6px">'+row('ယခင်ရက်များမှ ကျန်ငွေ <span class="sub">'+carN+' စောင်</span>',car)+row('ယနေ့ ဘောက်ချာများမှ ကျန်ငွေ',Math.max(0,out-car))+row('ကြွေးကျန် ဘောက်ချာ / ဖောက်သည်',0).replace(/<span class="num">.*<\/span><\/div>$/,'<span class="num"><b>'+unp.length+'</b> <span class="sub">စောင် · '+Object.keys(cs).length+' ဦး</span></span></div>')+(periodDebt!==out?row(esc(label)+' ဘောက်ချာများ၏ ကြွေး',periodDebt):'')+'</div>':'<div class="sub" style="color:#15803D;font-weight:700;margin-top:6px">ကြွေးမရှိ</div>')
+   +'<div class="rowf" style="margin-top:10px"><button type="button" class="btn s" data-act="goto" data-tab="debt">'+ico('list')+'ကြွေးစာရင်း ကြည့်မည်</button></div></section>';
+}
+function recvSheet(only0){
+  const D=DASH;let only=only0||'';
+  const all=D.pays.slice().sort((a,b)=>b.p.at-a.p.at),by={};
+  const get=m=>by[m]||(by[m]={n:m,tot:0,sold:0,debt:0,out:0,l:[],e:[]});
+  all.forEach(x=>{const r=get(x.p.method||DEFAULT_METHOD);r.tot+=x.p.amount;if(x.d>x.v.date)r.debt+=x.p.amount;else r.sold+=x.p.amount;r.l.push(x)});
+  (D.exL||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(e=>{const r=get(e.method||DEFAULT_METHOD);r.out+=e.amount;r.e.push(e)});
+  const names=Object.keys(by).sort((a,b)=>(by[b].tot-by[b].out)-(by[a].tot-by[a].out)||by[b].tot-by[a].tot);
+  const net=n=>'<b'+(n<0?' class="w"':'')+'>'+ks(n)+'</b>';
+  const body=()=>{
+    const ms=only?names.filter(m=>m===only):names,tot=ms.reduce((a,m)=>a+by[m].tot,0),sold=ms.reduce((a,m)=>a+by[m].sold,0),debt=ms.reduce((a,m)=>a+by[m].debt,0),out=ms.reduce((a,m)=>a+by[m].out,0);
+    return '<div class="stat" style="margin-top:0"><span>'+esc(D.label)+'</span><span>လက်ကျန်ငွေ '+net(tot-out)+' ကျပ်</span></div>'
+     +'<div class="tiles" style="margin:8px 0"><div class="tile"><div class="eb">ရရှိငွေ စုစုပေါင်း</div><div class="v">'+ks(tot)+'<small>ကျပ်</small></div><div class="sub">ရောင်းရငွေမှ '+ks(sold)+' · ကြွေးပြန် '+ks(debt)+'</div></div><div class="tile"><div class="eb">ကုန်ကျစရိတ် (နုတ်)</div><div class="v">'+ks(out)+'<small>ကျပ်</small></div></div></div>'
+     +'<div class="rowf" style="gap:6px;margin-bottom:6px"><button type="button" class="chip" data-fm="" style="cursor:pointer;'+(only?'':'background:var(--pri);color:var(--pri-fg)')+'">အားလုံး</button>'+names.map(m=>'<button type="button" class="chip" data-fm="'+esc(m)+'" style="cursor:pointer;'+(only===m?'background:var(--pri);color:var(--pri-fg)':'')+'">'+esc(m)+'</button>').join('')+'</div>'
+     +(ms.length?ms.map(m=>{const r=by[m];return '<div class="sec-t">'+esc(m)+'</div>'
+       +'<div class="card" style="padding:10px 14px;margin-bottom:8px"><div class="rowf" style="justify-content:space-between;flex-wrap:nowrap"><span>ရရှိငွေ <span class="sub">'+r.l.length+' ကြိမ်</span></span><span class="num"><b>'+ks(r.tot)+'</b></span></div>'
+       +'<div class="sub" style="margin:0 0 6px">ရောင်းရငွေမှ '+ks(r.sold)+' · ကြွေးပြန် '+ks(r.debt)+'</div>'
+       +'<div class="rowf" style="justify-content:space-between;flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:6px"><span>ကုန်ကျစရိတ် (နုတ်) <span class="sub">'+r.e.length+' ကြိမ်</span></span><span class="num">− <b>'+ks(r.out)+'</b></span></div>'
+       +'<div class="rowf" style="justify-content:space-between;flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:6px;margin-top:6px"><span style="font-weight:700">လက်ကျန်</span><span class="num">'+net(r.tot-r.out)+' <span class="sub">ကျပ်</span></span></div></div>'
+       +(r.l.length?'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ရရှိငွေ — အချိန် / ဖောက်သည်</th><th class="r">ပမာဏ</th></tr></thead><tbody>'+r.l.map(x=>'<tr data-act="open-voucher" data-id="'+x.v.id+'" tabindex="0"><td><div class="nm">'+fmtD(x.d)+' '+fmtT(x.p.at)+'</div><div class="sub">'+esc(Sel.cname(x.v))+' · #'+esc(x.v.no)+'</div>'+(x.d>x.v.date?'<div class="tag">ကြွေးပြန်ရငွေ ('+fmtD(x.v.date)+')</div>':'')+'</td><td class="r"><b>'+ks(x.p.amount)+'</b></td></tr>').join('')+'</tbody></table></div>':'')
+       +(r.e.length?'<div class="tbl-wrap" style="margin-top:8px"><table class="tbl"><thead><tr><th>ကုန်ကျစရိတ်</th><th class="r">ပမာဏ</th></tr></thead><tbody>'+r.e.map(e=>'<tr><td><div class="nm">'+esc(e.category||'အခြား')+'</div><div class="sub">'+fmtD(e.date)+(e.createdAt?' '+fmtT(e.createdAt):'')+(e.note?' · '+esc(e.note):'')+'</div></td><td class="r"><b class="w">− '+ks(e.amount)+'</b></td></tr>').join('')+'</tbody></table></div>':'')}).join(''):emptyBox('receipt','ဤကာလအတွင်း ငွေလက်ခံမှု မရှိပါ'));
+  };
+  Sheet.open({title:'Payment အသေးစိတ် (ရရှိ − ကုန်ကျ)',body:body(),onMount(el,ctl){el.addEventListener('click',e=>{const b=e.target.closest('[data-fm]');if(!b)return;only=b.dataset.fm;ctl.setBody(body())})}});
 }
 function dashCharts(vs,cutoff,t,sales,paidSum,hourly){
   let from=cutoff;
@@ -3464,7 +3835,7 @@ function dashCharts(vs,cutoff,t,sales,paidSum,hourly){
   if(hourly){vs.forEach(v=>{if(v.date===t){const h=hr(v.createdAt);sv[h]+=v.total;cv[h]+=(v.paid||0)}});Store.list('expenses').forEach(e=>{if(e.date===t)ev[hr(e.createdAt)]+=e.amount})}
   else{vs.forEach(v=>{if(ix[v.date]!=null){sv[ix[v.date]]+=v.total;cv[ix[v.date]]+=(v.paid||0)}});
   Store.list('expenses').forEach(e=>{if(ix[e.date]!=null)ev[ix[e.date]]+=e.amount})}
-  const mt={};vs.forEach(v=>(v.payments||[]).forEach(p=>{const m=p.method||DEFAULT_METHOD;mt[m]=(mt[m]||0)+p.amount}));
+  const mt={};((typeof DASH!=='undefined'&&DASH&&DASH.pays)?DASH.pays:[]).forEach(x=>{const m=x.p.method||DEFAULT_METHOD;mt[m]=(mt[m]||0)+x.p.amount});
   const mItems=Object.keys(mt).sort((a,b)=>mt[b]-mt[a]).map((k,i)=>({n:k,v:mt[k],c:DCOL[i%DCOL.length]}));
   const pm={};vs.forEach(v=>v.items.forEach(i=>{pm[i.name]=(pm[i.name]||0)+i.price*i.qty}));
   let pk=Object.keys(pm).sort((a,b)=>pm[b]-pm[a]);const pItems=pk.slice(0,4).map((k,i)=>({n:k,v:pm[k],c:DCOL[i]}));
@@ -3476,7 +3847,7 @@ function dashCharts(vs,cutoff,t,sales,paidSum,hourly){
   const card=(h,b)=>'<section class="card"><div class="card-h"><h3>'+h+'</h3></div>'+b+'</section>';
   return card('ရောင်းရငွေ လမ်းကြောင်း','<div class="sub" style="margin-bottom:4px">ကျပ် · '+(hourly?'နာရီအလိုက်':'နေ့စဉ်')+'</div>'+curveChart(hourly?H24.map(h=>'h'+h):days,[{n:'ရောင်းရငွေ',v:sv,c:DCOL[0],area:1},{n:'ရရှိငွေ',v:cv,c:DCOL[1]},{n:'ကုန်ကျ',v:ev,c:DCOL[3]}]))
    +card('ရရှိငွေ / ကြွေး အချိုး',donut([{n:'ရရှိပြီး',v:paidSum,c:DCOL[1]},{n:'ကြွေးကျန်',v:due,c:DCOL[3]}],pct+'%','ရရှိပြီး'))
-   +card('ငွေပေးချေမှု နည်းလမ်း',donut(mItems,ks(mItems.reduce((a,x)=>a+x.v,0)),'ကျပ်'))
+   +card('ငွေပေးချေမှု နည်းလမ်း',pieChart(mItems,{detail:1}))
    +card('ပစ္စည်းအလိုက် ရောင်းရငွေ',donut(pItems,String(pk.length),'မျိုး'))
    +card('ကုန်ကျစရိတ် အမျိုးအစား',donut(eItems,ks(eItems.reduce((a,x)=>a+x.v,0)),'ကျပ်'));
 }
@@ -3812,8 +4183,9 @@ function dashBody(){
   DASH={vs:vs,pays:pays,exL:exL,label:plabel,from:cutoff,to:t,sum:{sold:sales,recv:recv,debt:debt,repaid:repaid,ex:ex}};
   return '<div class="rrow">'+seg('rRange',[['day','Day'],['month','Month'],['year','Year']],rr)+'<button type="button" class="calbtn" data-act="cal-open" aria-label="Calendar">'+ico('calendar')+'</button></div><div class="cycrow"><button type="button" class="btn s" data-act="rnav" data-d="-1" aria-label="ယခင်">‹</button><div class="cl"><b>'+plabel+'</b></div><button type="button" class="btn s" data-act="rnav" data-d="1" aria-label="နောက်"'+(tEnd>=t0?' disabled':'')+'>›</button></div>'
    +heroRange({daily:Number(Store.d.settings.dailyTarget)||0,days:Math.max(1,Math.round((parseD(tEnd)-parseD(cutoff))/864e5)+1),label:plabel,from:cutoff,day:isDay,sold:sales,cnt:vs.length,recv:recv,debt:debt,repaid:repaid})
+   +recvTotalCard({label:plabel,sold:sales,recv:recv,repaid:repaid,ex:ex,isDay:isDay})
    +'<div class="tiles"><div class="tile"><div class="eb">ကုန်ကျစရိတ်</div><div class="v">'+ks(ex)+'<small>ကျပ်</small></div></div><button type="button" class="tile tap" data-act="bal-detail" style="text-align:left;font:inherit"><div class="eb">လက်ကျန်ငွေ (ရရှိ + ကြွေးပြန် − ကုန်ကျ)</div><div class="v'+(cashIn-ex<0?' w':'')+'">'+ks(cashIn-ex)+'<small>ကျပ်</small></div><div class="sub">Payment အလိုက် ကြည့်ရန် ›</div></button></div>'
-   +'<div class="tiles" style="grid-template-columns:1fr"><button type="button" class="tile tap" data-act="goto" data-tab="debt" style="text-align:left;font:inherit"><div class="eb">ကြွေးကျန် စုစုပေါင်း (ဆိုင်တစ်ခုလုံး)</div><div class="v'+(Sel.outstanding()>0?' w':'')+'">'+ks(Sel.outstanding())+'<small>ကျပ်</small></div>'+(Sel.outstanding()>0?'<div class="sub">စာရင်းကြည့်ရန် ›</div>':'<div class="sub" style="color:#15803D;font-weight:700">ကြွေးမရှိ</div>')+'</button></div>'
+   +receivableCard(debt,plabel)
    +'<div class="rowf" style="margin:-4px 0 14px"><button type="button" class="btn s" data-act="dash-xlsx">Excel ထုတ်မည် / Viber · Telegram ပို့မည်</button></div>'
    +(cash?'':profitCard(vs,ex,plabel))
    +methodSplitCard(pays,exL,plabel)
@@ -3871,7 +4243,7 @@ function paintChrome(){
   else if(Store.run){txt='ချိန်ညှိနေသည်…'}
   else if(n){txt='ပို့ရန် '+n+' ခု'}
   else txt=Store.rt==='live'?'Realtime · အွန်လိုင်း':'အွန်လိုင်း သိမ်းဆည်း';
-  chip.className=cls;
+  chip.className=cls;chip.onclick=()=>doRefresh();chip.style.cursor='pointer';chip.setAttribute('role','button');
   chip.innerHTML='<i></i><span>'+txt+'</span>';
 }
 const PARTIAL={sell:()=>{$('#posList').innerHTML=posListHTML()},vouchers:()=>{$('#vList').innerHTML=vListHTML()},customers:()=>{$('#cList').innerHTML=cListHTML()},stock:()=>{$('#sList').innerHTML=sListHTML()},exp:()=>{$('#eList').innerHTML=eListHTML()}};
@@ -3897,7 +4269,7 @@ async function doRefresh(){
       toast(n0?'Supabase သို့ '+n0+' ခု ပို့နေသည်...':'Refresh လုပ်နေသည်...');
       const ok=await Store.sync();
       const left=Store.pendingCount();
-      toast(Store.syncErr||(ok?(n0?'Supabase သို့ '+(n0-left)+' ခု ပို့ပြီးပါပြီ':'Refresh ပြီးပါပြီ'):'အင်တာနက် မရှိသေးပါ'+(left?' — ဖုန်းထဲတွင် '+left+' ခု သိမ်းထားသည်၊ ရသည်နှင့် အလိုအလျောက် ပို့ပါမည်':' — ရသည်နှင့် အလိုအလျောက် ချိန်ညှိပါမည်')));
+      toast(Store.syncErr||(ok?(n0?'Supabase သို့ '+(n0-left)+' ခု ပို့ပြီးပါပြီ':'Refresh ပြီးပါပြီ'):'ချိတ်ဆက်၍ မရပါ — အင်တာနက် စစ်ပြီး Refresh ပြန်နှိပ်ပါ'+(left?' — ဖုန်းထဲတွင် '+left+' ခု သိမ်းထားသည်၊ ရသည်နှင့် အလိုအလျောက် ပို့ပါမည်':' — ရသည်နှင့် အလိုအလျောက် ချိန်ညှိပါမည်')));
     }else toast('Refresh ပြီးပါပြီ');
     paintChrome();if(Auth.me)App.render();
   }catch(e){toast('Refresh လုပ်၍ မရပါ')}
@@ -3909,7 +4281,6 @@ const ACT={
   'goto':t=>{if(t.dataset.vstatus){F.vStatus=t.dataset.vstatus;F.vRange='all';F.vQuery=''}App.go(t.dataset.tab)},
   'seg':t=>{const k=t.dataset.key;if(k==='pmode')return;F[k]=t.dataset.val;App.paint(false)},
   'settings':()=>Auth.owner()?settingsSheet():mySheet(),
-  'demo-load':()=>loadDemo(),
   'open-voucher':t=>voucherSheet(t.dataset.id),
   'open-customer':t=>customerDetail(t.dataset.id),
   'new-customer':()=>customerSheet(null),
@@ -3935,6 +4306,7 @@ const ACT={
   'target-edit':()=>targetSheet(),
   'hero-detail':t=>heroSheet(t.dataset.k),
   'bal-detail':()=>balSheet(),
+  'recv-detail':t=>recvSheet((t&&t.dataset&&t.dataset.m)||''),
   'dash-xlsx':()=>dashXlsx(),
   'seller-detail':t=>{if(t.dataset.src==='tab'){const x=sellerVouchers();sellerSheet(t.dataset.s||'',x.vs,x.label)}else sellerSheet(t.dataset.s||'')},
   'day-detail':t=>daySheet((t&&t.dataset&&t.dataset.day)||today()),
@@ -4010,7 +4382,7 @@ document.addEventListener('change',function(e){
   $('#tabbarIn').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)App.go(b.dataset.tab)});
   $('#view').innerHTML='<div class="skel"></div><div class="skel" style="height:110px"></div><div class="skel"></div>';
   paintChrome();
-  Store.init().then(async()=>{
+  termsGate().then(()=>Store.init()).then(async()=>{bootHide();
     try{if(window.claude&&window.claude.use)Auth.plat=await window.claude.use('user')}catch(e){}
     Store.on(()=>{
       if(Auth.me){const a=Store.get('accounts',Auth.me.id);if(!a||a.active===false){Auth.out();return}Auth.me=a;if(waitOn&&!a.pending){waitOn=false;enter();return}if(waitOn)return}
@@ -4024,6 +4396,43 @@ document.addEventListener('change',function(e){
   setInterval(()=>{if(today()!==App.lastDay){App.lastDay=today();App.paint(false);toast('နောက်တစ်နေ့သို့ ရောက်ပါပြီ — မရှင်းရသေးသော ကြွေးများကို ယခင်ရက်မှ လွှဲပြောင်းဟု မှတ်ထားပါသည်')}},30000);
   let _cw=priceCol();window.addEventListener('resize',()=>{const w=priceCol();if(w===_cw)return;_cw=w;const cb=$('#cartBox');if(App.tab==='sell'&&cb&&!cb.contains(document.activeElement))cb.innerHTML=cartHTML()});
 })();
+})();
+</script>
+<script>
+/* auto icons: adds a matching icon to text-only buttons and section headings so screens are easier to scan */
+(function(){
+  const B=[[/^(သိမ်းမည်|ထည့်သွင်းမည်|မှတ်မည်|သုံးမည်|သတ်မှတ်မည်|အမှတ် သုံးမည်|ခွင့်ပြုမည်)/,'check'],
+   [/^(ထည့်မည်|သွင်းမည်|ဇယားထဲ ထည့်မည်|နောက်ထပ် ပြမည်)/,'plus'],
+   [/^(မလုပ်တော့ပါ|ပိတ်မည်|ပယ်မည်|ငြင်းမည်)/,'x'],
+   [/^(ဖျက်မည်|ဖယ်ရှား|ဖယ်မည်)/,'trash'],
+   [/^(ရှင်းလင်းမည်|မူလအတိုင်း|ပြန်အမ်းမည်|ပြန်စစ်မည်|ပြန်ဖွင့်မည်)/,'refresh'],
+   [/^(ပြင်မည်)/,'edit'],
+   [/^(ကူးမည်|စာသား ကူးမည်|အားလုံးရွေး)/,'file'],
+   [/CSV ထုတ်မည်/,'download'],
+   [/^(ထွက်မည်)/,'logout'],
+   [/(Printer|စမ်းပရင့်)/,'print'],
+   [/(Bluetooth|USB|Serial)/,'link'],
+   [/^စကားဝှက်/,'shield'],
+   [/^ယနေ့$/,'calendar'],
+   [/^ကုန်ပစ္စည်း$/,'box']];
+  const H=[[/ကြွေး/,'wallet'],[/ပစ္စည်း/,'box'],[/^ရောင်းသူများ/,'users'],[/Rank|အကြံပြုချက်/,'star'],
+   [/အရောင်/,'sliders'],[/အကောင့်|ခွင့်ပြုချက်/,'shield'],[/ဒေတာ|Backup/,'cloud'],[/Print|Printer|Label|ပရင့်/,'print'],
+   [/လက်ကားဈေး/,'tag'],[/အော်ဒါ/,'list'],[/အမြတ်/,'chart'],[/Pair code/,'link']];
+  const pick=(map,s)=>{for(const m of map)if(m[0].test(s))return m[1];return null};
+  function deco(root){
+    if(!root||!root.querySelectorAll)return;
+    root.querySelectorAll('button.btn:not([data-ai]),.sec-t:not([data-ai]),.card-h h3:not([data-ai])').forEach(el=>{
+      el.setAttribute('data-ai','1');
+      if(el.querySelector('svg'))return;
+      const tx=(el.textContent||'').replace(/^[\s←‹]+/,'').trim();
+      if(!tx||(tx.length>40&&el.tagName==='BUTTON'))return;
+      const n=pick(el.tagName==='BUTTON'?B:H,tx);
+      if(n&&window.__ICON&&window.__ICON[n])el.insertAdjacentHTML('afterbegin',window.__ico(n,'auto'));
+    });
+  }
+  let q=0;const run=()=>{q=0;deco(document.body)};
+  new MutationObserver(()=>{if(!q)q=requestAnimationFrame(run)}).observe(document.body,{childList:true,subtree:true});
+  run();
 })();
 </script>
 </body></html>
